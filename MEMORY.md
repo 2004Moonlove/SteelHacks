@@ -53,6 +53,8 @@ On 2026-09-19, the user confirmed two primary directions for differentiating Day
 1. Keep the frontend presentation as simple and clear as possible. Avoid a form-heavy experience that feels difficult or tedious to use.
 2. Integrate the two narrative experiences with the decision comparison, making the alternatives understandable through their corresponding stories.
 
+The user also explicitly wants Dayfork to remain distinct in both functionality and experience from [Wage101 Commute vs Rent](https://wage101.com/tools/commute-vs-rent-trade-off/) and the [SASEHacks 2026 ParallelMe project](https://devpost.com/software/parallelme). This is a confirmed product objective; the features proposed to achieve it still require a design decision.
+
 The exact layout and interaction design remain proposals. Earlier suggestions such as editing inside story scenes, a monthly scene index, personal constraints, threshold solvers, and calendar allocation are not automatically confirmed implementation scope.
 
 These experience priorities preserve explicit assumption review, deterministic money/time calculations, and user-triggered AI story generation.
