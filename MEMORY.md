@@ -205,6 +205,18 @@ An activity's frequency is stored once. For example, the UI may display 20 campu
 
 Each option owns its parameters. A shared editor must explicitly indicate that it updates both options. IDs must remain stable and unique within their owning collections; references are resolved using `optionId` and, where applicable, `activityId`.
 
+## Scenario Generation Reliability
+
+On 2026-09-19, the exact input `Should I get a year-long gym membership or a monthly one` reproduced a model-output validation failure. The model used a NumericField object for the plain integer `frequencyInput.eventsPerUnit`; its repair then left absent amounts labeled `derived`. The captured invalid response is a regression fixture, not a valid demonstration scenario.
+
+The generation prompt now spells out allowed activity units, unit conversion metadata, required baseline charges even when prices are missing, and the arithmetic meaning of each Tag. Annual membership fees are compared as clearly described monthly equivalents; cancellation, refunds, and contract duration are not silently represented as recurring charges or spent time.
+
+Before validating a generated decision, a null number labeled `user_input` or `derived` is conservatively relabeled `unknown`. No number is supplied or changed. Disallowed sources, unknown fields containing numbers, and invalid conversion factors still fail validation. There is still only one bounded model repair, with actionable conversion and enum feedback; editing a loaded simulation never generates new Tags or model requests.
+
+Verification: 10 new regression tests cover the captured scenario errors, preservation of missing and known values, strict rejection boundaries, and timeouts during response-header/body reads. The backend package passed. An isolated browser submitted the exact gym input to the real model and completed baseline review, display of five generated Tags, Tag toggles, and a price edit without additional generation requests. The two gym membership prices remained unknown until entered in the review UI.
+
+A cooking-versus-meal-delivery live check encountered an upstream read timeout and then an upstream service error, so that case is not yet live-verified. Response-read timeouts now produce the existing retryable `MODEL_UNAVAILABLE` API error instead of an unhandled HTTP 500. General support does not imply that every non-housing case or model-generated narrative has passed live acceptance.
+
 ## Tag Contract
 
 Keep four explicit external types: `fixed`, `add_activity`, `reduce_activity`, and `replace_activity`. The technology proposal's three conceptual rule groups do not replace this four-type data contract.

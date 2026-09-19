@@ -58,6 +58,11 @@ public class ContractValidator {
                     JsonNode frequency = object(activity.path("frequencyInput"), activityPath + ".frequencyInput");
                     onlyFields(frequency, activityPath + ".frequencyInput", "label", "eventsPerUnit");
                     string(frequency.path("label"), activityPath + ".frequencyInput.label");
+                    if (!frequency.path("eventsPerUnit").isIntegralNumber()) {
+                        fail(activityPath + ".frequencyInput.eventsPerUnit",
+                                "Use a plain positive integer conversion factor, such as 2 for two one-way trips per round trip. "
+                                + "This is not a NumericField or the monthly usage. Omit frequencyInput when no conversion is needed.");
+                    }
                     if (integer(frequency.path("eventsPerUnit"), activityPath + ".frequencyInput.eventsPerUnit") < 1) {
                         fail(activityPath + ".frequencyInput.eventsPerUnit", "Conversion must be positive.");
                     }
@@ -183,7 +188,7 @@ public class ContractValidator {
     public String oneOf(JsonNode node, String path, String... choices) {
         String value = string(node, path);
         for (String choice : choices) if (choice.equals(value)) return value;
-        fail(path, "Unsupported value.");
+        fail(path, "Expected one of: " + String.join(", ", choices) + ".");
         return value;
     }
 

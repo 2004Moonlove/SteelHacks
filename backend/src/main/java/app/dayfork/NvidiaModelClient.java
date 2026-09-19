@@ -2,6 +2,7 @@ package app.dayfork;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,7 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
 
 @Component
@@ -64,9 +66,13 @@ public class NvidiaModelClient implements ModelClient {
                     ? HttpStatus.SERVICE_UNAVAILABLE : HttpStatus.BAD_GATEWAY;
             throw new ApiException(status, "MODEL_UPSTREAM_ERROR",
                     "The model service could not complete the request. Please retry.");
-        } catch (ResourceAccessException exception) {
-            throw new ApiException(HttpStatus.GATEWAY_TIMEOUT, "MODEL_UNAVAILABLE",
-                    "The model service timed out or could not be reached. Please retry.");
+        } catch (RestClientException exception) {
+            if (exception instanceof ResourceAccessException || exception.getMostSpecificCause() instanceof IOException) {
+                throw new ApiException(HttpStatus.GATEWAY_TIMEOUT, "MODEL_UNAVAILABLE",
+                        "The model service timed out or could not be reached. Please retry.");
+            }
+            throw new ApiException(HttpStatus.BAD_GATEWAY, "MODEL_RESPONSE_INVALID",
+                    "The model returned an unreadable response. Please retry.");
         } catch (com.fasterxml.jackson.core.JsonProcessingException exception) {
             throw new ApiException(HttpStatus.BAD_GATEWAY, "MODEL_RESPONSE_INVALID",
                     "The model returned an unreadable response.");

@@ -1,0 +1,216 @@
+{
+  "schemaVersion": 1,
+  "id": "gym_membership_cmp",
+  "title": "Gym Membership Cost and Time Comparison",
+  "description": "Compare a year-long gym membership versus a month-to-month gym membership in terms of monthly cost and time spent working out.",
+  "originalInput": "Should I get a year-long gym membership or a monthly one",
+  "currency": "USD",
+  "options": [
+    {
+      "id": "opt_year",
+      "name": "Year-long Gym Membership",
+      "fixedCosts": [
+        {
+          "id": "fc_year_cost",
+          "name": "Membership fee",
+          "amountCentsMonthly": {
+            "value": null,
+            "source": "unknown",
+            "note": "Annual fee not provided; monthly equivalent unknown"
+          }
+        }
+      ],
+      "activities": [
+        {
+          "id": "act_workout",
+          "name": "Gym workout",
+          "eventUnit": "session",
+          "frequencyInput": {
+            "label": "Times per month",
+            "eventsPerUnit": {
+              "value": null,
+              "source": "unknown",
+              "note": "User did not specify workout frequency"
+            }
+          },
+          "eventsPerMonth": {
+            "value": null,
+            "source": "unknown",
+            "note": "Derived from frequencyInput"
+          },
+          "costCentsPerEvent": {
+            "value": null,
+            "source": "unknown",
+            "note": "Any per‑visit cost not specified; membership may cover it"
+          },
+          "minutesPerEvent": {
+            "value": null,
+            "source": "unknown",
+            "note": "Typical workout length not provided"
+          }
+        }
+      ]
+    },
+    {
+      "id": "opt_month",
+      "name": "Month-to-month Gym Membership",
+      "fixedCosts": [
+        {
+          "id": "fc_month_cost",
+          "name": "Membership fee",
+          "amountCentsMonthly": {
+            "value": null,
+            "source": "unknown",
+            "note": "Monthly fee not provided"
+          }
+        }
+      ],
+      "activities": [
+        {
+          "id": "act_workout",
+          "name": "Gym workout",
+          "eventUnit": "session",
+          "frequencyInput": {
+            "label": "Times per month",
+            "eventsPerUnit": {
+              "value": null,
+              "source": "unknown",
+              "note": "User did not specify workout frequency"
+            }
+          },
+          "eventsPerMonth": {
+            "value": null,
+            "source": "unknown",
+            "note": "Derived from frequencyInput"
+          },
+          "costCentsPerEvent": {
+            "value": null,
+            "source": "unknown",
+            "note": "Any per‑visit cost not specified; membership may cover it"
+          },
+          "minutesPerEvent": {
+            "value": null,
+            "source": "unknown",
+            "note": "Typical workout length not provided"
+          }
+        }
+      ]
+    }
+  ],
+  "tags": [
+    {
+      "id": "tag_cost_monthly",
+      "name": "Membership Cost",
+      "description": "Monthly cost of each membership option.",
+      "type": "fixed",
+      "targets": [
+        {
+          "optionId": "opt_year",
+          "costCentsMonthly": { "value": null, "source": "unknown" },
+          "minutesMonthly": { "value": null, "source": "unknown" }
+        },
+        {
+          "optionId": "opt_month",
+          "costCentsMonthly": { "value": null, "source": "unknown" },
+          "minutesMonthly": { "value": null, "source": "unknown" }
+        }
+      ]
+    },
+    {
+      "id": "tag_time_monthly",
+      "name": "Total Monthly Time",
+      "description": "Total minutes spent at the gym each month for each option.",
+      "type": "fixed",
+      "targets": [
+        {
+          "optionId": "opt_year",
+          "costCentsMonthly": { "value": null, "source": "unknown" },
+          "minutesMonthly": { "value": null, "source": "unknown" }
+        },
+        {
+          "optionId": "opt_month",
+          "costCentsMonthly": { "value": null, "source": "unknown" },
+          "minutesMonthly": { "value": null, "source": "unknown" }
+        }
+      ]
+    },
+    {
+      "id": "tag_frequency_add",
+      "name": "Workout Frequency (Add)",
+      "description": "Number of gym sessions per month for each option.",
+      "type": "add_activity",
+      "targets": [
+        {
+          "optionId": "opt_year",
+          "activityId": "act_workout",
+          "eventsPerMonth": { "value": null, "source": "unknown" }
+        },
+        {
+          "optionId": "opt_month",
+          "activityId": "act_workout",
+          "eventsPerMonth": { "value": null, "source": "unknown" }
+        }
+      ]
+    },
+    {
+      "id": "tag_frequency_reduce",
+      "name": "Workout Frequency (Reduce)",
+      "description": "Potential reduction in gym sessions per month for each option.",
+      "type": "reduce_activity",
+      "targets": [
+        {
+          "optionId": "opt_year",
+          "activityId": "act_workout",
+          "eventsPerMonth": { "value": null, "source": "unknown" }
+        },
+        {
+          "optionId": "opt_month",
+          "activityId": "act_workout",
+          "eventsPerMonth": { "value": null, "source": "unknown" }
+        }
+      ]
+    },
+    {
+      "id": "tag_cost_per_event",
+      "name": "Cost per Visit",
+      "description": "Effective cost per gym session, assuming membership covers visits.",
+      "type": "replace_activity",
+      "targets": [
+        {
+          "optionId": "opt_year",
+          "activityId": "act_workout",
+          "replacementName": "Gym workout",
+          "eventsPerMonth": { "value": null, "source": "unknown" },
+          "costCentsPerEvent": { "value": null, "source": "unknown" },
+          "minutesPerEvent": { "value": null, "source": "unknown" }
+        },
+        {
+          "optionId": "opt_month",
+          "activityId": "act_workout",
+          "replacementName": "Gym workout",
+          "eventsPerMonth": { "value": null, "source": "unknown" },
+          "costCentsPerEvent": { "value": null, "source": "unknown" },
+          "minutesPerEvent": { "value": null, "source": "unknown" }
+        }
+      ]
+    },
+    {
+      "id": "tag_annual_equivalent",
+      "name": "Annual Cost Equivalent",
+      "description": "Annual cost expressed as a monthly equivalent for each option.",
+      "type": "fixed",
+      "targets": [
+        {
+          "optionId": "opt_year",
+          "costCentsMonthly": { "value": null, "source": "derived" },
+          "minutesMonthly": { "value": null, "source": "unknown" }
+        },
+        {
+          "optionId": "opt_month",
+          "costCentsMonthly": { "value": null, "source": "derived" },
+          "minutesMonthly": { "value": null, "source": "unknown" }
+        }
+      ]
+    }
+  ]
+}
