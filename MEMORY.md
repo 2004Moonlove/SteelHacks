@@ -46,6 +46,17 @@ Core flow:
 
 The campus housing example is the primary test and demonstration fixture. The first release accepts general two-option decisions that can be represented using monthly cost, time, and the four defined Tag types.
 
+## Confirmed Experience Priorities
+
+On 2026-09-19, the user confirmed two primary directions for differentiating Dayfork:
+
+1. Keep the frontend presentation as simple and clear as possible. Avoid a form-heavy experience that feels difficult or tedious to use.
+2. Integrate the two narrative experiences with the decision comparison, making the alternatives understandable through their corresponding stories.
+
+The exact layout and interaction design remain proposals. Earlier suggestions such as editing inside story scenes, a monthly scene index, personal constraints, threshold solvers, and calendar allocation are not automatically confirmed implementation scope.
+
+These experience priorities preserve explicit assumption review, deterministic money/time calculations, and user-triggered AI story generation.
+
 ## Technology Baseline
 
 The supplied technology plan is the working implementation baseline:
