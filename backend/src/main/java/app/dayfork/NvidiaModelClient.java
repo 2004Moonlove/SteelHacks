@@ -1,4 +1,4 @@
-package me.parallel;
+package app.dayfork;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

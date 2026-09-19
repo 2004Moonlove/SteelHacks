@@ -1,4 +1,4 @@
-# Parallel Me — Project Memory
+# Dayfork — Project Memory
 
 Last updated: 2026-09-19
 
@@ -10,23 +10,27 @@ The user explicitly requested implementation of the local MVP plan. The applicat
 
 The canonical local repository is `/Users/ivan/Desktop/my-projects/SteelHacks`, linked to `https://github.com/2004Moonlove/SteelHacks`. The offline MVP was committed and pushed to `main` as `277e199` on 2026-09-19. During relocation, the prior project directory went to macOS Trash and the source was recovered into the current repository; the frontend lockfile was regenerated and the offline checks passed again. Codex's saved `SteelHacks-` project path is a local symlink to the canonical directory.
 
+The product was renamed to Dayfork on 2026-09-19. The UI branding, frontend package, backend namespace (`app.dayfork`), application entry point, build artifact (`dayfork-0.1.0.jar`), and documentation now use the new name. Rename verification passed: 19 frontend tests, 9 backend tests, both production builds, and localhost checks for the packaged page, UI assets, and API health.
+
 The user chose offline verification for this round. Real Nemotron scenario and story requests remain unverified: the local demo did not have `NVIDIA_API_KEY` and `NVIDIA_MODEL` configured, and its health response reported `modelConfigured: false`. A key previously disclosed in chat must be rotated before live use; never copy it into source, project memory, or Git history.
 
 This file distinguishes explicit requirements from working design decisions and suggestions that remain unresolved.
 
 ## Confirmed User Preferences
 
+- The product name is Dayfork, renamed from Parallel Me by user request on 2026-09-19. Use `Dayfork` in prose and `dayfork` in lowercase identifiers.
 - Run and demonstrate the application locally first. Public hosting is not the current delivery target.
 - Use English for every product screen and user-facing error.
 - Use English for code naming and comments.
 - Use English for README files and other project documentation, GitHub branch names, commit messages, issues, and PR titles and descriptions.
 - Continue communicating with the user in Chinese.
 - The user has requested implementation of the local MVP.
+- For small, low-risk changes on the current branch, commit and push directly after appropriate local verification without asking for redundant confirmation. The user confirmed this workflow on 2026-09-19.
 - Use a light, modern product UI with white and slate surfaces and blue and teal option accents.
 
 ## Product Goal
 
-Parallel Me turns a real-life decision between exactly two options into editable scenarios, calculates their monthly money and time tradeoffs, and presents two comparable narrative experiences.
+Dayfork turns a real-life decision between exactly two options into editable scenarios, calculates their monthly money and time tradeoffs, and presents two comparable narrative experiences.
 
 The product does not recommend a winner, assign scores, or claim that a computed exchange rate represents the user's personal value of time.
 

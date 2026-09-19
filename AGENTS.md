@@ -1,6 +1,6 @@
 # Project Instructions
 
-Read `MEMORY.md` before planning or changing this project. It records the product scope, implementation contract, user preferences, and unresolved decisions for Parallel Me.
+Read `MEMORY.md` before planning or changing this project. It records the product scope, implementation contract, user preferences, and unresolved decisions for Dayfork.
 
 - Use English for the product UI, code identifiers, comments, errors, documentation, branch names, commit messages, GitHub issues, and pull request titles and descriptions.
 - Communicate with the user in Chinese unless requested otherwise.

@@ -7,10 +7,10 @@
     <version>3.5.7</version>
     <relativePath/>
   </parent>
-  <groupId>me.parallel</groupId>
-  <artifactId>parallel-me</artifactId>
+  <groupId>app.dayfork</groupId>
+  <artifactId>dayfork</artifactId>
   <version>0.1.0</version>
-  <name>Parallel Me</name>
+  <name>Dayfork</name>
   <properties>
     <java.version>21</java.version>
   </properties>
