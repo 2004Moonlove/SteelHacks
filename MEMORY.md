@@ -32,7 +32,7 @@ Implementation boundaries: pasted text only, one tab's in-memory working state, 
 
 ## Delivery branch decision (2026-09-19)
 
-The verified implementation was committed as `ea04c1b`. During development, another contributor pushed a different implementation to remote `codex/clear-choice` at `e15a5bb` (author `2004Moonlove`, subject `yang`). No force push, merge or reset was performed. The user explicitly chose `codex/clear-choice-verified` for this implementation so both branches remain available. The local original development branch still preserves `ea04c1b`; final documentation is on the newly approved delivery branch.
+The verified implementation was committed as `ea04c1b`. During development, another contributor pushed a different implementation to remote `codex/clear-choice` at `e15a5bb` (author `2004Moonlove`, subject `yang`). No force push, merge or reset was performed. The user explicitly chose `codex/clear-choice-verified` for this implementation so both branches remain available. The local original development branch still preserves `ea04c1b`; final documentation is on the newly approved delivery branch. The final read-only remote check observed the other implementation, still exactly `e15a5bb`, under branch `Yang`; this task did not rename or modify it. Remote `main` remains `449e9f3`.
 
 ## Historical v1 status and authorization
 
