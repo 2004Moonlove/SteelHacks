@@ -1,0 +1,240 @@
+{
+  "schemaVersion": 2,
+  "id": "craft-class-choice",
+  "version": 1,
+  "title": "Compare pottery class, woodworking class, or deferring",
+  "description": "List the factors needed to decide between taking a pottery class, a woodworking class, or not enrolling this semester.",
+  "originalInput": "我想选陶艺课或者木工课，也可以这学期先不选。我想做出一个可以带回家的作品，但还不知道学费或具体上课时间。周六上午必须有空照顾家人。请帮我列出需要比较的因素。",
+  "domain": "education",
+  "decisionType": "one_of_many",
+  "template": "general",
+  "currency": "CNY",
+  "goals": [
+    {
+      "text": "Make a take-home artwork",
+      "source": "user_input",
+      "quote": "我想做出一个可以带回家的作品"
+    },
+    {
+      "text": "Keep Saturday morning free for family care",
+      "source": "user_input",
+      "quote": "周六上午必须有空照顾家人"
+    },
+    {
+      "text": "Minimize total cost",
+      "source": "model_suggestion",
+      "quote": ""
+    }
+  ],
+  "context": {
+    "months": {
+      "value": null,
+      "source": "unknown",
+      "note": "Not provided."
+    },
+    "usesPerMonth": {
+      "value": null,
+      "source": "unknown",
+      "note": "Monthly usage was not provided."
+    },
+    "budgetCents": {
+      "value": null,
+      "source": "unknown",
+      "note": "Not provided."
+    }
+  },
+  "options": [
+    {
+      "id": "pottery",
+      "name": "Pottery class",
+      "description": "A ceramics course where you can create a piece to take home.",
+      "costs": [],
+      "costsComplete": false,
+      "minutesPerUse": {
+        "value": null,
+        "source": "unknown",
+        "note": "Class duration not specified."
+      },
+      "minutesPerMonth": {
+        "value": null,
+        "source": "unknown",
+        "note": "No independent monthly overhead stated."
+      },
+      "materials": []
+    },
+    {
+      "id": "woodworking",
+      "name": "Woodworking class",
+      "description": "A woodworking course where you can create a piece to take home.",
+      "costs": [],
+      "costsComplete": false,
+      "minutesPerUse": {
+        "value": null,
+        "source": "unknown",
+        "note": "Class duration not specified."
+      },
+      "minutesPerMonth": {
+        "value": null,
+        "source": "unknown",
+        "note": "No independent monthly overhead stated."
+      },
+      "materials": []
+    },
+    {
+      "id": "defer",
+      "name": "Defer enrollment this semester",
+      "description": "Do not take any class this term.",
+      "costs": [],
+      "costsComplete": false,
+      "minutesPerUse": {
+        "value": null,
+        "source": "unknown",
+        "note": "Not applicable."
+      },
+      "minutesPerMonth": {
+        "value": null,
+        "source": "unknown",
+        "note": "Not applicable."
+      },
+      "materials": []
+    }
+  ],
+  "factors": [
+    {
+      "id": "take-home-artwork",
+      "name": "Can produce a take-home artwork",
+      "reason": "User explicitly wants to bring home a finished piece from the class.",
+      "optionIds": [
+        "pottery",
+        "woodworking",
+        "defer"
+      ],
+      "dataType": "boolean",
+      "unit": "",
+      "allowedValues": [],
+      "direction": "target",
+      "purpose": "hard",
+      "importance": 5,
+      "target": {
+        "min": null,
+        "max": null,
+        "desired": true
+      },
+      "values": {
+        "pottery": {
+          "value": null,
+          "source": "unknown",
+          "note": "Assumed yes based on description, but need confirmation."
+        },
+        "woodworking": {
+          "value": null,
+          "source": "unknown",
+          "note": "Assumed yes based on description, but need confirmation."
+        },
+        "defer": {
+          "value": false,
+          "source": "user_input",
+          "note": "Deferring means no class, thus no artwork.",
+          "quote": "也可以这学期先不选"
+        }
+      },
+      "origin": "user",
+      "confirmed": true,
+      "userQuote": "我想做出一个可以带回家的作品"
+    },
+    {
+      "id": "sat-morning-available",
+      "name": "Saturday morning free for family care",
+      "reason": "User must keep Saturday morning open; class timing must not conflict.",
+      "optionIds": [
+        "pottery",
+        "woodworking",
+        "defer"
+      ],
+      "dataType": "boolean",
+      "unit": "",
+      "allowedValues": [],
+      "direction": "target",
+      "purpose": "hard",
+      "importance": 5,
+      "target": {
+        "min": null,
+        "max": null,
+        "desired": true
+      },
+      "values": {
+        "pottery": {
+          "value": null,
+          "source": "unknown",
+          "note": "Schedule unknown; need to verify if class meets Saturday morning."
+        },
+        "woodworking": {
+          "value": null,
+          "source": "unknown",
+          "note": "Schedule unknown; need to verify if class meets Saturday morning."
+        },
+        "defer": {
+          "value": true,
+          "source": "user_input",
+          "note": "Not taking a class guarantees Saturday morning is free.",
+          "quote": "周六上午必须有空照顾家人"
+        }
+      },
+      "origin": "user",
+      "confirmed": true,
+      "userQuote": "周六上午必须有空照顾家人"
+    },
+    {
+      "id": "total-cost",
+      "name": "Total cost",
+      "reason": "User wants to minimize financial burden; cost unknown but important for decision.",
+      "optionIds": [
+        "pottery",
+        "woodworking",
+        "defer"
+      ],
+      "dataType": "money",
+      "unit": "CNY",
+      "allowedValues": [],
+      "direction": "minimize",
+      "purpose": "preference",
+      "importance": 4,
+      "target": {
+        "min": null,
+        "max": null,
+        "desired": null
+      },
+      "values": {
+        "pottery": {
+          "value": null,
+          "source": "unknown",
+          "note": "Calculated locally from current decision inputs."
+        },
+        "woodworking": {
+          "value": null,
+          "source": "unknown",
+          "note": "Calculated locally from current decision inputs."
+        },
+        "defer": {
+          "value": null,
+          "source": "unknown",
+          "note": "Calculated locally from current decision inputs."
+        }
+      },
+      "origin": "model",
+      "confirmed": false,
+      "ruleId": "total_cost"
+    }
+  ],
+  "primaryFactorId": null,
+  "questions": [
+    "What is the tuition fee for the pottery class (in CNY)?",
+    "What is the tuition fee for the woodworking class (in CNY)?",
+    "On which days and times are the pottery and woodworking classes held?"
+  ],
+  "assumptions": [
+    "Both classes are expected to allow students to bring home a finished piece, but this should be confirmed.",
+    "If the user chooses to defer, there is no monetary cost and Saturday morning remains free."
+  ],
+  "mode": "live"
+}

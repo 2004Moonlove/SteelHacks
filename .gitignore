@@ -19,3 +19,11 @@
 .idea/
 .vscode/
 *.iml
+
+# Browser verification artifacts
+**/test-results/
+**/playwright-report/
+
+# Python script caches
+**/__pycache__/
+*.pyc

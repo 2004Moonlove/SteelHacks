@@ -9,11 +9,13 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
@@ -34,16 +36,27 @@ public class NvidiaModelClient implements ModelClient {
     private final String apiKey;
     private final String model;
     private final String url;
+    private final String reasoningEffort;
 
+    public NvidiaModelClient(ObjectMapper mapper, String apiKey, String model, String url, int timeoutSeconds) {
+        this(mapper, apiKey, model, url, timeoutSeconds, "");
+    }
+
+    @Autowired
     public NvidiaModelClient(ObjectMapper mapper,
             @Value("${nvidia.api-key:}") String apiKey,
             @Value("${nvidia.model:}") String model,
             @Value("${nvidia.url}") String url,
-            @Value("${nvidia.timeout-seconds:60}") int timeoutSeconds) {
+            @Value("${nvidia.timeout-seconds:60}") int timeoutSeconds,
+            @Value("${nvidia.reasoning-effort:}") String reasoningEffort) {
         this.mapper = mapper;
         this.apiKey = apiKey;
         this.model = model;
         this.url = url;
+        this.reasoningEffort = reasoningEffort == null ? "" : reasoningEffort.trim();
+        if (!Set.of("", "none", "low", "high").contains(this.reasoningEffort)) {
+            throw new IllegalArgumentException("NVIDIA_REASONING_EFFORT must be empty, none, low or high.");
+        }
         int timeout = Math.max(1, timeoutSeconds);
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(Duration.ofSeconds(Math.min(timeout, 10)));
@@ -62,12 +75,18 @@ public class NvidiaModelClient implements ModelClient {
             throw new ApiException(HttpStatus.SERVICE_UNAVAILABLE, "MODEL_NOT_CONFIGURED",
                     "Model access is not configured. Set NVIDIA_API_KEY and NVIDIA_MODEL.");
         }
+        Map<String, Object> request = new LinkedHashMap<>();
+        request.put("model", model);
+        request.put("messages", messages);
+        request.put("stream", false);
+        // Optional provider-supported mode; leave legacy/default request behavior unchanged.
+        if (!reasoningEffort.isEmpty()) request.put("reasoning_effort", reasoningEffort);
         long started = System.nanoTime();
         for (int attempt = 1; attempt <= 2; attempt++) {
             try {
                 String body = client.post().uri(url)
                         .header("Authorization", "Bearer " + apiKey)
-                        .body(Map.of("model", model, "messages", messages, "stream", false))
+                        .body(request)
                         .retrieve().body(String.class);
                 JsonNode response = body == null || body.isBlank() ? null : mapper.readTree(body);
                 JsonNode content = response == null ? null

@@ -1,0 +1,236 @@
+{
+  "schemaVersion": 2,
+  "id": "pottery_vs_woodwork",
+  "version": 1,
+  "title": "Compare Pottery Class, Woodworking Class, or No Class",
+  "description": "List the factors to consider when choosing between a pottery class, a woodworking class, or not taking a class this semester.",
+  "originalInput": "我想选陶艺课或者木工课，也可以这学期先不选。我想做出一个可以带回家的作品，但还不知道学费或具体上课时间。周六上午必须有空照顾家人。请帮我列出需要比较的因素。",
+  "domain": "education",
+  "decisionType": "one_of_many",
+  "template": "general",
+  "currency": "USD",
+  "goals": [
+    {
+      "text": "Produce a take-home artwork from the class",
+      "source": "user_input",
+      "quote": "我想做出一个可以带回家的作品"
+    },
+    {
+      "text": "Keep Saturday morning free for family care",
+      "source": "user_input",
+      "quote": "周六上午必须有空照顾家人"
+    }
+  ],
+  "context": {
+    "months": {
+      "value": null,
+      "source": "unknown",
+      "note": "Not provided."
+    },
+    "usesPerMonth": {
+      "value": null,
+      "source": "unknown",
+      "note": "Monthly usage was not provided."
+    },
+    "budgetCents": {
+      "value": null,
+      "source": "unknown",
+      "note": "Not provided."
+    }
+  },
+  "options": [
+    {
+      "id": "pottery",
+      "name": "Pottery Class",
+      "description": "A pottery class where you can create a take-home ceramic piece.",
+      "costs": [],
+      "costsComplete": false,
+      "minutesPerUse": {
+        "value": null,
+        "source": "unknown",
+        "note": "Not provided."
+      },
+      "minutesPerMonth": {
+        "value": null,
+        "source": "unknown",
+        "note": "Not provided."
+      },
+      "materials": []
+    },
+    {
+      "id": "woodwork",
+      "name": "Woodworking Class",
+      "description": "A woodworking class where you can build a take-home wooden object.",
+      "costs": [],
+      "costsComplete": false,
+      "minutesPerUse": {
+        "value": null,
+        "source": "unknown",
+        "note": "Not provided."
+      },
+      "minutesPerMonth": {
+        "value": null,
+        "source": "unknown",
+        "note": "Not provided."
+      },
+      "materials": []
+    },
+    {
+      "id": "none",
+      "name": "No Class This Semester",
+      "description": "Do not enroll in any class this semester.",
+      "costs": [],
+      "costsComplete": false,
+      "minutesPerUse": {
+        "value": null,
+        "source": "unknown",
+        "note": "Not provided."
+      },
+      "minutesPerMonth": {
+        "value": null,
+        "source": "unknown",
+        "note": "Not provided."
+      },
+      "materials": []
+    }
+  ],
+  "factors": [
+    {
+      "id": "take_home_artwork",
+      "name": "Can produce a take-home artwork",
+      "reason": "User wants to create something they can bring home after the class.",
+      "optionIds": [
+        "pottery",
+        "woodwork",
+        "none"
+      ],
+      "dataType": "boolean",
+      "unit": "",
+      "allowedValues": [],
+      "direction": "target",
+      "purpose": "preference",
+      "importance": 4,
+      "target": {
+        "min": null,
+        "max": null,
+        "desired": true
+      },
+      "values": {
+        "pottery": {
+          "value": null,
+          "source": "unknown",
+          "note": "Not specified whether pottery class guarantees a take-home piece.",
+          "quote": "我想做出一个可以带回家的作品"
+        },
+        "woodwork": {
+          "value": null,
+          "source": "unknown",
+          "note": "Not specified whether woodworking class guarantees a take-home piece.",
+          "quote": "我想做出一个可以带回家的作品"
+        },
+        "none": {
+          "value": null,
+          "source": "unknown",
+          "note": "Model-calculated values are not accepted as facts. Confirm the underlying information."
+        }
+      },
+      "origin": "user",
+      "confirmed": true,
+      "userQuote": "我想做出一个可以带回家的作品"
+    },
+    {
+      "id": "sat_morning_free",
+      "name": "Saturday morning availability",
+      "reason": "User must keep Saturday morning free to care for family.",
+      "optionIds": [
+        "pottery",
+        "woodwork",
+        "none"
+      ],
+      "dataType": "boolean",
+      "unit": "",
+      "allowedValues": [],
+      "direction": "target",
+      "purpose": "hard",
+      "importance": 5,
+      "target": {
+        "min": null,
+        "max": null,
+        "desired": true
+      },
+      "values": {
+        "pottery": {
+          "value": null,
+          "source": "unknown",
+          "note": "Class schedule not known; cannot confirm if Saturday morning is free.",
+          "quote": "周六上午必须有空照顾家人"
+        },
+        "woodwork": {
+          "value": null,
+          "source": "unknown",
+          "note": "Class schedule not known; cannot confirm if Saturday morning is free.",
+          "quote": "周六上午必须有空照顾家人"
+        },
+        "none": {
+          "value": null,
+          "source": "unknown",
+          "note": "Model-calculated values are not accepted as facts. Confirm the underlying information."
+        }
+      },
+      "origin": "user",
+      "confirmed": true,
+      "userQuote": "周六上午必须有空照顾家人"
+    },
+    {
+      "id": "cost",
+      "name": "Cost",
+      "reason": "User wants to minimize financial burden; exact fees are unknown.",
+      "optionIds": [
+        "pottery",
+        "woodwork",
+        "none"
+      ],
+      "dataType": "money",
+      "unit": "USD",
+      "allowedValues": [],
+      "direction": "minimize",
+      "purpose": "preference",
+      "importance": 3,
+      "target": {
+        "min": null,
+        "max": null,
+        "desired": null
+      },
+      "values": {
+        "pottery": {
+          "value": null,
+          "source": "unknown",
+          "note": "Tuition not provided."
+        },
+        "woodwork": {
+          "value": null,
+          "source": "unknown",
+          "note": "Tuition not provided."
+        },
+        "none": {
+          "value": 0,
+          "source": "user_input",
+          "note": "No class implies no tuition cost.",
+          "quote": "也可以这学期先不选"
+        }
+      },
+      "origin": "model",
+      "confirmed": false
+    }
+  ],
+  "primaryFactorId": null,
+  "questions": [
+    "What is the tuition fee for the pottery class?",
+    "What is the tuition fee for the woodworking class?",
+    "What are the specific class times (especially Saturday morning) for each option?"
+  ],
+  "assumptions": [
+    "If no class is taken, there is no cost and Saturday morning is automatically free."
+  ],
+  "mode": "live"
+}

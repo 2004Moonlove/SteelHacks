@@ -2,7 +2,35 @@
 
 Last updated: 2026-09-19
 
-## Status and Authorization
+## Active direction: Clear Choice (confirmed 2026-09-19)
+
+The user's new implementation request supersedes the earlier two-option, spending-only, no-winner product boundary below. The temporary English UI brand is **Clear Choice** (Chinese working names: 清醒选择 / 选择预演). Keep the prior Dayfork implementation available as a legacy route. The repository's React/TypeScript/Vite/Zustand/Recharts and Java 21/Spring Boot/NVIDIA stack is retained.
+
+Confirmed scope:
+
+- Open-ended everyday decisions: natural-language understanding, 2–6 editable options, known calculation templates plus general comparison, explicit goals and a few meaningful clarifying questions.
+- Dynamic typed factors with stable IDs, applicability, sources, unknowns, user-confirmed hard constraints, preferences or references. One explicit primary preference; no opaque weighted score. Unknown is not zero or automatic failure. Suggested factors cannot silently overwrite confirmed/custom factors. Vague qualities are not converted to fabricated numeric thresholds.
+- Each option independently owns zero or more pasted materials. Analysis includes exact excerpts, multiple labels, disclosures, unknown conditions and contradictions. Absence of materials is not evidence of safety; pressure language is not proof of falsehood. Extracted facts require explicit user acceptance, including conflicts.
+- Pure deterministic calculations: paid-upfront/recurring/annual/per-use cost, horizon, cash requirement, time, budget and typed conditions, break-even. Never amortize an annual fee into fictitious monthly cash payments. No model calls on parameter changes. Common conditions affect relevant options; option parameters affect their owner and then overall comparison.
+- Controlled charts, per-option impact chains and a four-part life summary share the current calculation result. Statements distinguish facts, assumptions and qualitative possibilities; no invented wellbeing, adherence or outcome probabilities. AI responses bind to a decision ID/version.
+- Explicitly labeled fictional demos and a manual comparison work without model access or advertising. Live model failures never fall back to fixtures. Backend-only credentials, strict validation, bounded retries and clear errors remain required.
+- Preserve main and all existing work; develop on `codex/clear-choice` starting from `yy` at `449e9f3`, verify locally, commit and push if allowed, never merge main automatically.
+
+Working implementation contract is [docs/CLEAR_CHOICE_CONTRACT.md](docs/CLEAR_CHOICE_CONTRACT.md). Currency uses integer minor units (USD/CNY/EUR/GBP/CAD), duration uses minutes, and comparisons use whole months (1–120). Category ordering is only user-supplied. Optional qualitative user assumptions are displayed, never made into automatic causal formulas. Summaries are deterministic templates in v2; optional model prose polishing is not required for this release.
+
+User-provided HTML prototypes are interaction references, not evidence of a working model. The earlier text below records historical v1 agreements and verification and must not be read as limiting this newly confirmed scope. Current implementation and verified progress are recorded below and in docs/VERIFICATION.md.
+
+## Clear Choice implementation status (2026-09-19)
+
+Implemented in `frontend/src/choice/` and the backend `/api/choices` endpoints: open decision entry, manual comparison, typed editable factors, explicit requirements and primary preference, per-option text materials, exact-quote analysis, reviewed fact extraction, deterministic costs/time/constraints, shared-scale charts, break-even, impact chains and current-version life summaries. The existing Dayfork route remains at `/?legacy=1`. Four offline examples are visibly fictional; no model failure substitutes a demo response.
+
+The final local verification includes 62 frontend unit tests (43 v2 + 19 legacy), 110 backend tests, 13 Chromium acceptance cases, TypeScript/Vite and bundled Spring Boot builds. The browser suite covers no-ad decisions, 4/8/9-month arithmetic, local parameter edits, custom factors, material combinations, stale responses, unknown/no-solution states and mobile layout. Known usage time can appear separately in the summary while total time remains unknown. Final real Chinese gym, housing and generic course/defer checks passed, as did the latest material and factor follow-ups. The actual browser confirmed local-only parameter edits. Provider HTTP 503 errors and model-validation failures were observed and retained in the evaluation history. Full real-model results and observed limitations are recorded in `docs/VERIFICATION.md` and `docs/model-evaluation-2026-09-19.json`.
+
+The current ignored local `.env` already has the selected NVIDIA credentials/model; `NVIDIA_REASONING_EFFORT=low` is now configured locally and documented. Credentials are server-only and absent from commit candidates. The selected endpoint uses prompt instructions, structural/evidence validation and one semantic repair; provider-enforced JSON Schema is not claimed. Real evaluations exposed and produced regression coverage for annual billing, duplicate time and budget, ungrounded free/defer facts, wishes upgraded to hard constraints, missed explicit primary cost preference and obvious deadline omissions. Exact quotations support provenance but are not a guarantee of semantic correctness.
+
+Implementation boundaries: pasted text only, one tab's in-memory working state, whole-month supported cost rules, one primary preference, deterministic summaries. OCR, uploaded file parsing, website collection, external fact-checking, account/sync persistence, public deployment and optional model prose polishing remain unimplemented. Broad accuracy evaluation across unseen domains and languages remains future work; the live checks are a small fictional sample using real calls.
+
+## Historical v1 status and authorization
 
 The user supplied an MVP specification and a technology proposal, requested a data and Tag contract, and then requested that the existing plan and agreements be recorded in project memory.
 
@@ -12,7 +40,9 @@ The canonical local repository is `/Users/ivan/Desktop/my-projects/SteelHacks`, 
 
 The product was renamed to Dayfork on 2026-09-19. The UI branding, frontend package, backend namespace (`app.dayfork`), application entry point, build artifact (`dayfork-0.1.0.jar`), and documentation now use the new name. Rename verification passed: 19 frontend tests, 9 backend tests, both production builds, and localhost checks for the packaged page, UI assets, and API health.
 
-The user chose offline verification for this round. Real Nemotron scenario and story requests remain unverified: the local demo did not have `NVIDIA_API_KEY` and `NVIDIA_MODEL` configured, and its health response reported `modelConfigured: false`. A key previously disclosed in chat must be rotated before live use; never copy it into source, project memory, or Git history.
+Initial acceptance used offline verification without model credentials. On 2026-09-19, the user requested a free model and supplied a local API key. The selected model is `nvidia/nemotron-3-super-120b-a12b`, verified on NVIDIA Build as a free prototyping API endpoint. The key and model are stored in the Git-ignored repository-root `.env`, loaded into the backend environment; `.env.example` contains no key. After restart, health reported `modelConfigured: true`, and a real campus housing scenario returned HTTP 200 with exactly two options and five Tags in approximately 60 seconds. This initial scenario smoke test was followed by the story verification recorded below; broader input coverage remains pending. A diagnostic command accidentally echoed the supplied key into tool output; rotate it in NVIDIA and update only local `.env`. Never copy credentials into source, project memory, or Git history.
+
+A story request contract mismatch was fixed locally on 2026-09-19: the frontend supplies `monthlyCostComparison` and `monthlyTimeComparison`, but the backend previously rejected both as unsupported facts. The backend now recomputes and validates both directional statements, including equal values, while continuing to reject unknown or inconsistent facts before a model call. Regression coverage checks all nine money/time direction combinations and altered comparison statements. Verification passed 19 frontend tests, 18 backend tests, and both production builds. After backend restart, the exact frontend-generated requests that previously returned HTTP 400 succeeded against the real Nemotron API in General day and Campus day modes (HTTP 200, approximately 22 seconds each), with three aligned moments and two monthly reflections. The campus case included an Uber replacement and deterministic travel anchors.
 
 This file distinguishes explicit requirements from working design decisions and suggestions that remain unresolved.
 
@@ -27,6 +57,21 @@ This file distinguishes explicit requirements from working design decisions and 
 - The user has requested implementation of the local MVP.
 - For small, low-risk changes on the current branch, commit and push directly after appropriate local verification without asking for redundant confirmation. The user confirmed this workflow on 2026-09-19.
 - Use a light, modern product UI with white and slate surfaces and blue and teal option accents.
+
+## Competition Strategy Discussion (No Pivot Selected)
+
+On 2026-09-19, the user requested recommendations to improve hackathon competitiveness and explicitly allowed reconsidering the product idea and purpose. This authorizes evaluating substantial pivots; no replacement purpose or implementation plan has been selected. Keep the current implementation contract separate from proposed competition-oriented changes until a direction is resolved.
+
+The user subsequently rejected the proposed package/subscription-only comparison direction as too narrow. Broader usefulness across everyday situations and convenient, low-effort use are confirmed priorities for the next proposal. A package-specific product is not the chosen direction; the exact broader purpose and interaction flow remain unresolved.
+
+### Shopping and Everyday Modes Under Evaluation
+
+The user asked whether Dayfork can support two directions: comparing similar products encountered while shopping, with recommendations tailored to the user and explanations of possible usage experiences; and everyday choices with money/time tradeoffs. The user requested a feasibility assessment and an implementation approach, not implementation of a selected new design.
+
+For the proposed shopping mode, recommending a better fit is part of the requested capability under evaluation. The implemented everyday mode still follows its no-winner recommendation contract. A shopping schema, preference-matching rules, source evidence, one-time purchase costs, and shopping-specific narrative validation would be separate additions; do not force products into the existing monthly Tag model or silently relax its validation.
+
+Convenient input, supported shopping sources and languages, the first product categories, and the boundary between comparing supplied candidates and discovering products across stores remain unresolved. Broader live Nemotron coverage remains pending; the housing scenario and both story modes have passed smoke tests.
+
 
 ## Product Goal
 
@@ -98,7 +143,7 @@ The supplied technology plan is the working implementation baseline:
 | Optional persistence | Zustand persist + localStorage, browser-local only |
 | Tests | Vitest for meaningful simulation and validation coverage |
 
-Implemented dependency versions are recorded by `frontend/package-lock.json` and `backend/pom.xml` (Spring Boot 3.5.7). The available Nemotron model ID remains unselected. Verify account access and endpoint behavior before claiming live-model acceptance.
+Implemented dependency versions are recorded by `frontend/package-lock.json` and `backend/pom.xml` (Spring Boot 3.5.7). The selected Nemotron model ID is `nvidia/nemotron-3-super-120b-a12b`; one real scenario request passed. Full live-model acceptance remains pending.
 
 The backend protects credentials, calls the model, validates its output, and exposes decision generation at `POST /api/scenarios/generate` and story generation at `POST /api/stories/generate`.
 
@@ -485,14 +530,14 @@ Also test: disabling all Tags restores baseline; zero frequencies have no effect
 ## Still Unresolved
 
 - Deadline and available implementation/demo time.
-- An accessible Nemotron model ID and live API behavior for scenario and story generation. Do not ask the user to paste credentials into chat.
+- Additional live scenario coverage, especially non-housing and missing-value inputs, for the selected Nemotron model. Do not ask the user to paste credentials into chat.
 - The quality of real story narratives against the rule forbidding unconfigured events, subjective outcomes, and winner recommendations.
 
-Offline verification is complete. Live model acceptance remains pending until a fresh local credential and model ID are configured and real requests succeed.
+Offline verification, one real housing scenario, and General day/Campus day story smoke tests passed. Broader live acceptance remains pending for non-housing inputs, missing-value inputs, and repeated narrative-quality checks.
 
 ## Recommended Next Steps (Suggestions, Not Confirmed Scope)
 
-1. Rotate the previously disclosed API key, select an accessible Nemotron model ID, configure both values only in the local backend environment, and verify that the health endpoint reports model configuration.
+1. Rotate the disclosed API key, update the Git-ignored local `.env`, and restart the backend with that environment. Keep the selected free model unless later verification identifies a compatibility issue.
 2. Complete live acceptance with a campus housing decision, a non-housing decision, and an input missing key numbers. Generate both General day and Campus day stories, and inspect facts, repair behavior, and retryable errors.
 3. Add browser-level regression coverage for baseline confirmation, invalid edits, desktop/narrow layouts, stale stories, request races, and the invariant that Tag changes do not call the model. Existing frontend tests cover pure functions; backend tests use a fake model client.
 4. Review real story samples for unsupported nonnumeric events and subjective claims, which structural validators cannot fully rule out. Adjust prompts or validation only in response to observed failures.

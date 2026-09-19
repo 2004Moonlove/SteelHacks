@@ -1,0 +1,150 @@
+{
+  "date": "2026-09-19",
+  "model": "nvidia/nemotron-3-super-120b-a12b",
+  "reasoning_effort": "low",
+  "timeout_seconds": 60,
+  "input_provenance": "Fictional evaluation cases executed through the real local Nemotron integration. No fixture was substituted for a model response.",
+  "offline": {
+    "frontend_tests": 62,
+    "backend_tests": 110,
+    "chromium_acceptance_cases": 13
+  },
+  "generation": [
+    {
+      "case": "gym_zh",
+      "status": "passed_automated_checks",
+      "method": "Real browser generation plus API semantic assertions",
+      "parameter_edit_model_requests": 0,
+      "options": 2,
+      "factors": 1,
+      "generation_api_requests": 1,
+      "provider_successful_completions": 2,
+      "provider_transient_retries": 1,
+      "semantic_repairs": 1
+    },
+    {
+      "case": "housing_hard_zh",
+      "expected_review": "Keep pet permission unknown and both explicit hard requirements; no invented deposit.",
+      "status": "passed_automated_checks",
+      "options": 2,
+      "factors": 3,
+      "elapsed_seconds": 19.1
+    },
+    {
+      "case": "generic_course_zh",
+      "expected_review": "Generic comparison with 3 relevant options, Saturday availability, unknown price/time.",
+      "status": "passed_automated_checks",
+      "options": 3,
+      "factors": 3,
+      "elapsed_seconds": 16.9
+    }
+  ],
+  "followup_attempts": [
+    {
+      "case": "no_materials",
+      "status": "passed_automated_checks",
+      "analysis_status": "no_materials",
+      "findings": 0,
+      "elapsed_seconds": 0.0
+    },
+    {
+      "case": "single_material",
+      "status": "passed_automated_checks",
+      "analysis_status": "needs_verification",
+      "findings": 1,
+      "elapsed_seconds": 3.3
+    },
+    {
+      "case": "conflicting_materials",
+      "status": "api_error",
+      "http": 503,
+      "code": "MODEL_UNAVAILABLE",
+      "message": "The model service is temporarily unavailable. Please try again shortly.",
+      "issues": [],
+      "elapsed_seconds": 1.8
+    },
+    {
+      "case": "separate_option_material",
+      "status": "passed_automated_checks",
+      "analysis_status": "no_pressure_found",
+      "findings": 0,
+      "elapsed_seconds": 7.8
+    },
+    {
+      "case": "natural_language_factor",
+      "status": "api_error",
+      "http": 503,
+      "code": "MODEL_UNAVAILABLE",
+      "issues": [],
+      "elapsed_seconds": 1.9
+    },
+    {
+      "case": "conflicting_materials",
+      "status": "passed_automated_checks",
+      "analysis_status": "inconsistent",
+      "findings": 3,
+      "elapsed_seconds": 19.6
+    },
+    {
+      "case": "natural_language_factor",
+      "status": "api_error",
+      "http": 502,
+      "code": "MODEL_OUTPUT_INVALID",
+      "issues": [
+        {
+          "path": "response.assumptions",
+          "message": "Unsupported field."
+        }
+      ],
+      "elapsed_seconds": 27.0
+    },
+    {
+      "case": "natural_language_factor",
+      "status": "passed_automated_checks",
+      "factors": 1,
+      "elapsed_seconds": 16.1
+    }
+  ],
+  "latest_followup_results": [
+    {
+      "case": "no_materials",
+      "status": "passed_automated_checks",
+      "analysis_status": "no_materials",
+      "findings": 0,
+      "elapsed_seconds": 0.0
+    },
+    {
+      "case": "single_material",
+      "status": "passed_automated_checks",
+      "analysis_status": "needs_verification",
+      "findings": 1,
+      "elapsed_seconds": 3.3
+    },
+    {
+      "case": "conflicting_materials",
+      "status": "passed_automated_checks",
+      "analysis_status": "inconsistent",
+      "findings": 3,
+      "elapsed_seconds": 19.6
+    },
+    {
+      "case": "separate_option_material",
+      "status": "passed_automated_checks",
+      "analysis_status": "no_pressure_found",
+      "findings": 0,
+      "elapsed_seconds": 7.8
+    },
+    {
+      "case": "natural_language_factor",
+      "status": "passed_automated_checks",
+      "factors": 1,
+      "elapsed_seconds": 16.1
+    }
+  ],
+  "limits": [
+    "No-material handling is deterministic and does not call the model.",
+    "One browser generation API operation can include bounded provider retries and one semantic repair.",
+    "Passing this small, repeatedly exercised regression sample is not an accuracy benchmark for unseen inputs.",
+    "Earlier semantic failures became regression fixtures; the accompanying verification notes describe them."
+  ]
+}

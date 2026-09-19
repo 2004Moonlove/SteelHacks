@@ -1,0 +1,188 @@
+{
+  "schemaVersion": 2,
+  "id": "fitness-membership-choice",
+  "version": 1,
+  "title": "Compare annual and monthly gym memberships",
+  "description": "Review the options and confirm unknown information.",
+  "originalInput": "我在比较同一家健身房的年卡和月卡。年卡1200元人民币，月卡150元人民币，两种都不限次数，服务相同且无其他费用。我计划用4个月，每月8次，每次60分钟。我首先考虑总支出，预算最多1300元。",
+  "domain": "general",
+  "decisionType": "one_of_many",
+  "template": "general",
+  "currency": "CNY",
+  "goals": [
+    {
+      "text": "Minimize total cost",
+      "source": "user_input",
+      "quote": "我首先考虑总支出"
+    },
+    {
+      "text": "Keep total expenditure within budget of 1300 CNY",
+      "source": "user_input",
+      "quote": "预算最多1300元"
+    }
+  ],
+  "context": {
+    "months": {
+      "value": 4,
+      "source": "user_input",
+      "note": "User stated plan to use for 4 months.",
+      "quote": "我计划用4个月"
+    },
+    "usesPerMonth": {
+      "value": 8,
+      "source": "user_input",
+      "note": "User stated 8 uses per month.",
+      "quote": "每月8次"
+    },
+    "budgetCents": {
+      "value": 130000,
+      "source": "user_input",
+      "note": "1300 CNY in minor units.",
+      "quote": "预算最多1300元"
+    }
+  },
+  "options": [
+    {
+      "id": "annual",
+      "name": "Annual membership",
+      "description": "One-time annual fee, unlimited use, same service as monthly.",
+      "costs": [
+        {
+          "id": "annual-fee",
+          "name": "Annual membership fee",
+          "cadence": "annual",
+          "amount": {
+            "value": 120000,
+            "source": "user_input",
+            "note": "1200 CNY in minor units.",
+            "quote": "年卡1200元人民币"
+          }
+        }
+      ],
+      "costsComplete": true,
+      "minutesPerUse": {
+        "value": 60,
+        "source": "user_input",
+        "note": "Each session lasts 60 minutes.",
+        "quote": "每次60分钟"
+      },
+      "minutesPerMonth": {
+        "value": 480,
+        "source": "derived",
+        "note": "8 uses per month × 60 minutes per use = 480 minutes.",
+        "quote": "每月8次，每次60分钟"
+      },
+      "materials": []
+    },
+    {
+      "id": "monthly",
+      "name": "Monthly membership",
+      "description": "Recurring monthly fee, unlimited use, same service as annual.",
+      "costs": [
+        {
+          "id": "monthly-fee",
+          "name": "Monthly membership fee",
+          "cadence": "monthly",
+          "amount": {
+            "value": 15000,
+            "source": "user_input",
+            "note": "150 CNY in minor units.",
+            "quote": "月卡150元人民币"
+          }
+        }
+      ],
+      "costsComplete": true,
+      "minutesPerUse": {
+        "value": 60,
+        "source": "user_input",
+        "note": "Each session lasts 60 minutes.",
+        "quote": "每次60分钟"
+      },
+      "minutesPerMonth": {
+        "value": 480,
+        "source": "derived",
+        "note": "8 uses per month × 60 minutes per use = 480 minutes.",
+        "quote": "每月8次，每次60分钟"
+      },
+      "materials": []
+    }
+  ],
+  "factors": [
+    {
+      "id": "total-cost",
+      "name": "Total cost",
+      "reason": "Compare the financial commitment over the chosen horizon (4 months).",
+      "optionIds": [
+        "annual",
+        "monthly"
+      ],
+      "dataType": "money",
+      "unit": "CNY",
+      "allowedValues": [],
+      "direction": "minimize",
+      "purpose": "preference",
+      "importance": 5,
+      "target": {
+        "min": null,
+        "max": null,
+        "desired": null
+      },
+      "values": {
+        "annual": {
+          "value": null,
+          "source": "unknown",
+          "note": "Calculated locally from current decision inputs."
+        },
+        "monthly": {
+          "value": null,
+          "source": "unknown",
+          "note": "Calculated locally from current decision inputs."
+        }
+      },
+      "origin": "user",
+      "confirmed": true,
+      "userQuote": "我首先考虑总支出",
+      "ruleId": "total_cost"
+    },
+    {
+      "id": "budget-constraint",
+      "name": "Budget limit",
+      "reason": "Ensure total cost does not exceed the user's maximum budget.",
+      "optionIds": [
+        "annual",
+        "monthly"
+      ],
+      "dataType": "money",
+      "unit": "CNY",
+      "allowedValues": [],
+      "direction": "target",
+      "purpose": "hard",
+      "importance": 5,
+      "target": {
+        "min": null,
+        "max": 130000,
+        "desired": null
+      },
+      "values": {
+        "annual": {
+          "value": null,
+          "source": "unknown",
+          "note": "Calculated locally from current decision inputs."
+        },
+        "monthly": {
+          "value": null,
+          "source": "unknown",
+          "note": "Calculated locally from current decision inputs."
+        }
+      },
+      "origin": "user",
+      "confirmed": true,
+      "userQuote": "预算最多1300元",
+      "ruleId": "total_cost"
+    }
+  ],
+  "primaryFactorId": "total-cost",
+  "questions": [],
+  "assumptions": [],
+  "mode": "live"
+}

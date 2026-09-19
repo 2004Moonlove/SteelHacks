@@ -127,9 +127,20 @@ public class StoryValidator {
         expectedFact(facts, "optionB_monthlyTime", duration(time[1]));
         expectedFact(facts, "monthlyCostDifference", money(Math.abs(cost[1] - cost[0])));
         expectedFact(facts, "monthlyTimeDifference", duration(Math.abs(time[1] - time[0])));
+        String optionA = decision.path("options").get(0).path("name").asText();
+        String optionB = decision.path("options").get(1).path("name").asText();
+        expectedFact(facts, "monthlyCostComparison", cost[0] == cost[1]
+                ? optionA + " and " + optionB + " have equal monthly cost."
+                : (cost[1] > cost[0] ? optionB : optionA) + " costs " + money(Math.abs(cost[1] - cost[0]))
+                        + " more per month than " + (cost[1] > cost[0] ? optionA : optionB) + ".");
+        expectedFact(facts, "monthlyTimeComparison", time[0] == time[1]
+                ? optionA + " and " + optionB + " use equal monthly time."
+                : (time[1] > time[0] ? optionB : optionA) + " uses " + duration(Math.abs(time[1] - time[0]))
+                        + " more per month than " + (time[1] > time[0] ? optionA : optionB) + ".");
         Set<String> allowedFacts = new HashSet<>(List.of(
                 "optionA_name", "optionB_name", "optionA_monthlyCost", "optionB_monthlyCost",
-                "optionA_monthlyTime", "optionB_monthlyTime", "monthlyCostDifference", "monthlyTimeDifference"));
+                "optionA_monthlyTime", "optionB_monthlyTime", "monthlyCostDifference", "monthlyTimeDifference",
+                "monthlyCostComparison", "monthlyTimeComparison"));
         if (mode.equals("campus")) {
             for (String prefix : List.of("optionA", "optionB")) {
                 for (String suffix : List.of("leaveHome", "arriveCampus", "leaveCampus", "arriveHome",

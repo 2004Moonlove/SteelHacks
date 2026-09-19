@@ -103,6 +103,31 @@ class NvidiaModelClientTest {
         }
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"none", "low", "high"})
+    void includesOnlyExplicitSupportedReasoningMode(String effort) throws Exception {
+        try (var provider = new ProviderStub(successfulReply())) {
+            NvidiaModelClient client = new NvidiaModelClient(new ObjectMapper(), "test-key", "test-model",
+                    "http://127.0.0.1:" + provider.server.getAddress().getPort() + "/chat/completions", 1, effort);
+            assertEquals("Generated content", client.complete(messages()));
+            assertEquals(effort, new ObjectMapper().readTree(provider.requests.get(0)).path("reasoning_effort").asText());
+        }
+    }
+
+    @Test
+    void defaultRequestDoesNotAssumeModelSupportsReasoningControl() throws Exception {
+        try (var provider = new ProviderStub(successfulReply())) {
+            provider.client().complete(messages());
+            assertFalse(new ObjectMapper().readTree(provider.requests.get(0)).has("reasoning_effort"));
+        }
+    }
+
+    @Test
+    void rejectsUnsupportedReasoningModeBeforeAnyProviderCall() {
+        assertThrows(IllegalArgumentException.class, () -> new NvidiaModelClient(new ObjectMapper(), "test-key", "test-model",
+                "http://127.0.0.1:1/chat/completions", 1, "unbounded"));
+    }
+
     private static List<ModelClient.Message> messages() {
         return List.of(new ModelClient.Message("user", "Compare two choices"));
     }

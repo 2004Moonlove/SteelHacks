@@ -1,0 +1,192 @@
+{
+  "schemaVersion": 2,
+  "id": "gym-membership-comparison",
+  "version": 1,
+  "title": "Gym Membership Comparison: Annual vs Monthly Pass",
+  "description": "Comparing annual and monthly gym passes from the same gym for a 4-month usage plan with 8 visits per month, each 60 minutes long, under a budget of 1300 CNY.",
+  "originalInput": "我在比较同一家健身房的年卡和月卡。年卡1200元人民币，月卡150元人民币，两种都不限次数，服务相同且无其他费用。我计划用4个月，每月8次，每次60分钟。我首先考虑总支出，预算最多1300元。",
+  "domain": "fitness",
+  "decisionType": "purchase",
+  "template": "purchase",
+  "currency": "CNY",
+  "goals": [
+    {
+      "text": "Minimize total expenditure",
+      "source": "user_input",
+      "quote": "我首先考虑总支出"
+    },
+    {
+      "text": "Stay within budget of 1300 CNY",
+      "source": "user_input",
+      "quote": "预算最多1300元"
+    }
+  ],
+  "context": {
+    "months": {
+      "value": 4,
+      "source": "user_input",
+      "note": "Usage duration specified as 4 months",
+      "quote": "我计划用4个月"
+    },
+    "usesPerMonth": {
+      "value": 8,
+      "source": "user_input",
+      "note": "Usage frequency specified as 8 times per month",
+      "quote": "每月8次"
+    },
+    "budgetCents": {
+      "value": 130000,
+      "source": "user_input",
+      "note": "Budget of 1300 CNY converted to minor units (1 CNY = 100 cents)",
+      "quote": "预算最多1300元"
+    }
+  },
+  "options": [
+    {
+      "id": "annual-pass",
+      "name": "Annual Pass",
+      "description": "Gym annual pass for 1200 CNY, unlimited usage, same service as monthly pass, no other fees.",
+      "costs": [
+        {
+          "id": "annual-fee",
+          "name": "Annual Fee",
+          "cadence": "one_time",
+          "amount": {
+            "value": 120000,
+            "source": "user_input",
+            "note": "Annual pass price is 1200 CNY",
+            "quote": "年卡1200元人民币"
+          }
+        }
+      ],
+      "costsComplete": true,
+      "minutesPerUse": {
+        "value": 60,
+        "source": "user_input",
+        "note": "Each session is 60 minutes",
+        "quote": "每次60分钟"
+      },
+      "minutesPerMonth": {
+        "value": null,
+        "source": "unknown",
+        "note": "Minutes per month is derived from usage; not a fixed cost"
+      },
+      "materials": []
+    },
+    {
+      "id": "monthly-pass",
+      "name": "Monthly Pass",
+      "description": "Gym monthly pass for 150 CNY, unlimited usage, same service as annual pass, no other fees.",
+      "costs": [
+        {
+          "id": "monthly-fee",
+          "name": "Monthly Fee",
+          "cadence": "monthly",
+          "amount": {
+            "value": 15000,
+            "source": "user_input",
+            "note": "Monthly pass price is 150 CNY",
+            "quote": "月卡150元人民币"
+          }
+        }
+      ],
+      "costsComplete": true,
+      "minutesPerUse": {
+        "value": 60,
+        "source": "user_input",
+        "note": "Each session is 60 minutes",
+        "quote": "每次60分钟"
+      },
+      "minutesPerMonth": {
+        "value": null,
+        "source": "unknown",
+        "note": "Minutes per month is derived from usage; not a fixed cost"
+      },
+      "materials": []
+    }
+  ],
+  "factors": [
+    {
+      "id": "total-cost",
+      "name": "Total Cost",
+      "reason": "User explicitly prioritizes total expenditure as a key decision factor to minimize cost.",
+      "optionIds": [
+        "annual-pass",
+        "monthly-pass"
+      ],
+      "dataType": "money",
+      "unit": "CNY",
+      "allowedValues": [],
+      "direction": "minimize",
+      "purpose": "preference",
+      "importance": 5,
+      "target": {
+        "min": null,
+        "max": null,
+        "desired": null
+      },
+      "values": {
+        "annual-pass": {
+          "value": 120000,
+          "source": "derived",
+          "note": "Annual pass cost is 1200 CNY (120000 cents) as a one-time fee.",
+          "quote": "年卡1200元人民币"
+        },
+        "monthly-pass": {
+          "value": 60000,
+          "source": "derived",
+          "note": "Monthly pass cost for 4 months: 150 CNY/month × 4 = 600 CNY (60000 cents).",
+          "quote": "月卡150元人民币"
+        }
+      },
+      "origin": "user",
+      "confirmed": true,
+      "userQuote": "我首先考虑总支出"
+    },
+    {
+      "id": "budget-adherence",
+      "name": "Within Budget",
+      "reason": "User has a strict budget limit of 1300 CNY; options must not exceed this to be feasible.",
+      "optionIds": [
+        "annual-pass",
+        "monthly-pass"
+      ],
+      "dataType": "boolean",
+      "unit": "",
+      "allowedValues": [],
+      "direction": "target",
+      "purpose": "hard",
+      "importance": 5,
+      "target": {
+        "min": null,
+        "max": null,
+        "desired": true
+      },
+      "values": {
+        "annual-pass": {
+          "value": true,
+          "source": "derived",
+          "note": "Annual pass costs 1200 CNY, which is within the 1300 CNY budget.",
+          "quote": "预算最多1300元"
+        },
+        "monthly-pass": {
+          "value": true,
+          "source": "derived",
+          "note": "Monthly pass costs 600 CNY for 4 months, which is within the 1300 CNY budget.",
+          "quote": "预算最多1300元"
+        }
+      },
+      "origin": "user",
+      "confirmed": true,
+      "userQuote": "预算最多1300元"
+    }
+  ],
+  "primaryFactorId": "total-cost",
+  "questions": [],
+  "assumptions": [
+    "No additional fees beyond the stated pass prices.",
+    "Service quality and access are identical between annual and monthly passes.",
+    "User will use the gym exactly as planned: 4 months, 8 times/month, 60 minutes/session."
+  ],
+  "mode": "live"
+}

@@ -9,6 +9,8 @@ import java.util.ArrayDeque;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.http.HttpStatus;
 
 class GenerationServiceTest {
@@ -131,6 +133,7 @@ class GenerationServiceTest {
         facts.put("optionA_monthlyTime", "0 hr 20 min");
         facts.put("optionB_monthlyTime", "0 hr 40 min");
         facts.put("monthlyTimeDifference", "0 hr 20 min");
+        facts.put("monthlyTimeComparison", "Option B uses 0 hr 20 min more per month than Option A.");
         facts.put("optionA_leaveHome", "8:50 AM");
         facts.put("optionB_leaveHome", "8:40 AM");
         for (String prefix : new String[]{"optionA", "optionB"}) {
@@ -149,6 +152,62 @@ class GenerationServiceTest {
         ((com.fasterxml.jackson.databind.node.ObjectNode) request.path("context").path("selections").get(0))
                 .put("outboundChoiceId", "missing");
         assertThrows(ContractValidator.ContractException.class, () -> stories.request(request));
+    }
+
+    @ParameterizedTest
+    @CsvSource({"-1,-1", "-1,0", "-1,1", "0,-1", "0,0", "0,1", "1,-1", "1,0", "1,1"})
+    void validatesDirectionalComparisonsAndRejectsTampering(int costDirection, int timeDirection) throws Exception {
+        JsonNode request = validStoryRequest();
+        long[] costs = {125, 125 + costDirection * 125};
+        long[] minutes = {65, 65 + timeDirection * 65};
+        var facts = (com.fasterxml.jackson.databind.node.ObjectNode) request.path("facts");
+        for (int i = 0; i < 2; i++) {
+            String id = i == 0 ? "a" : "b";
+            String prefix = i == 0 ? "optionA" : "optionB";
+            var option = (com.fasterxml.jackson.databind.node.ObjectNode) request.path("snapshot").path("decision").path("options").get(i);
+            option.set("fixedCosts", mapper.readTree("""
+                [{"id":"fee","name":"Fee","amountCentsMonthly":{"value":%d,"source":"user_input"}}]
+                """.formatted(costs[i])));
+            option.set("activities", mapper.readTree("""
+                [{"id":"activity","name":"Activity","eventUnit":"event",
+                  "eventsPerMonth":{"value":1,"source":"user_input"},
+                  "costCentsPerEvent":{"value":0,"source":"user_input"},
+                  "minutesPerEvent":{"value":%d,"source":"user_input"}}]
+                """.formatted(minutes[i])));
+            var result = (com.fasterxml.jackson.databind.node.ObjectNode) request.path("snapshot").path("calculation").path("options").get(i);
+            result.put("totalCostCents", costs[i]);
+            result.put("totalTimeMinutes", minutes[i]);
+            result.set("breakdown", mapper.readTree("""
+                [{"id":"%s:fee:fixed","kind":"baseline_fixed","label":"Fee","totalCostCents":%d,"totalTimeMinutes":0},
+                 {"id":"%s:activity:original","kind":"original_activity","label":"Activity","activityId":"activity",
+                  "eventsPerMonth":1,"costCentsPerEvent":0,"minutesPerEvent":%d,"totalCostCents":0,"totalTimeMinutes":%d}]
+                """.formatted(id, costs[i], id, minutes[i], minutes[i])));
+            facts.put(prefix + "_monthlyCost", new String[]{"$0.00", "$1.25", "$2.50"}[(int) costs[i] / 125]);
+            facts.put(prefix + "_monthlyTime", new String[]{"0 hr 0 min", "1 hr 5 min", "2 hr 10 min"}[(int) minutes[i] / 65]);
+        }
+        var comparison = (com.fasterxml.jackson.databind.node.ObjectNode) request.path("snapshot").path("calculation").path("comparison");
+        comparison.put("costDeltaCents", costDirection * 125);
+        comparison.put("timeDeltaMinutes", timeDirection * 65);
+        facts.put("monthlyCostDifference", costDirection == 0 ? "$0.00" : "$1.25");
+        facts.put("monthlyTimeDifference", timeDirection == 0 ? "0 hr 0 min" : "1 hr 5 min");
+        facts.put("monthlyCostComparison", new String[]{
+                "Option A costs $1.25 more per month than Option B.",
+                "Option A and Option B have equal monthly cost.",
+                "Option B costs $1.25 more per month than Option A."}[costDirection + 1]);
+        facts.put("monthlyTimeComparison", new String[]{
+                "Option A uses 1 hr 5 min more per month than Option B.",
+                "Option A and Option B use equal monthly time.",
+                "Option B uses 1 hr 5 min more per month than Option A."}[timeDirection + 1]);
+        stories.request(request);
+
+        for (String key : List.of("monthlyCostComparison", "monthlyTimeComparison")) {
+            String original = facts.path(key).asText();
+            facts.put(key, "Option A always wins.");
+            ApiException exception = assertThrows(ApiException.class, () -> service.story(request));
+            assertEquals("facts." + key, exception.issues().get(0).path());
+            assertEquals(0, model.calls);
+            facts.put(key, original);
+        }
     }
 
     private JsonNode validStoryRequest() throws Exception {
@@ -172,7 +231,9 @@ class GenerationServiceTest {
                 "optionA_name":"Option A","optionB_name":"Option B",
                 "optionA_monthlyCost":"$0.00","optionB_monthlyCost":"$0.00",
                 "optionA_monthlyTime":"0 hr 0 min","optionB_monthlyTime":"0 hr 0 min",
-                "monthlyCostDifference":"$0.00","monthlyTimeDifference":"0 hr 0 min"
+                "monthlyCostDifference":"$0.00","monthlyTimeDifference":"0 hr 0 min",
+                "monthlyCostComparison":"Option A and Option B have equal monthly cost.",
+                "monthlyTimeComparison":"Option A and Option B use equal monthly time."
               }
             }
             """.formatted(validDecision()));
