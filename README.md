@@ -1,6 +1,6 @@
 # Dayfork
 
-Dayfork helps compare two real-life choices through editable monthly costs and time. A model can turn a written decision into two options and suggested Tags. A deterministic browser-side engine calculates the tradeoff, and a second, explicit model request can turn a valid snapshot into parallel stories. The product does not recommend a winner.
+Dayfork helps compare two spending choices through editable monthly costs and time. A model can turn a written decision into two options and suggested Tags. A deterministic browser-side engine calculates the tradeoff, and a second, explicit model request can turn a valid snapshot into parallel stories. The product does not recommend a winner.
 
 ## Requirements
 

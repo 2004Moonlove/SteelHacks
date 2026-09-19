@@ -30,7 +30,7 @@ This file distinguishes explicit requirements from working design decisions and 
 
 ## Product Goal
 
-Dayfork turns a real-life decision between exactly two options into editable scenarios, calculates their monthly money and time tradeoffs, and presents two comparable narrative experiences.
+Dayfork turns a spending decision between exactly two options into editable scenarios, calculates their monthly money and time tradeoffs, and presents two comparable narrative experiences.
 
 The product does not recommend a winner, assign scores, or claim that a computed exchange rate represents the user's personal value of time.
 
@@ -44,7 +44,7 @@ Core flow:
 6. Explicitly request Parallel Stories for the current valid configuration.
 7. Compare both options within the same scenario and corresponding moments.
 
-The campus housing example is the primary test and demonstration fixture. The first release accepts general two-option decisions that can be represented using monthly cost, time, and the four defined Tag types.
+The campus housing example is the primary test and demonstration fixture. The implemented engine supports two-option decisions represented using monthly cost, time, and the four defined Tag types; the proposed spending-decision boundary is documented below.
 
 ## Confirmed Experience Priorities
 
@@ -58,6 +58,27 @@ The user also explicitly wants Dayfork to remain distinct in both functionality 
 The exact layout and interaction design remain proposals. Earlier suggestions such as editing inside story scenes, a monthly scene index, personal constraints, threshold solvers, and calendar allocation are not automatically confirmed implementation scope.
 
 These experience priorities preserve explicit assumption review, deterministic money/time calculations, and user-triggered AI story generation.
+
+## Scope Clarification: Confirmed Direction and Proposed Boundary
+
+On 2026-09-19, the user clarified that Dayfork needs a coherent category of spending decisions that includes renting a home without becoming a housing-only tool. Preserve the original flow of two options, selectable Tags, editable parameters, deterministic calculations, and comparable storylines. The user identified clear UI and storylines as the intended distinction from Wage101, and selectable factors and editable parameters as the intended distinction from ParallelMe. These are product intentions, not verified claims that competitors cannot offer similar interactions.
+
+The earlier personal-deadline and schedule-planning suggestions remain optional proposals and must not displace this core spending-decision flow.
+
+### Proposed Category (Not Yet Confirmed)
+
+Everyday spending choices with recurring effects: choosing between two ways to meet the same practical everyday need, where the choice has repeated effects on spending, time spent on relevant activities, and daily routines. A decision may be made infrequently, such as signing a lease, while its costs and routine consequences recur.
+
+Proposed first-release boundaries:
+
+- Compare exactly two alternatives for the same need and a comparable level of use. An alternative may have no fixed fee but still involve per-use spending and time.
+- Model the recurring effects on a monthly basis using explicit fixed costs, activity counts, per-event costs, durations, and the existing four Tag types.
+- Let Tags represent concrete changes in how the options are used, such as occasional ride replacements, meal substitutions, or extra visits. Parameters describe the amount, frequency, and duration of those changes; Tags are not subjective preference scores.
+- Use matched, illustrative situations to explain configured differences. Housing can illustrate a trip home; meal preparation can illustrate an evening meal; laundry can illustrate a recurring household task. A story does not imply that every modeled monthly activity occurs every day.
+- Candidate cases include near versus far rental housing, cooking versus a meal service, self-service versus paid laundry, and nearby versus farther-away gym memberships. These are proposed coverage examples, not verified live-model support.
+- Keep investment returns, broad life-outcome predictions, and purely aesthetic product preferences outside this proposed scope. Purchases requiring upfront-cost treatment, financing, depreciation, or resale assumptions need a separate cost-horizon design before becoming first-release examples; do not silently amortize them into the existing monthly contract.
+
+This proposed category does not change the implemented schemas, calculation rules, story-generation triggers, or the confirmed distinction between illustrative scenes and monthly results.
 
 ## Technology Baseline
 
