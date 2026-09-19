@@ -2,7 +2,43 @@
 
 Last updated: 2026-09-19
 
-## Status and Authorization
+## Current Clear Choice Contract (2026-09-19)
+
+This section records the user's new explicit implementation request and supersedes conflicting Dayfork v1 restrictions below. Earlier sections remain historical design context, not current limits for the Clear Choice workspace.
+
+### Confirmed Requirements
+
+- Working product title: Clear Choice (the user's temporary Chinese names are translated for the English UI). Preserve the existing Dayfork code and main branch. Implement on `codex/clear-choice`, commit and push when remote permissions permit, and do not merge main.
+- The current checkout is `E:/博一/steelhack/SteelHacks`, remote `https://github.com/2004Moonlove/SteelHacks.git`. Work began on a clean `Yang` checkout at `cfeeb68`, also the local main revision. The remote had no existing `codex/clear-choice` branch.
+- Extend beyond exactly two monthly spending options: support open everyday scenarios, typed user-editable factors, explicit hard requirements, one primary preference, qualitative/reference factors, and unknown/tie/no-solution states. Existing v1 monthly simulation remains available as a separate workspace.
+- Main flow: freely describe a decision, understand goal/options/requirements, review suggested factors, edit data, compare, view charts and instant per-option life summaries, then adjust conditions. Advertising is optional and must not be necessary to use the product.
+- Each option independently owns zero or more pasted materials. Findings include original quotes, multiple tags, source option, cross-document conflicts and value proposals. No risk scores, material-count penalties, or automatic price overwrites.
+- Model requests are explicit understanding, factor-suggestion and material-analysis actions. Calculations, parameter changes, charts and Clear Choice life summaries do not call a model. This supersedes the older two-model-call-category invariant for the new workspace.
+- Preserve confirmed/custom data. Additional suggestions are appended for review, not merged destructively. Disallow arbitrary model formulas/components. Bound repair to one attempt and bind responses to decision ID/version.
+- UI, code, documentation and Git metadata stay in English; conversation stays in Chinese. Local development/demo first. No public deployment requested in this implementation round.
+
+### Implemented v2 Design Decisions
+
+- Reuse React/TypeScript/Vite, shared UI primitives, Recharts, Zod, Spring Boot and the existing NVIDIA client. New modules live in `frontend/src/choice/`; legacy UI is reachable at `/#legacy`.
+- v2 supports 2–6 options, at most 30 factors, 8 pasted materials per option, one currency per decision, integer cents, minute-based time rules and whole-month horizons 1–120. Factors carry stable IDs, option references, type, unit/allowed values, direction/target, purpose, importance, values, sources, confirmation and optional predefined rule ID.
+- Rules: one-time upfront cost, recurring payment with explicit billing months, per-use charge, time per use, fixed monthly time, and commitment months. Known annual costs are full scheduled payments, including renewal; never silently amortized. Average monthly visits use 52/12 weeks. Zero visits has no per-use cost result. Missing dependencies yield unknown totals, not zero.
+- One common use unit is modeled per decision. Unrelated activities can use fixed monthly time. Unspecified cost components remain outside the calculation; possible fees should be included explicitly as unknown factors.
+- Budget can constrain total horizon cash outflow or the first month. Hard factors use inclusive numeric ranges and exact/ordered date targets. Cost primary preferences using lower/higher compare horizon totals. Other explicit targets compare their factor's value. No composite scores.
+- Charts are restricted to known cost bars, cumulative curves, and monthly time bars; option cards have a shared-scale cost bar. Breakpoints are displayed within the selected horizon. Summaries use the same current calculation results and separate recorded inputs from conditional reconsideration prompts.
+- New APIs: `/api/choices/understand`, `/api/choices/factors`, `/api/choices/materials`. The Java validator consumes JSON Schemas generated from Zod, plus source/reference/type/date/status validation. Live known values and explicit hard requirements require supporting input quotes. This verifies provenance, not the real-world truth or full semantic completeness of a claim.
+- Browser-local persistence saves the current valid decision and material text; invalid drafts stay in memory without overwriting the last valid save. A one-step Undo preserves reversibility. Analysis remains in workspace memory across tabs and is marked stale after changes.
+- Exact normalized names and overlapping rule IDs are deduplicated. Semantic synonym resolution remains a user/model review responsibility.
+
+### Verification and Remaining Work
+
+- Current evidence is recorded in `docs/ACCEPTANCE.md`. Offline model responses in backend/browser tests are explicit mocks, not live Nemotron acceptance. Fictional gym/housing/course examples contain no preset material findings.
+- No NVIDIA credential or model ID is configured in the current process. Integration and failure handling can be verified locally; real English/Chinese semantic quality, actual account/model access, and material-analysis quality remain unverified until live evaluation succeeds.
+- The NVIDIA Nemotron 3 Super model card documents English/Chinese support. `NVIDIA_MODEL` remains a required explicit configuration; the candidate is not claimed to be accessible on this account. JSON-object output mode is configurable because endpoint support varies, and validation remains mandatory.
+- Clear Choice life summaries are deterministic templates. Optional model polishing, screenshots/OCR, file parsing, URL collection, public deployment, arbitrary calendars, currency conversion, partial-month billing and automatic refund calculation are not implemented.
+- The supplied `/Users/ivan/.codex/visualizations/...` prototype paths do not exist on this Windows host. Implementation follows the written interaction requirements without claiming to have loaded those HTML files.
+
+---
+## Historical Dayfork v1 Status and Authorization
 
 The user supplied an MVP specification and a technology proposal, requested a data and Tag contract, and then requested that the existing plan and agreements be recorded in project memory.
 

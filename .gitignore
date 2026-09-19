@@ -19,3 +19,9 @@
 .idea/
 .vscode/
 *.iml
+
+# Local build tools and browser artifacts
+.tools/
+artifacts/
+frontend/test-results/
+frontend/playwright-report/

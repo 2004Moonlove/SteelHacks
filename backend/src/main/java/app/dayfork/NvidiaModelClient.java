@@ -22,6 +22,8 @@ public class NvidiaModelClient implements ModelClient {
     private final String apiKey;
     private final String model;
     private final String url;
+    @Value("${nvidia.json-mode:true}")
+    private boolean jsonMode = true;
 
     public NvidiaModelClient(ObjectMapper mapper,
             @Value("${nvidia.api-key:}") String apiKey,
@@ -51,10 +53,17 @@ public class NvidiaModelClient implements ModelClient {
                     "Model access is not configured. Set NVIDIA_API_KEY and NVIDIA_MODEL.");
         }
         try {
+            var payload = new java.util.HashMap<String, Object>();
+            payload.put("model", model); payload.put("messages", messages); payload.put("stream", false);
+            payload.put("max_tokens", 8192); payload.put("temperature", 0.2);
+            if (jsonMode) payload.put("response_format", Map.of("type", "json_object"));
             String body = client.post().uri(url)
                     .header("Authorization", "Bearer " + apiKey)
-                    .body(Map.of("model", model, "messages", messages, "stream", false))
+                    .body(payload)
                     .retrieve().body(String.class);
+            if (body == null || body.isBlank()) {
+                throw new ApiException(HttpStatus.BAD_GATEWAY, "MODEL_RESPONSE_INVALID", "The model returned an empty response.");
+            }
             JsonNode content = mapper.readTree(body).path("choices").path(0).path("message").path("content");
             if (!content.isTextual() || content.asText().isBlank()) {
                 throw new ApiException(HttpStatus.BAD_GATEWAY, "MODEL_RESPONSE_INVALID",

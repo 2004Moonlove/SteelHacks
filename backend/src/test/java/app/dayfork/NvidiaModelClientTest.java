@@ -17,6 +17,25 @@ import org.springframework.http.HttpStatus;
 
 class NvidiaModelClientTest {
     @ParameterizedTest
+    @ValueSource(ints = {204, 429, 502})
+    void reportsEmptyAndUpstreamErrorsWithoutLeakingTheCredential(int status) throws Exception {
+        var server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        server.createContext("/chat/completions", exchange -> {
+            exchange.getRequestBody().readAllBytes();
+            exchange.sendResponseHeaders(status, -1);
+            exchange.close();
+        });
+        server.start();
+        try {
+            var client = new NvidiaModelClient(new ObjectMapper(), "do-not-echo-this-key", "test-model",
+                    "http://127.0.0.1:" + server.getAddress().getPort() + "/chat/completions", 1);
+            ApiException error = assertThrows(ApiException.class, () -> client.complete(List.of(new ModelClient.Message("user", "Test"))));
+            assertEquals(status == 204 ? "MODEL_RESPONSE_INVALID" : "MODEL_UPSTREAM_ERROR", error.code());
+            org.junit.jupiter.api.Assertions.assertFalse(error.getMessage().contains("do-not-echo-this-key"));
+        } finally { server.stop(0); }
+    }
+
+    @ParameterizedTest
     @ValueSource(booleans = {false, true})
     void reportsTimeoutWhileReadingHeadersOrBodyWithoutRetrying(boolean sendHeaders) throws Exception {
         var release = new CountDownLatch(1);

@@ -1,0 +1,163 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "decisionId": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9_-]{1,80}$"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "optionId": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9_-]{1,80}$"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "no_pressure",
+        "needs_verification",
+        "inconsistent"
+      ]
+    },
+    "findings": {
+      "maxItems": 30,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]{1,80}$"
+          },
+          "tags": {
+            "minItems": 1,
+            "maxItems": 10,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "urgency",
+                "scarcity",
+                "social_pressure",
+                "emotional_pressure",
+                "unclear_price",
+                "unclear_terms",
+                "unsupported_claim",
+                "normal_marketing",
+                "clear_disclosure",
+                "conflict"
+              ]
+            }
+          },
+          "explanation": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "evidence": {
+            "minItems": 1,
+            "maxItems": 8,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "materialId": {
+                  "type": "string",
+                  "pattern": "^[a-zA-Z0-9_-]{1,80}$"
+                },
+                "quote": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2000
+                }
+              },
+              "required": [
+                "materialId",
+                "quote"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "id",
+          "tags",
+          "explanation",
+          "evidence"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "extracted": {
+      "maxItems": 30,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "factorId": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]{1,80}$"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": -1000000000000,
+                "maximum": 1000000000000
+              },
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "unit": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "materialId": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]{1,80}$"
+          },
+          "quote": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 1000
+          }
+        },
+        "required": [
+          "factorId",
+          "value",
+          "unit",
+          "materialId",
+          "quote",
+          "note"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "decisionId",
+    "version",
+    "optionId",
+    "status",
+    "findings",
+    "extracted"
+  ],
+  "additionalProperties": false
+}
