@@ -7,12 +7,15 @@ import com.networknt.schema.JsonSchema;
 import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SpecVersion;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -90,6 +93,61 @@ public class ChoiceValidator {
             JsonNode primary = find(d.path("factors"), d.path("primaryFactorId").asText());
             require(primary != null && primary.path("confirmed").asBoolean() && primary.path("purpose").asText().equals("preference"), "Primary preference must be confirmed.");
         }
+    }
+    // These checks apply only to model-generated decisions, not to editable or general reference factors.
+    // Recognized housing payment/trip evidence is deliberately narrow; this is not a full natural-language proof.
+    void generatedDecision(JsonNode d) {
+        boolean housing = matches(d.path("domain").asText(), "\\b(housing|rental|accommodation)\\b");
+        for (JsonNode f : d.path("factors")) {
+            String rule = f.path("ruleId").asText("");
+            for (JsonNode oid : f.path("optionIds")) {
+                String optionId = oid.asText();
+                JsonNode field = f.path("values").path(optionId);
+                String quote = field.path("source").path("quote").asText();
+                if (housing && !field.path("value").isNull()) {
+                    boolean payment = f.path("dataType").asText().equals("money")
+                        && !List.of("upfront", "per_use").contains(rule)
+                        && !matches(f.path("name").asText(), "\\b(upfront|deposit|security|average|median|benchmark|resale)\\b")
+                        && matches(f.path("name").asText(), "\\b(rent|rental|housing cost|housing payment|monthly cost|annual cost|total cost)\\b")
+                        && matches(quote, "\\b(rent|rents|rental|housing)\\b")
+                        && matches(quote, "\\b(monthly|annually|yearly|per month|per year|each month|each year|a month|a year)\\b");
+                    if (payment) {
+                        require(rule.equals("recurring"), "Housing payments need recurring with the original per-billing-period amount and billing_months; do not replace inputs with computed horizon totals.");
+                        require(quotedPaymentAmount(field, d.path("currency").asText()), "A recurring housing payment must preserve an explicitly quoted payment amount, not a computed horizon total. Keep the original payment in cents and its billing_months.");
+                    }
+                    boolean trip = f.path("dataType").asText().equals("duration")
+                        && matches(f.path("name").asText(), "\\b(commute|commuting|travel)\\b")
+                        && matches(quote, "\\b(commute|commuting|travel)\\b")
+                        && matches(quote, "\\b(one[- ]way|per trip|per commute|each trip|each commute)\\b");
+                    if (trip) require(rule.equals("time_per_use"), "A quoted one-way or per-trip commute duration needs time_per_use, with the matching trip frequency in usesPerWeek; do not return an unmapped or computed total-time factor.");
+                }
+                if (rule.equals("recurring")) {
+                    boolean billing = false;
+                    for (JsonNode candidate : d.path("factors")) {
+                        if (candidate.path("ruleId").asText().equals("billing_months") && contains(candidate.path("optionIds"), oid)) billing = true;
+                    }
+                    require(billing, "Every recurring payment needs a billing_months factor for the same option. Use the stated billing interval or an unknown value; never invent it.");
+                }
+            }
+        }
+    }
+    private boolean matches(String text, String pattern) {
+        return Pattern.compile(pattern, Pattern.CASE_INSENSITIVE).matcher(text.toLowerCase(Locale.ROOT).replaceAll("[\\p{Pd}\\u2212]", "-")).find();
+    }
+    private boolean quotedPaymentAmount(JsonNode field, String currency) {
+        String prefix = switch (currency) { case "CNY" -> "[¥￥]|CNY|RMB"; case "EUR" -> "€|EUR"; case "GBP" -> "£|GBP"; default -> "\\$|USD"; };
+        String suffix = switch (currency) { case "CNY" -> "CNY|RMB|yuan"; case "EUR" -> "EUR|euros?"; case "GBP" -> "GBP|pounds?"; default -> "USD|(?:US )?dollars?"; };
+        String amount = "([0-9]+(?:,[0-9]{3})*(?:\\.[0-9]{1,2})?)";
+        var amounts = Pattern.compile("(?:(?:" + prefix + ")\\s*" + amount + "|" + amount + "\\s*(?:" + suffix + ")\\b)", Pattern.CASE_INSENSITIVE).matcher(field.path("source").path("quote").asText());
+        boolean recognizedAmount = false;
+        while (amounts.find()) {
+            recognizedAmount = true;
+            String raw = amounts.group(1) == null ? amounts.group(2) : amounts.group(1);
+            BigDecimal cents = new BigDecimal(raw.replace(",", "")).movePointRight(2);
+            if (cents.compareTo(field.path("value").decimalValue()) == 0) return true;
+        }
+        // Unsupported amount spellings stay subject to the existing grounding check and user review.
+        return !recognizedAmount;
     }
     private boolean contains(JsonNode values, JsonNode target) { for (JsonNode value : values) if (value.equals(target)) return true; return false; }
     JsonNode find(JsonNode list, String id) { for (JsonNode value : list) if (value.path("id").asText().equals(id)) return value; return null; }

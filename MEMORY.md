@@ -14,6 +14,14 @@ This is the latest confirmed branch and local environment decision. It supersede
 
 Earlier references to development on `codex/clear-choice`, the Windows checkout and Windows-specific verification describe historical provenance, not the current branch or machine. The product requirements and implementation contract below remain applicable unless superseded by an explicit later decision.
 
+## Missing-data Follow-up (2026-09-19)
+
+- The user reported that `live on campus or off campus` creates factors but leaves the comparison unknown. The user explicitly chose guided entry of actual values with immediate recalculation, rather than generated example assumptions.
+- Distinguish missing values from supplied values awaiting factor confirmation. Guide users to the inputs needed for costs, time and requirements, including the horizon, matching use frequency and billing interval. Reference-only qualitative factors can remain unknown without blocking unrelated calculations.
+- Keep factor confirmation explicit. Once a factor is confirmed, edits recalculate locally; entering a budget does not supply an option's rent or other costs. Do not invent missing prices, durations or payment schedules.
+- Model interpretation must retain original payment amounts and per-use durations with supported calculation rules. Horizon totals belong to the deterministic engine; a source quote alone does not make a model-computed total a valid input.
+- Local follow-up verification passed 78 frontend tests, 48 backend tests and 10 browser cases, plus clean production packaging. The macOS backend loads the ignored local .env and reports modelConfigured=true. Live follow-up attempts still encountered an invalid model response and an upstream timeout; these are recorded in docs/ACCEPTANCE.md, and successful live generation after this fix is not claimed.
+
 ## Current Clear Choice Contract (2026-09-19)
 
 This section records the user's new explicit implementation request and supersedes conflicting Dayfork v1 restrictions below. Earlier sections remain historical design context, not current limits for the Clear Choice workspace.

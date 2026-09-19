@@ -65,6 +65,98 @@ class ChoiceServiceTest {
         ((ObjectNode) a.path("findings").path(0)).putArray("tags").add("normal_marketing").add("clear_disclosure");
         validator.analysis(a, decision, "a");
     }
+    private ObjectNode housing() throws Exception {
+        try (var input = getClass().getResourceAsStream("/housing-generated-unmapped.json")) {
+            return (ObjectNode) mapper.readTree(input);
+        }
+    }
+    private ObjectNode mappedHousing() throws Exception {
+        ObjectNode d = housing();
+        ObjectNode rent = (ObjectNode) d.path("factors").path(0);
+        rent.put("id", "rent").put("name", "Monthly rent").put("ruleId", "recurring");
+        ((ObjectNode) rent.path("values").path("on_campus")).put("value", 150000);
+        ((ObjectNode) rent.path("values").path("off_campus")).put("value", 110000);
+        ((ObjectNode) d.path("factors").path(1)).put("ruleId", "time_per_use");
+        ObjectNode billing = rent.deepCopy();
+        billing.put("id", "billing").put("name", "Billing period").put("dataType", "number").put("unit", "months").put("ruleId", "billing_months").put("purpose", "reference").put("direction", "none");
+        for (JsonNode field : billing.path("values")) {
+            ((ObjectNode) field).put("value", 1);
+            ((ObjectNode) field.path("source")).put("quote", "both billed monthly").put("note", "Monthly billing is explicit.");
+        }
+        ((com.fasterxml.jackson.databind.node.ArrayNode) d.path("factors")).add(billing);
+        return d;
+    }
+    @Test void repairsCapturedHousingTotalsIntoExecutableInputsExactlyOnce() throws Exception {
+        ObjectNode captured = housing(), repaired = mappedHousing();
+        var calls = new AtomicInteger();
+        ModelClient model = new ModelClient() {
+            public boolean configured() { return true; }
+            public String complete(List<Message> messages) {
+                if (calls.getAndIncrement() == 0) return captured.toString();
+                assertTrue(messages.getLast().content().contains("original per-billing-period amount"));
+                return repaired.toString();
+            }
+        };
+        JsonNode output = new ChoiceService(model, mapper, validator).understand(mapper.createObjectNode().put("description", captured.path("description").asText()));
+        assertEquals(2, calls.get());
+        assertEquals("recurring", output.path("factors").path(0).path("ruleId").asText());
+        assertEquals(150000, output.path("factors").path(0).path("values").path("on_campus").path("value").asInt());
+        assertEquals(110000, output.path("factors").path(0).path("values").path("off_campus").path("value").asInt());
+        assertEquals("time_per_use", output.path("factors").path(1).path("ruleId").asText());
+        assertEquals("billing_months", output.path("factors").path(2).path("ruleId").asText());
+        for (JsonNode factor : output.path("factors")) assertFalse(factor.path("confirmed").asBoolean());
+    }
+    @Test void rejectsCapturedUnmappedHousingAfterBoundedRepair() throws Exception {
+        ObjectNode d = housing();
+        ApiException error = assertThrows(ApiException.class, () -> service(d.toString()).understand(mapper.createObjectNode().put("description", d.path("description").asText())));
+        assertEquals("MODEL_OUTPUT_INVALID", error.code());
+    }
+    @Test void doesNotAcceptComputedHorizonTotalRenamedAsRecurringRent() throws Exception {
+        ObjectNode d = mappedHousing();
+        ((ObjectNode) d.path("factors").path(0).path("values").path("on_campus")).put("value", 1350000);
+        IllegalArgumentException error = assertThrows(IllegalArgumentException.class, () -> validator.generatedDecision(d));
+        assertTrue(error.getMessage().contains("explicitly quoted payment amount"));
+    }
+    @Test void requiresBillingForEveryGeneratedRecurringOption() throws Exception {
+        ObjectNode d = mappedHousing();
+        ((com.fasterxml.jackson.databind.node.ArrayNode) d.path("factors")).remove(2);
+        IllegalArgumentException error = assertThrows(IllegalArgumentException.class, () -> validator.generatedDecision(d));
+        assertTrue(error.getMessage().contains("billing_months"));
+    }
+    @Test void requiresPerUseMappingForExplicitOneWayHousingCommutes() throws Exception {
+        ObjectNode d = mappedHousing();
+        ((ObjectNode) d.path("factors").path(1)).putNull("ruleId");
+        IllegalArgumentException error = assertThrows(IllegalArgumentException.class, () -> validator.generatedDecision(d));
+        assertTrue(error.getMessage().contains("time_per_use"));
+    }
+    @Test void preservesUnknownGeneratedPaymentsAndBillingWithoutFillingThem() throws Exception {
+        ObjectNode d = mappedHousing();
+        for (int index : new int[]{0, 2}) for (JsonNode field : d.path("factors").path(index).path("values")) {
+            ((ObjectNode) field).putNull("value");
+            ((ObjectNode) field).putObject("source").put("kind", "unknown").put("note", "Not provided.");
+        }
+        JsonNode output = service(d.toString()).understand(mapper.createObjectNode().put("description", d.path("description").asText()));
+        assertTrue(output.path("factors").path(0).path("values").path("on_campus").path("value").isNull());
+        assertTrue(output.path("factors").path(2).path("values").path("on_campus").path("value").isNull());
+    }
+    @Test void keepsGeneralHousingReferenceMoneyAndTimeUnmapped() throws Exception {
+        ObjectNode d = mappedHousing();
+        ObjectNode money = (ObjectNode) d.path("factors").path(0);
+        money.put("name", "Average neighborhood rent").putNull("ruleId").put("purpose", "reference");
+        ((ObjectNode) d.path("factors").path(1)).put("name", "Daily free time").putNull("ruleId");
+        ((com.fasterxml.jackson.databind.node.ArrayNode) d.path("factors")).remove(2);
+        validator.generatedDecision(d);
+        // Manual decisions can also retain arbitrary reference factors without the generation-only checks.
+        validator.decision(housing());
+    }
+    @Test void doesNotConfuseExplicitUpfrontHousingChargesWithRent() throws Exception {
+        ObjectNode d = mappedHousing();
+        ObjectNode upfront = ((ObjectNode) d.path("factors").path(0)).deepCopy();
+        upfront.put("id", "upfront").put("name", "Upfront housing fee").put("ruleId", "upfront");
+        for (JsonNode field : upfront.path("values")) ((ObjectNode) field).put("value", 0);
+        ((com.fasterxml.jackson.databind.node.ArrayNode) d.path("factors")).add(upfront);
+        validator.generatedDecision(d);
+    }
     @Test void rejectsExtraExecutableFields() { decision.put("script", "alert(1)"); assertThrows(IllegalArgumentException.class, () -> validator.decision(decision)); }
 }
 

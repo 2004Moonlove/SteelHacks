@@ -2,6 +2,19 @@
 
 Date: 2026-09-19. Host: Windows, Node.js 24, Java 21. Work started from a clean `Yang` checkout at `cfeeb68`, the same commit as local `main`. Development branch: `codex/clear-choice`.
 
+## Housing input completion follow-up (2026-09-19, macOS / Yang)
+
+The user reported that `live on campus or off campus` produced factors but only unknown results, and chose guided entry of actual values. Missing real-world facts still remain unknown. The new comparison guide distinguishes missing data from supplied values awaiting confirmation, includes applicable billing/frequency dependencies and links to factor settings for missing calculation roles or requirement targets. After confirmation, edits calculate locally. Qualitative reference factors need not be filled to compute costs or time.
+
+A real model diagnostic with a fictional, fully specified housing scenario exposed a separate defect: the response replaced monthly rent with model-computed nine-month totals, while both cost and commute factors had no calculation rule. That captured invalid interpretation is retained in `backend/src/test/resources/housing-generated-unmapped.json`. Prompt guidance and generated-decision checks now require supported payment/trip mappings for recognized housing evidence and reject recognized quoted payment amounts being replaced by computed totals. These checks do not modify manual decisions, supply unknown values or provide full natural-language semantic proof.
+
+Verification of this change:
+
+- 78 frontend unit tests and 48 backend tests passed; generated-schema consistency, frontend production build and clean bundled Spring Boot package passed.
+- All 10 browser acceptance cases passed, including two new explicitly mocked housing flows. Entering 9 months, rents of USD 1,500/1,100 billed monthly, one-way commute times of 10/40 minutes and 10 one-way trips per week produces USD 13,500/9,900 and 433/1,733 monthly minutes. Zero values, confirmation, continuous input focus and mobile overflow are covered. Each flow issued only its initial understanding POST; local edits and confirmations issued none.
+- The running localhost:8080 page and assets matched the rebuilt frontend. Health reported ready with model configuration available; no credential was exposed.
+- Before the fix, live diagnostic attempts included an invalid-output failure, an upstream error and the successful but unmapped response described above. After restart, the exact short housing input returned MODEL_OUTPUT_INVALID after its bounded repair (73.4 seconds); a clearly labeled fictional full-data housing scenario returned MODEL_UNAVAILABLE after a 60-second timeout. A successful live end-to-end generation after this fix is therefore not claimed. The real request/response records are saved locally in /tmp/yang-housing-diagnostic. Automated mocks are not substituted for these real outcomes.
+
 ## Verified implementation
 
 - Frontend pure-function tests: **66 passed** (47 Clear Choice tests and 19 preserved Dayfork/unit tests).

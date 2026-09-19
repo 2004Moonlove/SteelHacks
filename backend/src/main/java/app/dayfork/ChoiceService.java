@@ -28,6 +28,9 @@ public class ChoiceService {
         billing_months (positive integer months), per_use (additional cents/use), time_per_use (minutes/use), time_monthly (minutes/month), commitment_months (integer months).
         Price factors use unit equal to currency; time rules use min; billing/commitment use months. Other factors have ruleId=null.
         Annual price must stay as the FULL payment with billing_months=12, monthly price with billing_months=1. Never amortize annual fees.
+        Every recurring factor needs a billing_months factor for the same options; if billing is not stated, its value stays null for review.
+        Preserve raw payment amounts and per-use durations from the input. Never multiply prices by the horizon or durations by frequency yourself.
+        Never replace calculation inputs with a "total cost" or "total time" factor. Totals are produced only by the application.
         Cost for m months = upfront + ceil(m/billing_months)*recurring + per_use*usesPerWeek*52/12*m.
         The first month includes upfront, first scheduled payment and modeled usage. Refunds are not assumed.
         Existing contract periods are calendar-month buckets, not actual calendar schedules. Do not represent a deadline as a payment.
@@ -35,7 +38,12 @@ public class ChoiceService {
     private static final String UNDERSTAND = """
         Identify domain, decisionType, explicit goals, options (2 to 6), must-haves, preferences, horizon and at most 3 key questions.
         Include keep-current/do-nothing/wait when applicable. For unclear options use clearly marked proposed alternatives and ask a key question.
-        Known domains can use vetted rule combinations: membership=recurring+billing_months+per_use+commitment; housing=rent+billing+upfront+commute+pet rules as relevant;
+        Known domains can use vetted rule combinations: membership=recurring+billing_months+per_use+commitment_months;
+        housing=recurring (rent payment)+billing_months+upfront+time_per_use (commute), with pet or other rules as relevant;
+        Housing rent, including an unknown suggested rent, must use recurring, not ruleId=null. Use one rent payment per option and an explicit billing_months factor.
+        For example, rent of 1500 USD per month for 9 months means recurring=150000 and billing_months=1, never recurring=1350000 or a computed total-cost factor.
+        A stated one-way or per-trip commute duration uses time_per_use; the matching number of one-way or per-trip events belongs in usesPerWeek.
+        Do not map arbitrary reference money or durations to cash flows or per-use time. Only use these rules when the factor represents the corresponding payment or activity.
         consumer purchase/repair=upfront+usage/time; courses/work/unknown domains=general factors, schedule, fit and explicit goals, without forcing a cost template.
         Include a small relevant set (typically 4-8 factors); incorporate every explicit hard requirement even if this needs more factors.
         All factors must initially have confirmed=false; primaryFactorId=null; origin=model; version=0; schemaVersion=2.
@@ -81,6 +89,7 @@ public class ChoiceService {
             for (JsonNode o : d.path("options")) validator.require(o.path("materials").isEmpty(), "Understanding cannot invent materials.");
             for (JsonNode f : d.path("factors")) { ((ObjectNode) f).put("confirmed", false); groundedFactor(f, description); }
             validator.decision(d);
+            validator.generatedDecision(d);
         });
     }
     public JsonNode factors(JsonNode request) {

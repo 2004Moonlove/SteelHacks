@@ -12,6 +12,8 @@ import {
 import { Badge, Button, Card, Input } from "../components/ui";
 import { Factors, selectClass } from "./FactorEditor";
 import { Materials } from "./Materials";
+import { CompletionGuide } from "./CompletionGuide";
+import { getCompletionNeeds } from "./completion";
 import { Charts, colors } from "./Charts";
 import { blankDecision, demoDecision, makeFactor } from "./fixtures";
 import { compare, impact, lifeSummary, money, type Comparison } from "./engine";
@@ -276,8 +278,18 @@ function Workspace({
     {},
   );
   const [tab, setTab] = useState<"compare" | "factors">(
-    d.origin === "model" || !d.factors.length ? "factors" : "compare",
+    !d.factors.length ? "factors" : "compare",
   );
+  const [setupOpen, setSetupOpen] = useState(d.origin === "model");
+  const completion = getCompletionNeeds(d);
+  const openSetup = () => {
+    setSetupOpen(true);
+    requestAnimationFrame(() =>
+      document
+        .getElementById("comparison-setup")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" }),
+    );
+  };
   const [instruction, setInstruction] = useState(""),
     [busy, setBusy] = useState(false),
     [notice, setNotice] = useState("");
@@ -627,6 +639,13 @@ function Workspace({
         </div>
       ) : (
         <div className="space-y-6">
+          <CompletionGuide
+            d={d}
+            edit={edit}
+            open={setupOpen}
+            onOpen={setSetupOpen}
+            onFactors={() => setTab("factors")}
+          />
           <div className="grid items-start gap-5 lg:grid-cols-2">
             {d.options.map((o, i) => {
               const r = result.options.find((r) => r.optionId === o.id);
@@ -690,6 +709,25 @@ function Workspace({
                             </p>
                           </div>
                         </div>
+                        {(completion.factors.some((need) =>
+                          d.factors
+                            .find((f) => f.id === need.factorId)
+                            ?.optionIds.includes(o.id),
+                        ) ||
+                          completion.missingMonths ||
+                          completion.missingUsage ||
+                          completion.missingBillingOptionIds.includes(
+                            o.id,
+                          )) && (
+                          <Button
+                            className="mt-3"
+                            size="sm"
+                            variant="subtle"
+                            onClick={openSetup}
+                          >
+                            Add or confirm missing inputs
+                          </Button>
+                        )}
                         <div
                           className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100"
                           role="img"
