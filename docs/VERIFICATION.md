@@ -4,8 +4,9 @@ This file separates implemented behavior, fictional demonstration content and re
 
 ## Provenance and scope
 
-- Base branch: `yy`, commit `449e9f3`; development branch: `codex/clear-choice`.
-- This task never checked out, merged or reset `main`. The initial local `main` was `cfeeb68`; a separate repository operation fast-forwarded it from `yy` to `449e9f3` at 18:02:47 (observed in its reflog). The final local and remote `main` are `449e9f3`, and that state is preserved. Only `codex/clear-choice` receives this implementation.
+- Base branch: `yy`, commit `449e9f3`; initial development branch: `codex/clear-choice`; user-approved delivery branch: `codex/clear-choice-verified`. Implementation commit: `ea04c1b`.
+- This task never checked out, merged or reset `main`. The initial local `main` was `cfeeb68`; a separate repository operation fast-forwarded it from `yy` to `449e9f3` at 18:02:47 (observed in its reflog). The final local and remote `main` are `449e9f3`, and that state is preserved. Only `codex/clear-choice-verified` is published by this task.
+- A concurrent remote implementation appeared on `codex/clear-choice` at `e15a5bb` (author `2004Moonlove`, subject `yang`). The normal push was rejected as non-fast-forward. The user then explicitly chose the separate `codex/clear-choice-verified` branch; the remote original is preserved, with no merge or force push.
 - Pre-existing changes to `.env.example`, `MEMORY.md`, `README.md`, `StoryValidator.java` and `GenerationServiceTest.java` are preserved. The original README is also retained in `docs/LEGACY_DAYFORK.md`.
 - The provided standalone HTML files informed interaction design. Their preset material findings are not used as evidence of real model analysis.
 - Offline examples are fictional. The v2 summaries are deterministic text from the same arithmetic as the charts. There is no v2 model prose-generation claim.

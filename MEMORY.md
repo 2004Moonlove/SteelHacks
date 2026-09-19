@@ -14,7 +14,7 @@ Confirmed scope:
 - Pure deterministic calculations: paid-upfront/recurring/annual/per-use cost, horizon, cash requirement, time, budget and typed conditions, break-even. Never amortize an annual fee into fictitious monthly cash payments. No model calls on parameter changes. Common conditions affect relevant options; option parameters affect their owner and then overall comparison.
 - Controlled charts, per-option impact chains and a four-part life summary share the current calculation result. Statements distinguish facts, assumptions and qualitative possibilities; no invented wellbeing, adherence or outcome probabilities. AI responses bind to a decision ID/version.
 - Explicitly labeled fictional demos and a manual comparison work without model access or advertising. Live model failures never fall back to fixtures. Backend-only credentials, strict validation, bounded retries and clear errors remain required.
-- Preserve main and all existing work; develop on `codex/clear-choice` starting from `yy` at `449e9f3`, verify locally, commit and push if allowed, never merge main automatically.
+- Preserve main and all existing work; develop from `yy` at `449e9f3`, verify locally, commit and push if allowed, never merge main automatically. Development began on `codex/clear-choice`. After a concurrent remote implementation appeared, the user explicitly approved publishing this verified implementation on `codex/clear-choice-verified` while preserving the existing remote branch.
 
 Working implementation contract is [docs/CLEAR_CHOICE_CONTRACT.md](docs/CLEAR_CHOICE_CONTRACT.md). Currency uses integer minor units (USD/CNY/EUR/GBP/CAD), duration uses minutes, and comparisons use whole months (1–120). Category ordering is only user-supplied. Optional qualitative user assumptions are displayed, never made into automatic causal formulas. Summaries are deterministic templates in v2; optional model prose polishing is not required for this release.
 
@@ -29,6 +29,10 @@ The final local verification includes 62 frontend unit tests (43 v2 + 19 legacy)
 The current ignored local `.env` already has the selected NVIDIA credentials/model; `NVIDIA_REASONING_EFFORT=low` is now configured locally and documented. Credentials are server-only and absent from commit candidates. The selected endpoint uses prompt instructions, structural/evidence validation and one semantic repair; provider-enforced JSON Schema is not claimed. Real evaluations exposed and produced regression coverage for annual billing, duplicate time and budget, ungrounded free/defer facts, wishes upgraded to hard constraints, missed explicit primary cost preference and obvious deadline omissions. Exact quotations support provenance but are not a guarantee of semantic correctness.
 
 Implementation boundaries: pasted text only, one tab's in-memory working state, whole-month supported cost rules, one primary preference, deterministic summaries. OCR, uploaded file parsing, website collection, external fact-checking, account/sync persistence, public deployment and optional model prose polishing remain unimplemented. Broad accuracy evaluation across unseen domains and languages remains future work; the live checks are a small fictional sample using real calls.
+
+## Delivery branch decision (2026-09-19)
+
+The verified implementation was committed as `ea04c1b`. During development, another contributor pushed a different implementation to remote `codex/clear-choice` at `e15a5bb` (author `2004Moonlove`, subject `yang`). No force push, merge or reset was performed. The user explicitly chose `codex/clear-choice-verified` for this implementation so both branches remain available. The local original development branch still preserves `ea04c1b`; final documentation is on the newly approved delivery branch.
 
 ## Historical v1 status and authorization
 
