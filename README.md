@@ -2,7 +2,7 @@
 
 Clear Choice helps people understand an everyday decision, compare confirmed requirements and tradeoffs, and preview its effects on money, time and plans. Ordinary decisions work without advertising or sales material.
 
-The new workspace is the default application. The original Dayfork application, calculation engine, APIs and tests remain available at `/#legacy`. Development is on `codex/clear-choice`; `main` is preserved.
+The new workspace is the default application. The original Dayfork application, calculation engine, APIs and tests remain available at `/#legacy`. Development is on `Yang`, tracking `origin/Yang`; `main` is preserved.
 
 ## Run locally
 

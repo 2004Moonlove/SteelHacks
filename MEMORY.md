@@ -2,6 +2,18 @@
 
 Last updated: 2026-09-19
 
+## Current Branch Decision (2026-09-19)
+
+This is the latest confirmed branch and local environment decision. It supersedes conflicting branch, path and host statements below.
+
+- Use the implementation on remote `Yang` (capital Y). The local `Yang` branch tracks `origin/Yang`; current development and local startup use this branch.
+- The current repository is `/Users/ivan/Desktop/my-projects/SteelHacks` on macOS. Codex's saved project path `/Users/ivan/Desktop/my-projects/SteelHacks-` is a symlink to that directory.
+- The previous local `codex/clear-choice` branch has been removed, and the remote branch with that name no longer exists. Do not restore the previous implementation as the active version.
+- The user explicitly chose to retain both the local and remote `codex/clear-choice-verified` branches. Preserve them as a reference to the previous implementation.
+- Preserve `main`; do not merge, reset or replace it as part of this branch switch.
+
+Earlier references to development on `codex/clear-choice`, the Windows checkout and Windows-specific verification describe historical provenance, not the current branch or machine. The product requirements and implementation contract below remain applicable unless superseded by an explicit later decision.
+
 ## Current Clear Choice Contract (2026-09-19)
 
 This section records the user's new explicit implementation request and supersedes conflicting Dayfork v1 restrictions below. Earlier sections remain historical design context, not current limits for the Clear Choice workspace.
