@@ -6,7 +6,11 @@ Last updated: 2026-09-19
 
 The user supplied an MVP specification and a technology proposal, requested a data and Tag contract, and then requested that the existing plan and agreements be recorded in project memory.
 
-The user explicitly requested implementation of the local MVP plan. The application is implemented in `frontend/` and `backend/`. Offline acceptance passed: 19 frontend tests, 9 backend tests, a production frontend build, a bundled Spring Boot package, and a localhost browser/HTTP check of the packaged app. The user chose offline verification for this round, so real Nemotron requests remain unverified until `NVIDIA_API_KEY` and `NVIDIA_MODEL` are configured locally.
+The user explicitly requested implementation of the local MVP plan. The application is implemented in `frontend/` and `backend/`. Offline acceptance passed: 19 frontend tests, 9 backend tests, a production frontend build, a bundled Spring Boot package, and localhost page/API checks. Browser interaction was manually checked on desktop and narrow layouts; there is no automated browser regression suite yet.
+
+The canonical local repository is `/Users/ivan/Desktop/my-projects/SteelHacks`, linked to `https://github.com/2004Moonlove/SteelHacks`. The offline MVP was committed and pushed to `main` as `277e199` on 2026-09-19. During relocation, the prior project directory went to macOS Trash and the source was recovered into the current repository; the frontend lockfile was regenerated and the offline checks passed again. Codex's saved `SteelHacks-` project path is a local symlink to the canonical directory.
+
+The user chose offline verification for this round. Real Nemotron scenario and story requests remain unverified: the local demo did not have `NVIDIA_API_KEY` and `NVIDIA_MODEL` configured, and its health response reported `modelConfigured: false`. A key previously disclosed in chat must be rotated before live use; never copy it into source, project memory, or Git history.
 
 This file distinguishes explicit requirements from working design decisions and suggestions that remain unresolved.
 
@@ -421,7 +425,15 @@ Also test: disabling all Tags restores baseline; zero frequencies have no effect
 ## Still Unresolved
 
 - Deadline and available implementation/demo time.
-- Nemotron model ID, account/API availability, and supported structured-output parameters. Do not ask the user to paste credentials into chat.
-- Live Nemotron behavior for scenario and story generation with an accessible model ID.
+- An accessible Nemotron model ID and live API behavior for scenario and story generation. Do not ask the user to paste credentials into chat.
+- The quality of real story narratives against the rule forbidding unconfigured events, subjective outcomes, and winner recommendations.
 
-Offline verification is complete. Live model acceptance remains pending until local model configuration and real requests succeed.
+Offline verification is complete. Live model acceptance remains pending until a fresh local credential and model ID are configured and real requests succeed.
+
+## Recommended Next Steps (Suggestions, Not Confirmed Scope)
+
+1. Rotate the previously disclosed API key, select an accessible Nemotron model ID, configure both values only in the local backend environment, and verify that the health endpoint reports model configuration.
+2. Complete live acceptance with a campus housing decision, a non-housing decision, and an input missing key numbers. Generate both General day and Campus day stories, and inspect facts, repair behavior, and retryable errors.
+3. Add browser-level regression coverage for baseline confirmation, invalid edits, desktop/narrow layouts, stale stories, request races, and the invariant that Tag changes do not call the model. Existing frontend tests cover pure functions; backend tests use a fake model client.
+4. Review real story samples for unsupported nonnumeric events and subjective claims, which structural validators cannot fully rule out. Adjust prompts or validation only in response to observed failures.
+5. After live acceptance, consider P1 browser-local persistence and restore validation first, then custom Tags, Latest Change animation, and the optional per-hour comparison metric.
