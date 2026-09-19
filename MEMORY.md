@@ -217,6 +217,16 @@ Verification: 10 new regression tests cover the captured scenario errors, preser
 
 A cooking-versus-meal-delivery live check encountered an upstream read timeout and then an upstream service error, so that case is not yet live-verified. Response-read timeouts now produce the existing retryable `MODEL_UNAVAILABLE` API error instead of an unhandled HTTP 500. General support does not imply that every non-housing case or model-generated narrative has passed live acceptance.
 
+### Upstream Request Recovery
+
+A follow-up report on 2026-09-19 showed the generic upstream-service error. The previous client discarded the provider's HTTP status, so the exact cause of that earlier failure cannot be reconstructed. A minimal connection check, the complete gym prompt through Python and Java, and the local scenario endpoint subsequently returned HTTP 200 with the existing credential and selected model. This verifies current access, not the cause of the earlier failure.
+
+The client now distinguishes denied access, rejected configuration, a missing endpoint, rate limits, and temporary service failures. Logs contain only the upstream status or transport exception class, attempt number, and elapsed time; credentials, prompts, provider bodies, and exception messages are not logged.
+
+For fast HTTP 429, 500, 502, 503, or 504 responses, the client retries the same request at most once. A retry must start within ten seconds of the original attempt, and a provider-requested wait must be at most two seconds; longer or unrecognized Retry-After values stop automatic recovery. Without that header, the retry waits one second. Authentication/configuration errors, empty or unreadable successful responses, and transport/read timeouts are not retried. The separate semantic validation repair remains limited to one correction attempt.
+
+Verification: all 48 backend tests and the bundled package passed. HTTP stub tests cover successful transient recovery, retry exhaustion, Retry-After handling, actionable error categories, empty responses, preserved requests, and absence of private provider text in logs. After restart, a real browser completed the exact gym input in approximately 44 seconds with two options and seven generated Tags, then verified baseline review, Tag toggles, and local price edits without further generation calls. A live cooking-versus-delivery request returned HTTP 200 in approximately 36 seconds with two options and eight Tags and reached baseline review. The captured real meal response was then replayed to finish UI/calculation checks after fixing an ambiguous heading selector in the temporary test script. Missing meal prices, usage, and duration remained unknown. These checks establish coverage for those examples; broader model reliability and narrative quality still require evaluation.
+
 ## Tag Contract
 
 Keep four explicit external types: `fixed`, `add_activity`, `reduce_activity`, and `replace_activity`. The technology proposal's three conceptual rule groups do not replace this four-type data contract.
