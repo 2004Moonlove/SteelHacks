@@ -245,6 +245,7 @@ public class ContractValidator {
             JsonNode tag = tags.get(i);
             String name = tag.path("name").asText();
             String context = name + " " + tag.path("description").asText();
+            if ("add_activity".equals(tag.path("type").asText())) validateAddedTransport(decision, tag, i, context);
             boolean incremental = Pattern.compile("(?i)\\b(?:extra|additional|more|increase|increased|increment|incremental|upgrade|upgraded|surcharge|supplement)\\b")
                     .matcher(context).find();
             if (incremental) continue;
@@ -268,6 +269,26 @@ public class ContractValidator {
                                     + "Use a distinct optional service or explicitly incremental extra cost; never charge the baseline twice. "
                                     + "Review every numerical Tag for the same issue before returning the corrected decision.");
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    private void validateAddedTransport(JsonNode decision, JsonNode tag, int tagIndex, String context) {
+        Pattern alternative = Pattern.compile("(?i)\\b(?:ride[\\s-]?share|uber|lyft|taxi)\\b");
+        if (!alternative.matcher(context).find()) return;
+        for (JsonNode target : tag.path("targets")) {
+            for (JsonNode option : decision.path("options")) {
+                if (!option.path("id").asText().equals(target.path("optionId").asText())) continue;
+                for (JsonNode activity : option.path("activities")) {
+                    if (!activity.path("id").asText().equals(target.path("activityId").asText())) continue;
+                    if (!alternative.matcher(activity.path("name").asText()).find()) {
+                        fail("decision.tags[" + tagIndex + "]", "This rideshare/taxi add_activity Tag would inherit the ordinary baseline commute's price and time. "
+                                + "For trips taken by rideshare, Uber, Lyft, or taxi instead of the baseline transport, use replace_activity with "
+                                + "its own replacementName, costCentsPerEvent and minutesPerEvent; leave those prices and durations unknown unless supplied. "
+                                + "Use add_activity only for genuinely additional events of the referenced baseline activity, or when that baseline "
+                                + "already models the named rideshare/taxi transport. Do not silently reuse an ordinary commute's cost for another transport mode.");
                     }
                 }
             }

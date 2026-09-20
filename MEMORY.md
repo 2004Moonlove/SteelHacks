@@ -6,10 +6,10 @@ Last updated: 2026-09-20. Keep this file within 300 lines; link detailed evidenc
 
 - The user explicitly authorized local MVP implementation through local verification; do not ask for redundant permission.
 - Dayfork is implemented in `frontend/` and `backend/`. The original offline MVP and rename passed tests, production builds, and localhost checks.
-- Canonical repository: `/Users/ivan/Desktop/my-projects/SteelHacks`; saved project path `SteelHacks-` is a symlink to it. Remote: `https://github.com/2004Moonlove/SteelHacks`.
-- Current inspected HEAD: `20537d7` (scenario contracts and code-owned story metadata). Earlier milestones include `277e199` (MVP), `0ae8f8e` (Dayfork rename), and `437f752` (story-fact alignment).
-- Qualitative decisions, per-use costs, importance controls, subscriptions, richer housing factors, and story presentation changes are present in the working tree; do not assume these uncommitted changes are on the remote.
-- Qualitative and per-use flows have documented offline, browser, and actual-model acceptance. Subscription/story enhancements are newer; distinguish their latest test evidence from earlier complete acceptance.
+- Canonical repository: `/Users/ivan/Desktop/my-projects/SteelHacks`. The previous saved path `SteelHacks-` is currently unavailable; use the canonical path. Remote: `https://github.com/2004Moonlove/SteelHacks`.
+- Remote feature update `348a139` has been integrated into local `main`, retaining the additional story-money, usage-frequency, and rideshare safeguards. Earlier milestones include `277e199` (MVP), `0ae8f8e` (Dayfork rename), `437f752` (story-fact alignment), and `20537d7` (scenario contracts).
+- Qualitative decisions, per-use costs, importance controls, subscriptions, richer housing factors, and story presentation changes are committed in `348a139`. The synchronization follow-up includes the additional validated safeguards and completed acceptance report.
+- Qualitative, per-use, subscription, and story flows have documented acceptance. Synchronization reran 94 frontend, 392 backend, and 21 harness tests successfully, plus the frontend production build; the existing local service remained healthy. The sync itself made no live model calls.
 - Implementation is changing concurrently. Validation below is a dated observation, not a guarantee that later edits or the running service match it.
 - This file separates confirmed requirements, the working implementation contract, verified evidence, and unresolved suggestions.
 
@@ -160,7 +160,7 @@ time = original * original minutes/event + sum(replacement events * replacement 
 - Campus timelines depict one illustrative day; monthly results describe the full configuration. Six Uber trips/month must not imply daily Uber use.
 - Qualitative, break-even, and subscription stories use corresponding Beginning/During/Later moments and empty monthly reflections.
 - Qualitative facts contain only the two option names; per-use/subscription facts contain independently reconciled costs and comparisons.
-- Actual numerical claims use validated fact references. Reject unsupported numeric claims and unsupported calendar-payback conversions.
+- Actual numerical claims use validated fact references. Reject unsupported numeric claims and unsupported calendar-payback conversions. The assembler can normalize a dollar literal only when exact integer cents match a unique allowed validated money fact; ambiguous or unknown amounts remain invalid. Explicit written-out attendance frequencies also trigger repair rather than inventing usage.
 - Monthly cost/time comparison facts are accepted as a complete pair and reconstructed exactly; legacy inventories without that pair remain accepted.
 - Story responses support optional paired `advice: [{ optionId, text }, { optionId, text }]`, validated like narrative text. New requests should provide practical advice for both paths; older responses without advice remain readable.
 - Advice proposes actions; it does not silently add expenses, time, or activities. Paired slots and conditional wording alone cannot guarantee narrative alignment or quality.
@@ -171,7 +171,7 @@ time = original * original minutes/event + sum(replacement events * replacement 
 - Before generation validation, null fields labeled `user_input`/`derived` can be relabeled `unknown`; never supply a missing number or hide malformed fields.
 - A conservative guard clears otherwise-valid known values when input has no possible numeric/free/no-fee evidence. It is not a complete provenance proof for inputs containing some quantities.
 - Explicit annual/upfront charges cannot enter new monthly fixed-cost fields; route to the supported appropriate mode or preserve uncertainty.
-- New-generation semantic checks reject clear baseline-cost duplicates, opposing-option consideration targets, and daily/weekly frequency labels that the monthly editor cannot implement. The frequency conversion only changes counting units (for example, round trips to one-way trips); never infer a days-per-month multiplier.
+- New-generation semantic checks reject clear baseline-cost duplicates, opposing-option consideration targets, named rideshare additions that would reuse a different baseline activity's price/time, and daily/weekly frequency labels that the monthly editor cannot implement. The frequency conversion only changes counting units (for example, round trips to one-way trips); never infer a days-per-month multiplier.
 - One semantic repair includes actionable field/numeric-claim feedback. Authentication/configuration failures and provider availability are separate concerns.
 - Fast HTTP 429/500/502/503/504 responses may retry the same request once, starting within ten seconds; recognized Retry-After must be at most two seconds (otherwise no retry); default delay is one second.
 - Do not automatically retry authentication/configuration errors, empty/unreadable successes, or transport/read timeouts. Truncation produces `MODEL_RESPONSE_TRUNCATED` rather than semantic repair.
@@ -204,10 +204,12 @@ time = original * original minutes/event + sum(replacement events * replacement 
 - Actual QQQ/CD scenario and story succeeded with selected importance. Missing-price coffee stayed break-even; supplied coffee crossed at 60 cups.
 - A live coffee story incorrectly referred to months; a targeted guard and deterministic crossover insertion were added, and the final live repeat used cup counts correctly.
 - The reported QQQ invalid-output error was not reproduced; a provider 503 followed by explicit successful retry does not establish its original cause.
-- Membership/story implementation: 94 frontend + 370 backend + 21 harness tests passed (485 total); production frontend build and bundled backend package passed.
+- Membership/story implementation: 94 frontend + 392 backend + 21 harness tests passed (507 total); production frontend build and bundled backend package passed.
 - Packaged browser checks passed for fee entry, 6/12/13-month payment totals, unknown amounts, nine visible campus factors, three importance sliders, local-only edits, paired advice, stale stories, and interactive corresponding stages at desktop and 390px widths.
 - Actual chart SVG dimensions, axis labels, and line/bar geometry were verified for subscription, coffee, and campus charts across repeated desktop/mobile resizes. Duplicate React keys and a zero-width responsive chart defect found during these checks were corrected.
-- Real-model review exposed omitted explicit comparisonMonths, baseline-duplicate factors, opposing targets, unsupported subscription rights, misleading frequency labels, and generic campus scenes. Captured regressions and targeted generation/story guidance were added; final live acceptance is being recorded in `docs/membership-stories-validation-2026-09-20.md`.
+- Real-model review exposed omitted explicit comparisonMonths, baseline-duplicate factors, opposing targets, unsupported subscription rights, misleading frequency labels, and generic campus scenes. Captured regressions and targeted generation/story guidance were added; final live acceptance is recorded in `docs/membership-stories-validation-2026-09-20.md`.
+- Final real-model checks: exact year/month input returned subscription inputs and six factors; explicit thirteen-month payments stayed $1,200/$780; campus generation returned nine factors (five numerical/four qualitative). Final membership and campus stories returned HTTP 200 with paired advice; campus scenes included selected social/privacy concerns. Provider 503/timeouts and rejected drafts occurred before the recorded successful final responses.
+- Subscription stories focus on possible experiences and actionable advice; charts and the canonical code-owned summary carry billing numbers. Do not require the model to restate payment or coverage counts in scenes.
 - Historical reports: `docs/scenario-validation-2026-09-20.md`, `docs/qualitative-validation-2026-09-20.md`, `docs/break-even-validation-2026-09-20.md`.
 - Read older report boundaries in context: annual membership previously routed qualitatively; current subscription support supersedes that limitation. Initial six-factor visibility and fixed 5–10 generation quotas are also obsolete.
 - No maintained automated browser regression suite is established. Historical browser checks and temporary artifacts are evidence for the runs described, not a reliability guarantee.
@@ -238,4 +240,4 @@ Also preserve baseline restoration, zero-frequency behavior, original-cost/time 
 - Provider availability, narrative semantic alignment, unsupported nonnumeric claims, and suggestion quality remain limitations despite structural validation.
 - Browser-local persistence/restore validation, custom Tags, latest-change animation, and an optional per-hour metric remain P1 suggestions. There are no accounts or cross-device state.
 - Editing inside story scenes, a monthly scene index, personal constraints, general threshold solvers, calendar allocation, and deadline planning remain proposals, not authorized replacements for the core flow.
-- Suggested next work: finish subscription/story acceptance and its report; add durable browser coverage for invalid edits, stale/in-flight stories, narrow layouts, and local-only controls; review actual narrative failures before adjusting prompts/guards.
+- Suggested next work: add durable browser coverage for invalid edits, stale/in-flight stories, narrow layouts, and local-only controls; review actual narrative failures before adjusting prompts/guards.

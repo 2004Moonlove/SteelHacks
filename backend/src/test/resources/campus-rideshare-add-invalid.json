@@ -1,0 +1,272 @@
+{
+  "schemaVersion": 2,
+  "comparisonMode": "quantitative",
+  "id": "campus-housing-choice",
+  "title": "Live on campus vs off campus",
+  "description": "Decision about whether to reside in on\u2011campus housing or rent an off\u2011campus apartment while attending school.",
+  "originalInput": "live on campus or off campus",
+  "currency": "USD",
+  "options": [
+    {
+      "id": "on-campus",
+      "name": "On\u2011campus housing",
+      "fixedCosts": [
+        {
+          "id": "rent",
+          "name": "Monthly rent",
+          "amountCentsMonthly": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        {
+          "id": "utilities",
+          "name": "Utilities (electricity, water, internet)",
+          "amountCentsMonthly": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      ],
+      "activities": [
+        {
+          "id": "commute",
+          "name": "Commute to classes",
+          "eventUnit": "one_way_trip",
+          "frequencyInput": {
+            "label": "Round trips",
+            "eventsPerUnit": 2
+          },
+          "eventsPerMonth": {
+            "value": null,
+            "source": "unknown"
+          },
+          "costCentsPerEvent": {
+            "value": null,
+            "source": "unknown",
+            "note": "No numeric value was supplied; enter this value to continue."
+          },
+          "minutesPerEvent": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      ]
+    },
+    {
+      "id": "off-campus",
+      "name": "Off\u2011campus apartment",
+      "fixedCosts": [
+        {
+          "id": "rent",
+          "name": "Monthly rent",
+          "amountCentsMonthly": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        {
+          "id": "utilities",
+          "name": "Utilities (electricity, water, internet)",
+          "amountCentsMonthly": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      ],
+      "activities": [
+        {
+          "id": "commute",
+          "name": "Commute to classes",
+          "eventUnit": "one_way_trip",
+          "frequencyInput": {
+            "label": "Round trips",
+            "eventsPerUnit": 2
+          },
+          "eventsPerMonth": {
+            "value": null,
+            "source": "unknown"
+          },
+          "costCentsPerEvent": {
+            "value": null,
+            "source": "unknown"
+          },
+          "minutesPerEvent": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      ]
+    }
+  ],
+  "tags": [
+    {
+      "id": "extra-grocery",
+      "name": "Extra grocery spending",
+      "description": "Additional monthly amount spent on groceries beyond a baseline meal plan.",
+      "type": "fixed",
+      "targets": [
+        {
+          "optionId": "off-campus",
+          "costCentsMonthly": {
+            "value": null,
+            "source": "unknown"
+          },
+          "minutesMonthly": {
+            "value": null,
+            "source": "unknown",
+            "note": "No numeric value was supplied; enter this value to continue."
+          }
+        }
+      ]
+    },
+    {
+      "id": "laundry-cost",
+      "name": "Laundry expense",
+      "description": "Monthly cost for laundry services or machines.",
+      "type": "fixed",
+      "targets": [
+        {
+          "optionId": "on-campus",
+          "costCentsMonthly": {
+            "value": null,
+            "source": "unknown"
+          },
+          "minutesMonthly": {
+            "value": null,
+            "source": "unknown",
+            "note": "No numeric value was supplied; enter this value to continue."
+          }
+        },
+        {
+          "optionId": "off-campus",
+          "costCentsMonthly": {
+            "value": null,
+            "source": "unknown"
+          },
+          "minutesMonthly": {
+            "value": null,
+            "source": "unknown",
+            "note": "No numeric value was supplied; enter this value to continue."
+          }
+        }
+      ]
+    },
+    {
+      "id": "parking-fee",
+      "name": "Parking fee",
+      "description": "Monthly cost for a parking permit or spot if you have a car.",
+      "type": "fixed",
+      "targets": [
+        {
+          "optionId": "off-campus",
+          "costCentsMonthly": {
+            "value": null,
+            "source": "unknown"
+          },
+          "minutesMonthly": {
+            "value": null,
+            "source": "unknown",
+            "note": "No numeric value was supplied; enter this value to continue."
+          }
+        }
+      ]
+    },
+    {
+      "id": "occasional-rideshare",
+      "name": "Occasional rideshare trips",
+      "description": "Extra rideshare trips per month for off\u2011campus residents.",
+      "type": "add_activity",
+      "targets": [
+        {
+          "optionId": "off-campus",
+          "activityId": "commute",
+          "eventsPerMonth": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      ]
+    },
+    {
+      "id": "privacy",
+      "name": "Privacy",
+      "description": "How important is having a private space versus shared facilities?",
+      "type": "consideration",
+      "targets": [
+        {
+          "optionId": "on-campus",
+          "consideration": "Do you need a private bedroom and bathroom?"
+        },
+        {
+          "optionId": "off-campus",
+          "consideration": "Does the apartment offer the privacy you desire?"
+        }
+      ]
+    },
+    {
+      "id": "flexibility",
+      "name": "Lease flexibility",
+      "description": "How much flexibility do you need in lease length or move\u2011out timing?",
+      "type": "consideration",
+      "targets": [
+        {
+          "optionId": "on-campus",
+          "consideration": "Are you comfortable with the typical academic\u2011year housing contract?"
+        },
+        {
+          "optionId": "off-campus",
+          "consideration": "Do you prefer a month\u2011to\u2011month or short\u2011term lease?"
+        }
+      ]
+    },
+    {
+      "id": "social-life",
+      "name": "Social life",
+      "description": "How important is easy access to campus events and peer interaction?",
+      "type": "consideration",
+      "targets": [
+        {
+          "optionId": "on-campus",
+          "consideration": "Does living on campus help you feel more connected to student life?"
+        },
+        {
+          "optionId": "off-campus",
+          "consideration": "Will living off campus make it harder to join spontaneous campus activities?"
+        }
+      ]
+    },
+    {
+      "id": "noise",
+      "name": "Noise level",
+      "description": "How sensitive are you to noise from neighbors or traffic?",
+      "type": "consideration",
+      "targets": [
+        {
+          "optionId": "on-campus",
+          "consideration": "Are you comfortable with typical residence hall noise levels?"
+        },
+        {
+          "optionId": "off-campus",
+          "consideration": "Does the apartment\u2019s location expose you to unwanted street or neighbor noise?"
+        }
+      ]
+    },
+    {
+      "id": "independence",
+      "name": "Independence",
+      "description": "How important is having full control over your living space and schedule?",
+      "type": "consideration",
+      "targets": [
+        {
+          "optionId": "on-campus",
+          "consideration": "Do you mind following residence hall rules and curfews?"
+        },
+        {
+          "optionId": "off-campus",
+          "consideration": "Do you want the freedom to set your own rules and schedule?"
+        }
+      ]
+    }
+  ]
+}

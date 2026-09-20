@@ -23,7 +23,7 @@ public final class StoryDraftAssembler {
         if (draft.has("decisionId") || draft.has("simulationVersion")
                 || draft.has("moments") || draft.has("monthlyReflections")) {
             // Legacy responses retain their metadata and must pass the existing response validator.
-            return ensureCostSummary(draft, request);
+            return finish(draft, request);
         }
         boolean qualitative = ContractValidator.isLongTerm(request.path("snapshot").path("decision"));
         String[] momentKeys = qualitative ? LONG_TERM_MOMENTS : DAILY_MOMENTS;
@@ -67,14 +67,18 @@ public final class StoryDraftAssembler {
             }
         }
         ArrayNode reflections = story.putArray("monthlyReflections");
-        if (qualitative) return ensureCostSummary(story, request);
+        if (qualitative) return finish(story, request);
         for (int i = 0; i < OPTION_KEYS.length; i++) {
             reflections.addObject().put("optionId", options.get(i).path("id").asText())
                     .put("text", "{{" + OPTION_KEYS[i] + "_name}} has a monthly cost of {{"
                             + OPTION_KEYS[i] + "_monthlyCost}} and uses {{" + OPTION_KEYS[i]
                             + "_monthlyTime}} of tracked time.");
         }
-        return story;
+        return finish(story, request);
+    }
+
+    private JsonNode finish(JsonNode story, JsonNode request) {
+        return StoryMoneyNormalizer.normalize(ensureCostSummary(story, request), request.path("facts"));
     }
 
     private JsonNode ensureCostSummary(JsonNode story, JsonNode request) {

@@ -15,7 +15,7 @@ Date: 2026-09-20. Scope: local development and demonstration.
 ## Automated verification
 
 - Frontend: 94 tests across 11 files passed.
-- Backend: 370 tests passed, with no failures, errors, or skips.
+- Backend: 392 tests passed, with no failures, errors, or skips.
 - Scenario harness: 21 tests passed.
 - Frontend production build and bundled backend package succeeded.
 - `git diff --check` passed.
@@ -52,7 +52,29 @@ A second real-model pass returned the correct subscription route for the exact s
 
 Further review found an unsupported daily frequency label in a monthly campus input and a campus story that reserved its selected qualitative concerns for advice. Generation now rejects daily/weekly labels that the monthly frequency editor cannot implement. Story guidance requires selected concerns to appear in possible lived scenes, keeps privacy conditional, and distinguishes shared campus arrival/departure from each option's home arrival.
 
-Final live verification results follow after the last requests complete.
+The next thirteen-month scenario retained `comparisonMonths: 13` and the supplied payment amounts. Its story request hit a provider 503; an explicit repeat then failed the strict text validator because it emitted the known payment as literal `$600` instead of a fact placeholder. The updated campus-story request encountered a provider timeout. These are separate observed failures and are not counted as successful story acceptance.
+
+Known dollar literals now become fact references only when their exact cent value matches a unique allowed money fact. Unknown or ambiguous values, ordinary numbers, percentages, and malformed amounts remain invalid. A later HTTP 200 story exposed invented written-out attendance counts such as “three times a week”; these were captured and a narrow frequency guard was added. This illustrates why an HTTP success alone is insufficient narrative acceptance.
+
+The final campus generation returned nine factors: five numerical adjustments and four qualitative considerations. The rideshare factor now uses `replace_activity` with independent cost/time inputs; frequency labels use `Round trips` and preserve a two-one-way-trip conversion. Missing prices remain unknown and correctly require baseline review.
+
+The final live campus story returned HTTP 200 with paired advice. Its evening scenes incorporate the selected social-connection and privacy concerns. The browser confirmed the story renders, corresponding-stage navigation works, and desktop/mobile layouts remain within the viewport. The earlier provider timeout is preserved separately.
+
+The final membership prompt focuses on lived experiences and practical actions; numerical billing details stay in the chart and program-generated summary. The same thirteen-month request then returned HTTP 200 with paired Beginning/During/Later scenes and advice. Both branches use the same schedule change, and the response contains no invented numeric attendance frequency. The canonical summary retains the computed $1,200/$780 comparison over thirteen months.
+
+Final live evidence:
+
+| Check | Observed result |
+| --- | --- |
+| Exact `year card or month card` | HTTP 200; subscription mode, periods 12/1, unknown prices, six factors |
+| Explicit thirteen-month gym comparison | HTTP 200; preserved window and $600/$60 payment inputs; deterministic $1,200/$780 totals |
+| Final membership story | HTTP 200; paired experiences and advice; code-owned cost summary |
+| Broad campus housing | HTTP 200; nine factors, five numerical and four qualitative; missing baseline values remain unknown |
+| Mixed-factor campus demo story | HTTP 200; social/privacy scenes and paired advice, verified in the browser |
+
+Detailed local artifacts are in `/private/tmp/dayfork-membership-final-live`, `/private/tmp/dayfork-membership-accepted-live`, `/private/tmp/dayfork-campus-final-live`, and `/private/tmp/dayfork-live-campus-story`. Earlier failing responses remain distinguishable from final accepted outputs. The final membership response is `story-experience-response.json`; HTTP 200 alone was not treated as narrative acceptance.
+
+The user-facing demo at `http://127.0.0.1:8080` was refreshed from a separate immutable runtime JAR. Its complete fee/factor/story interaction check and all twelve chart resize checks passed before the final backend-only story refinement; the final JAR received a health, homepage, asset, and membership-panel smoke check.
 
 ## Limits
 

@@ -15,6 +15,11 @@ import org.springframework.stereotype.Component;
 public class StoryValidator {
     private static final Pattern PLACEHOLDER = Pattern.compile("\\{\\{([A-Za-z0-9_-]{1,80})}}", Pattern.CASE_INSENSITIVE);
     private static final Pattern NUMBER = Pattern.compile("\\S*[0-9]\\S*");
+    private static final String SPELLED_USAGE_COUNT = "(?:once|twice|(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)"
+            + "\\s+(?:times?|visits?|sessions?|workouts?|trips?|meals?|cups?|evenings?|mornings?|afternoons?|nights?|days?))";
+    private static final Pattern SPELLED_USAGE_FREQUENCY = Pattern.compile(
+            "(?i)\\b" + SPELLED_USAGE_COUNT + "\\s+(?:a|per|each|every)\\s+(?:day|week|month)\\b"
+            + "|\\b(?:each|every|per)\\s+(?:day|week|month)\\b[^.!?;\\n]{0,100}\\b" + SPELLED_USAGE_COUNT + "\\b");
     private static final Pattern CALENDAR_PAYBACK = Pattern.compile(
             "(?i)(?:\\b(?:how\\s+many|(?:the\\s+)?number\\s+of)\\s+(?:days?|weeks?|months?|years?)\\b[^.!?\\n]{0,220}\\b(?:equal|cover|offset|recover|recoup|break(?:s)?[-\\s]*even|upfront|price|cost|expense)\\b"
             + "|\\b(?:payback|break(?:s)?[-\\s]*even|recover|recoup|offset|pay(?:s)?\\s+for\\s+itself)\\b[^.!?\\n]{0,100}\\b(?:days?|weeks?|months?|years?)\\b"
@@ -326,6 +331,13 @@ public class StoryValidator {
                     + "and use the canonical {{breakEvenSummary}} sentence; do not infer how long payback takes.");
         }
         if (facts.has("subscriptionCostComparison")) validateSubscriptionNarrative(withoutFacts, path);
+        Matcher frequency = SPELLED_USAGE_FREQUENCY.matcher(withoutFacts);
+        if (frequency.find()) {
+            ContractValidator.fail(path, "Spelled-out usage frequencies are numerical claims and must not be invented. Found '"
+                    + frequency.group().substring(0, Math.min(frequency.group().length(), 100))
+                    + "'. Remove the numeric attendance or usage schedule from every story field. Use a qualitative phrase such as "
+                    + "'when you use the gym' or 'as your routine allows'; do not replace the words with digits or invent a fact ID.");
+        }
         Matcher number = NUMBER.matcher(withoutFacts);
         if (number.find()) {
             String token = number.group();

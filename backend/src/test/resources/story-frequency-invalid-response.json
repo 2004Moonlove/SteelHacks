@@ -1,0 +1,61 @@
+{
+  "mode": "qualitative",
+  "decisionId": "gym-year-vs-month-13mo",
+  "simulationVersion": 1,
+  "sharedScenario": {
+    "title": "Evening gym routine after a schedule change",
+    "description": "Your job shifts to a fixed evening shift, so you plan to go to the gym three times a week after work. {{subscriptionCostComparison}}"
+  },
+  "moments": [
+    {
+      "key": "beginning",
+      "options": [
+        {
+          "optionId": "yearCard",
+          "text": "You purchase the Year Card for {{optionA_payment}}, receiving the full access period granted by that plan and paying the amount up front."
+        },
+        {
+          "optionId": "monthCard",
+          "text": "You start with a Month Card, paying {{optionB_payment}} for the first month of access."
+        }
+      ]
+    },
+    {
+      "key": "during",
+      "options": [
+        {
+          "optionId": "yearCard",
+          "text": "Three evenings each week you swipe the card at the turnstile, confident that the payment is already covered and you won\u2019t need to think about renewals for the duration of the card."
+        },
+        {
+          "optionId": "monthCard",
+          "text": "Each week you go to the gym three times in the evenings, and at the end of the month you pay another {{optionB_payment}} to keep the card active for the following month."
+        }
+      ]
+    },
+    {
+      "key": "later",
+      "options": [
+        {
+          "optionId": "yearCard",
+          "text": "After the comparison period your schedule remains unchanged; you continue the same evening routine while still having access remaining on the card."
+        },
+        {
+          "optionId": "monthCard",
+          "text": "After the comparison period you have paid the total associated with the month\u2011to\u2011month option; if your evening routine continues, you simply keep purchasing a new month card each month, adjusting the expense as needed."
+        }
+      ]
+    }
+  ],
+  "advice": [
+    {
+      "optionId": "yearCard",
+      "text": "Before buying, confirm you can set aside the upfront amount and review the card\u2019s terms for any renewal or cancellation conditions."
+    },
+    {
+      "optionId": "monthCard",
+      "text": "Before committing, verify the month\u2011to\u2011month terms (such as notice required to stop) and set a reminder to periodically reassess whether the monthly cost still fits your budget."
+    }
+  ],
+  "monthlyReflections": []
+}

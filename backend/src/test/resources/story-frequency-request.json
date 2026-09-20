@@ -1,0 +1,241 @@
+{
+  "snapshot": {
+    "decision": {
+      "schemaVersion": 2,
+      "comparisonMode": "subscription",
+      "comparisonMonths": 13,
+      "id": "gym-year-vs-month-13mo",
+      "title": "Gym Year Card vs Month Card over 13 months",
+      "description": "Compare the total payments required to maintain gym access for a 13‑month window when choosing either a 12‑month year‑card priced at USD 600 or a month‑to‑month card priced at USD 60 per month, with both plans granting identical gym access and no additional fees.",
+      "originalInput": "Compare a gym year card costing USD 600 per 12 months with a month card costing USD 60 per month over exactly 13 months. Both plans provide the same gym access. Compare actual payments needed to cover that window, including a full renewal payment when needed. These are all prices; there are no signup fees or per-visit charges. Do not amortize the annual payment, assume a partial refund, or introduce workout frequency or time per visit.",
+      "currency": "USD",
+      "options": [
+        {
+          "id": "yearCard",
+          "name": "Year Card",
+          "fixedCosts": [],
+          "activities": [],
+          "subscriptionCosts": {
+            "paymentCents": {
+              "value": 60000,
+              "source": "user_input"
+            },
+            "periodMonths": 12
+          }
+        },
+        {
+          "id": "monthCard",
+          "name": "Month Card",
+          "fixedCosts": [],
+          "activities": [],
+          "subscriptionCosts": {
+            "paymentCents": {
+              "value": 6000,
+              "source": "user_input"
+            },
+            "periodMonths": 1
+          }
+        }
+      ],
+      "tags": [
+        {
+          "id": "upfrontAffordability",
+          "name": "Upfront affordability",
+          "description": "Does paying a larger sum now fit your current budget?",
+          "type": "consideration",
+          "targets": [
+            {
+              "optionId": "yearCard",
+              "consideration": "Can you comfortably allocate USD 600 at the start?"
+            },
+            {
+              "optionId": "monthCard",
+              "consideration": "Would spreading USD 60 each month be easier on your cash flow?"
+            }
+          ]
+        },
+        {
+          "id": "usageConsistency",
+          "name": "Usage consistency",
+          "description": "How steady do you expect your gym attendance to be over the next year?",
+          "type": "consideration",
+          "targets": [
+            {
+              "optionId": "yearCard",
+              "consideration": "If you plan to attend regularly, does the year‑card lock in access without worrying about monthly renewals?"
+            },
+            {
+              "optionId": "monthCard",
+              "consideration": "If your attendance might vary month‑to‑month, does a month‑card let you pause or stop without losing a prepaid amount?"
+            }
+          ]
+        },
+        {
+          "id": "changingNeeds",
+          "name": "Changing needs",
+          "description": "Do you anticipate changes in your schedule, location, or fitness goals that could affect gym use?",
+          "type": "consideration",
+          "targets": [
+            {
+              "optionId": "yearCard",
+              "consideration": "If your circumstances might shift, are you comfortable committing to a full year?"
+            },
+            {
+              "optionId": "monthCard",
+              "consideration": "Does a month‑to‑month plan give you the flexibility to adapt if your needs change?"
+            }
+          ]
+        },
+        {
+          "id": "renewalTerms",
+          "name": "Renewal terms",
+          "description": "What are the implications of automatic renewal or the need to manually renew each month?",
+          "type": "consideration",
+          "targets": [
+            {
+              "optionId": "yearCard",
+              "consideration": "Does the year‑card automatically renew after 12 months, and are you okay with that?"
+            },
+            {
+              "optionId": "monthCard",
+              "consideration": "Do you prefer to manually renew each month to retain full control over continuation?"
+            }
+          ]
+        },
+        {
+          "id": "accessRequirements",
+          "name": "Access requirements",
+          "description": "Is uninterrupted gym access important, or can you tolerate occasional gaps?",
+          "type": "consideration",
+          "targets": [
+            {
+              "optionId": "yearCard",
+              "consideration": "Does having a single payment for a full year guarantee continuous access without worrying about lapses?"
+            },
+            {
+              "optionId": "monthCard",
+              "consideration": "Would you be comfortable with the possibility of a gap if you forget to renew a month‑card?"
+            }
+          ]
+        }
+      ]
+    },
+    "enabledTagIds": [
+      "upfrontAffordability",
+      "usageConsistency"
+    ],
+    "simulationVersion": 1,
+    "calculation": {
+      "status": "subscription",
+      "comparisonMonths": 13,
+      "options": [
+        {
+          "optionId": "yearCard",
+          "totalCostCents": 120000,
+          "paymentCount": 2,
+          "coverageMonths": 24
+        },
+        {
+          "optionId": "monthCard",
+          "totalCostCents": 78000,
+          "paymentCount": 13,
+          "coverageMonths": 13
+        }
+      ],
+      "timeline": [
+        {
+          "month": 0,
+          "optionACostCents": 0,
+          "optionBCostCents": 0
+        },
+        {
+          "month": 1,
+          "optionACostCents": 60000,
+          "optionBCostCents": 6000
+        },
+        {
+          "month": 2,
+          "optionACostCents": 60000,
+          "optionBCostCents": 12000
+        },
+        {
+          "month": 3,
+          "optionACostCents": 60000,
+          "optionBCostCents": 18000
+        },
+        {
+          "month": 4,
+          "optionACostCents": 60000,
+          "optionBCostCents": 24000
+        },
+        {
+          "month": 5,
+          "optionACostCents": 60000,
+          "optionBCostCents": 30000
+        },
+        {
+          "month": 6,
+          "optionACostCents": 60000,
+          "optionBCostCents": 36000
+        },
+        {
+          "month": 7,
+          "optionACostCents": 60000,
+          "optionBCostCents": 42000
+        },
+        {
+          "month": 8,
+          "optionACostCents": 60000,
+          "optionBCostCents": 48000
+        },
+        {
+          "month": 9,
+          "optionACostCents": 60000,
+          "optionBCostCents": 54000
+        },
+        {
+          "month": 10,
+          "optionACostCents": 60000,
+          "optionBCostCents": 60000
+        },
+        {
+          "month": 11,
+          "optionACostCents": 60000,
+          "optionBCostCents": 66000
+        },
+        {
+          "month": 12,
+          "optionACostCents": 60000,
+          "optionBCostCents": 72000
+        },
+        {
+          "month": 13,
+          "optionACostCents": 120000,
+          "optionBCostCents": 78000
+        }
+      ],
+      "comparison": {
+        "costDeltaCents": -42000
+      }
+    }
+  },
+  "context": {
+    "mode": "qualitative"
+  },
+  "facts": {
+    "comparisonMonths": "13",
+    "optionA_name": "Year Card",
+    "optionA_payment": "$600.00",
+    "optionA_periodMonths": "12",
+    "optionA_totalCost": "$1,200.00",
+    "optionA_paymentCount": "2",
+    "optionA_coverageMonths": "24",
+    "optionB_name": "Month Card",
+    "optionB_payment": "$60.00",
+    "optionB_periodMonths": "1",
+    "optionB_totalCost": "$780.00",
+    "optionB_paymentCount": "13",
+    "optionB_coverageMonths": "13",
+    "subscriptionCostComparison": "Year Card costs $1,200.00 and Month Card costs $780.00 over 13 months."
+  }
+}
