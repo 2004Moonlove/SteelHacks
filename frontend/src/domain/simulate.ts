@@ -1,3 +1,5 @@
+import { simulateSubscription } from "./subscription";
+import { simulateBreakEven } from "./break-even";
 import { validateDecision } from "./schema";
 import type { Activity, BreakdownItem, CalculationResult, Decision, NumericField, OptionResult, Tag, ValidationIssue } from "./types";
 
@@ -109,6 +111,9 @@ export function simulate(decision: Decision, enabledTagIds: string[]): Calculati
     if (!tagIds.has(id) || enabledTagIds.indexOf(id) !== index) issues.push({ code: "INVALID_REFERENCE", path: `enabledTagIds.${index}`, message: !tagIds.has(id) ? `Tag ${id} does not exist.` : `Tag ${id} is enabled more than once.`, tagIds: [id] });
   });
   if (issues.length) return { status: "invalid", issues };
+  if (decision.comparisonMode === "qualitative") return { status: "qualitative" };
+  if (decision.comparisonMode === "break_even") return simulateBreakEven(decision);
+  if (decision.comparisonMode === "subscription") return simulateSubscription(decision);
   checkRequiredFields(decision, enabled, issues);
   if (issues.length) return { status: "invalid", issues };
 

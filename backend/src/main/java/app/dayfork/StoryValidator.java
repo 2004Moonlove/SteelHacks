@@ -14,7 +14,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class StoryValidator {
     private static final Pattern PLACEHOLDER = Pattern.compile("\\{\\{([A-Za-z0-9_-]{1,80})}}", Pattern.CASE_INSENSITIVE);
-    private static final Pattern NUMBER = Pattern.compile("[0-9]");
+    private static final Pattern NUMBER = Pattern.compile("\\S*[0-9]\\S*");
+    private static final Pattern CALENDAR_PAYBACK = Pattern.compile(
+            "(?i)(?:\\b(?:how\\s+many|(?:the\\s+)?number\\s+of)\\s+(?:days?|weeks?|months?|years?)\\b[^.!?\\n]{0,220}\\b(?:equal|cover|offset|recover|recoup|break(?:s)?[-\\s]*even|upfront|price|cost|expense)\\b"
+            + "|\\b(?:payback|break(?:s)?[-\\s]*even|recover|recoup|offset|pay(?:s)?\\s+for\\s+itself)\\b[^.!?\\n]{0,100}\\b(?:days?|weeks?|months?|years?)\\b"
+            + "|\\b(?:days?|weeks?|months?|years?)\\b[^.!?\\n]{0,100}\\b(?:payback|break(?:s)?[-\\s]*even|recover|recoup|offset|pay(?:s)?\\s+for\\s+itself)\\b"
+            + "|\\b(?:how\\s+long|time\\s+to)\\b[^.!?\\n]{0,100}\\b(?:payback|break(?:s)?[-\\s]*even|recover|recoup|offset|pay(?:s)?\\s+for\\s+itself)\\b)");
     private final ContractValidator contract;
     private final SimulationReconciler reconciler;
 
@@ -40,6 +45,18 @@ public class StoryValidator {
             }
         }
         JsonNode calculation = contract.object(snapshot.path("calculation"), "snapshot.calculation");
+        if (ContractValidator.isSubscription(decision)) {
+            subscriptionRequest(request, snapshot, calculation, decision);
+            return;
+        }
+        if (ContractValidator.isBreakEven(decision)) {
+            breakEvenRequest(request, snapshot, calculation, decision);
+            return;
+        }
+        if (ContractValidator.isQualitative(decision)) {
+            qualitativeRequest(request, snapshot, calculation, decision);
+            return;
+        }
         if (!"valid".equals(contract.string(calculation.path("status"), "snapshot.calculation.status"))) {
             ContractValidator.fail("snapshot.calculation.status", "Stories require valid calculation results.");
         }
@@ -156,10 +173,102 @@ public class StoryValidator {
         if (facts.size() != allowedFacts.size()) ContractValidator.fail("facts", "Fact inventory is incomplete.");
     }
 
+    private void subscriptionRequest(JsonNode request, JsonNode snapshot, JsonNode calculation, JsonNode decision) {
+        contract.onlyFields(request, "request", "snapshot", "context", "facts");
+        contract.onlyFields(snapshot, "snapshot", "decision", "enabledTagIds", "simulationVersion", "calculation");
+        new SubscriptionReconciler(contract).reconcile(snapshot);
+        JsonNode context = contract.object(request.path("context"), "context");
+        contract.onlyFields(context, "context", "mode");
+        contract.oneOf(context.path("mode"), "context.mode", "qualitative");
+        JsonNode facts = contract.object(request.path("facts"), "facts");
+        contract.onlyFields(facts, "facts", "comparisonMonths", "subscriptionCostComparison",
+                "optionA_name", "optionA_payment", "optionA_periodMonths", "optionA_totalCost", "optionA_paymentCount", "optionA_coverageMonths",
+                "optionB_name", "optionB_payment", "optionB_periodMonths", "optionB_totalCost", "optionB_paymentCount", "optionB_coverageMonths");
+        long months = calculation.path("comparisonMonths").longValue();
+        expectedFact(facts, "comparisonMonths", Long.toString(months));
+        String[] names = new String[2], totals = new String[2];
+        for (int i = 0; i < 2; i++) {
+            String prefix = i == 0 ? "optionA" : "optionB";
+            JsonNode option = decision.path("options").get(i);
+            JsonNode costs = option.path("subscriptionCosts");
+            JsonNode result = calculation.path("options").get(i);
+            names[i] = option.path("name").asText();
+            totals[i] = money(result.path("totalCostCents").longValue());
+            expectedFact(facts, prefix + "_name", names[i]);
+            expectedFact(facts, prefix + "_payment", money(costs.path("paymentCents").path("value").longValue()));
+            expectedFact(facts, prefix + "_periodMonths", Long.toString(costs.path("periodMonths").longValue()));
+            expectedFact(facts, prefix + "_totalCost", totals[i]);
+            expectedFact(facts, prefix + "_paymentCount", Long.toString(result.path("paymentCount").longValue()));
+            expectedFact(facts, prefix + "_coverageMonths", Long.toString(result.path("coverageMonths").longValue()));
+        }
+        expectedFact(facts, "subscriptionCostComparison", names[0] + " costs " + totals[0] + " and " + names[1] + " costs " + totals[1]
+                + " over " + months + " " + (months == 1 ? "month" : "months") + ".");
+        facts.fields().forEachRemaining(entry -> {
+            if (!entry.getValue().isTextual()) ContractValidator.fail("facts." + entry.getKey(), "A canonical text fact is required.");
+        });
+    }
+
+    private void breakEvenRequest(JsonNode request, JsonNode snapshot, JsonNode calculation, JsonNode decision) {
+        contract.onlyFields(request, "request", "snapshot", "context", "facts");
+        contract.onlyFields(snapshot, "snapshot", "decision", "enabledTagIds", "simulationVersion", "calculation");
+        new BreakEvenReconciler(contract).reconcile(snapshot);
+        JsonNode context = contract.object(request.path("context"), "context");
+        contract.onlyFields(context, "context", "mode");
+        contract.oneOf(context.path("mode"), "context.mode", "qualitative");
+        JsonNode facts = contract.object(request.path("facts"), "facts");
+        contract.onlyFields(facts, "facts", "optionA_name", "optionB_name", "optionA_upfrontCost", "optionB_upfrontCost",
+                "optionA_perUseCost", "optionB_perUseCost", "usageUnit", "breakEvenSummary");
+        for (int i = 0; i < 2; i++) {
+            String prefix = i == 0 ? "optionA" : "optionB";
+            JsonNode option = decision.path("options").get(i);
+            expectedFact(facts, prefix + "_name", option.path("name").asText());
+            expectedFact(facts, prefix + "_upfrontCost", money(option.path("usageCosts").path("upfrontCents").path("value").longValue()));
+            expectedFact(facts, prefix + "_perUseCost", money(option.path("usageCosts").path("perUseCents").path("value").longValue()));
+        }
+        expectedFact(facts, "usageUnit", decision.path("usageUnit").asText());
+        JsonNode crossing = calculation.path("crossover");
+        String summary = switch (crossing.path("kind").asText()) {
+            case "equal" -> "Both options have the same modeled cost at every use count.";
+            case "no_crossing" -> "There is no positive break-even point with these costs.";
+            default -> {
+                String name = decision.path("options").get(0).path("id").asText().equals(crossing.path("recoveryOptionId").asText())
+                        ? decision.path("options").get(0).path("name").asText() : decision.path("options").get(1).path("name").asText();
+                yield name + " has the same or lower modeled cost from use " + crossing.path("firstWholeUse").longValue() + " onward.";
+            }
+        };
+        expectedFact(facts, "breakEvenSummary", summary);
+        facts.fields().forEachRemaining(entry -> {
+            if (!entry.getValue().isTextual()) ContractValidator.fail("facts." + entry.getKey(), "A canonical text fact is required.");
+        });
+    }
+
+    private void qualitativeRequest(JsonNode request, JsonNode snapshot, JsonNode calculation, JsonNode decision) {
+        contract.onlyFields(request, "request", "snapshot", "context", "facts");
+        contract.onlyFields(snapshot, "snapshot", "decision", "enabledTagIds", "simulationVersion", "calculation");
+        contract.onlyFields(calculation, "snapshot.calculation", "status");
+        contract.oneOf(calculation.path("status"), "snapshot.calculation.status", "qualitative");
+        JsonNode context = contract.object(request.path("context"), "context");
+        contract.onlyFields(context, "context", "mode");
+        contract.oneOf(context.path("mode"), "context.mode", "qualitative");
+        JsonNode facts = contract.object(request.path("facts"), "facts");
+        contract.onlyFields(facts, "facts", "optionA_name", "optionB_name");
+        for (int i = 0; i < 2; i++) {
+            String key = i == 0 ? "optionA_name" : "optionB_name";
+            contract.string(facts.path(key), "facts." + key);
+            expectedFact(facts, key, decision.path("options").get(i).path("name").asText());
+        }
+    }
+
     public void response(JsonNode story, JsonNode request) {
         contract.object(story, "story");
-        contract.onlyFields(story, "story", "decisionId", "simulationVersion", "sharedScenario", "moments", "monthlyReflections");
         JsonNode snapshot = request.path("snapshot");
+        boolean qualitative = ContractValidator.isLongTerm(snapshot.path("decision"));
+        if (qualitative) {
+            contract.onlyFields(story, "story", "mode", "decisionId", "simulationVersion", "sharedScenario", "moments", "monthlyReflections", "advice");
+            contract.oneOf(story.path("mode"), "story.mode", "qualitative");
+        } else {
+            contract.onlyFields(story, "story", "decisionId", "simulationVersion", "sharedScenario", "moments", "monthlyReflections", "advice");
+        }
         JsonNode options = snapshot.path("decision").path("options");
         String decisionId = snapshot.path("decision").path("id").asText();
         if (!decisionId.equals(contract.id(story.path("decisionId"), "story.decisionId"))) {
@@ -174,16 +283,18 @@ public class StoryValidator {
         narrative(shared.path("title"), "story.sharedScenario.title", request.path("facts"));
         narrative(shared.path("description"), "story.sharedScenario.description", request.path("facts"));
         JsonNode moments = contract.array(story.path("moments"), "story.moments", 3, 3);
-        String[] keys = {"morning", "daytime", "evening"};
+        String[] keys = qualitative ? new String[]{"beginning", "during", "later"} : new String[]{"morning", "daytime", "evening"};
         for (int i = 0; i < 3; i++) {
             JsonNode moment = contract.object(moments.get(i), "story.moments[" + i + "]");
             contract.onlyFields(moment, "story.moments[" + i + "]", "key", "options");
             if (!keys[i].equals(contract.string(moment.path("key"), "story.moments[" + i + "].key"))) {
-                ContractValidator.fail("story.moments[" + i + "].key", "Story moments must be ordered morning, daytime, evening.");
+                ContractValidator.fail("story.moments[" + i + "].key", "Story moments must be ordered " + String.join(", ", keys) + ".");
             }
             paired(moment.path("options"), "story.moments[" + i + "].options", options, request.path("facts"));
         }
-        paired(story.path("monthlyReflections"), "story.monthlyReflections", options, request.path("facts"));
+        if (story.has("advice")) paired(story.path("advice"), "story.advice", options, request.path("facts"));
+        if (qualitative) contract.array(story.path("monthlyReflections"), "story.monthlyReflections", 0, 0);
+        else paired(story.path("monthlyReflections"), "story.monthlyReflections", options, request.path("facts"));
     }
 
     private void paired(JsonNode entries, String path, JsonNode options, JsonNode facts) {
@@ -206,8 +317,46 @@ public class StoryValidator {
             if (!facts.has(matcher.group(1))) ContractValidator.fail(path, "Unknown fact reference: " + matcher.group(1));
         }
         String withoutFacts = matcher.replaceAll("");
-        if (withoutFacts.contains("{{") || withoutFacts.contains("}}") || NUMBER.matcher(withoutFacts).find()) {
-            ContractValidator.fail(path, "Numeric claims must use provided fact references.");
+        if (withoutFacts.contains("{{") || withoutFacts.contains("}}")) {
+            ContractValidator.fail(path, "Fact placeholders must use exactly {{factId}} with a provided fact ID and balanced braces.");
+        }
+        if (facts.has("breakEvenSummary") && CALENDAR_PAYBACK.matcher(withoutFacts).find()) {
+            ContractValidator.fail(path, "Break-even comparisons use a use count only, not calendar time. "
+                    + "No daily, weekly, monthly, or yearly usage frequency was provided. Remove the conversion to days, weeks, months, or years "
+                    + "and use the canonical {{breakEvenSummary}} sentence; do not infer how long payback takes.");
+        }
+        if (facts.has("subscriptionCostComparison")) validateSubscriptionNarrative(withoutFacts, path);
+        Matcher number = NUMBER.matcher(withoutFacts);
+        if (number.find()) {
+            String token = number.group();
+            ContractValidator.fail(path, "Numeric claims must use provided fact references. Found literal '"
+                    + token.substring(0, Math.min(token.length(), 80)) + "'. Use the option-name placeholder for names; "
+                    + "paraphrase a selected digit-bearing task label in words (for example, spatial rendering), "
+                    + "or omit unsupported detail. Do not repeat the literal or invent a fact ID.");
+        }
+    }
+
+    private void validateSubscriptionNarrative(String text, String path) {
+        Pattern permission = Pattern.compile("(?i)\\b(?:can|could|may|are free to|are able to)\\s+(?:choose\\s+to\\s+)?(?:skip|pause|cancel|suspend|stop)\\b"
+                + "(?=\\s+(?:(?:a|an|the|your|this|that|one|another)\\s+)?(?:month|payment|renewal|membership|subscription|plan|access|service|billing|arrangement)\\b"
+                + "|\\s+(?:paying|renewing)\\b|\\s+(?:if|when|whenever|subject)\\b|\\s*(?:[,;.!?]|$))");
+        Pattern qualified = Pattern.compile("(?i)(?:\\bif\\b[^.!?]{0,90}\\b(?:terms?|contract|policy|policies)\\b[^.!?]{0,60}\\b(?:allow|permit)|"
+                + "\\bsubject\\s+to\\b[^.!?]{0,90}\\b(?:terms?|contract|policy|policies)|"
+                + "\\b(?:terms?|contract|policy|policies)\\b[^.!?]{0,60}\\b(?:permitting|allowing))");
+        Pattern endAssumption = Pattern.compile("(?i)\\b(?:comparison|selected)\\s+window\\b[^.!?]{0,240}"
+                + "\\b(?:you\\s+(?:stop|cancel)|(?:access|subscription|membership)\\s+(?:ends|stops)|no\\s+longer\\s+need)\\b");
+        for (String sentence : text.split("[.!?]+")) {
+            if (permission.matcher(sentence).find() && !qualified.matcher(sentence).find()) {
+                ContractValidator.fail(path, "Pause, skip, cancel, or stop permissions were not supplied. In the same sentence, "
+                        + "make any such possibility explicitly subject to actual contract terms, such as 'if the terms permit' or 'subject to the actual terms'. "
+                        + "A changing schedule alone does not grant cancellation rights; preserve the shared hypothetical scene without inventing those rights.");
+            }
+            if (endAssumption.matcher(sentence).find()
+                    && !Pattern.compile("(?i)\\b(?:if|whether|might|could)\\b").matcher(sentence).find()) {
+                ContractValidator.fail(path, "The comparison window is an accounting window, not the end of the user's need or service. "
+                        + "Do not say they stop, cancel, or no longer need access because the window ends. Describe an ongoing situation "
+                        + "or a conditional decision subject to actual terms, while leaving the modeled payment totals unchanged.");
+            }
         }
     }
 

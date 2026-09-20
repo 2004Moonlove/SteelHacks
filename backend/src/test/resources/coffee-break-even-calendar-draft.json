@@ -1,0 +1,16 @@
+{
+  "sharedScenario": {
+    "title": "Buy a coffee machine vs buy coffee at Starbucks",
+    "description": "Compare the upfront cost of purchasing a coffee machine with the per\u2011cup cost of buying coffee at Starbucks. The decision hinges on how many cups must be brewed at home before the machine\u2019s higher upfront cost is offset by the lower per\u2011cup cost."
+  },
+  "optionA": {
+    "beginning": "You purchase a coffee machine, paying the upfront cost and setting it up at home.",
+    "during": "Each cup you brew adds the per\u2011use cost, and you track whether the cumulative savings compared to buying at Starbucks cover the machine\u2019s upfront expense.",
+    "later": "Over time you evaluate whether the machine continues to meet your coffee needs as your usage pattern evolves."
+  },
+  "optionB": {
+    "beginning": "You start buying coffee at Starbucks, incurring no upfront cost but paying the per\u2011cup price each time.",
+    "during": "With each purchase you accumulate expense, and you consider how many months of buying at Starbucks would equal the machine\u2019s upfront price.",
+    "later": "You assess whether continuing to buy coffee at Starbucks remains suitable given your consumption habits and budget."
+  }
+}

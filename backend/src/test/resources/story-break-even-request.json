@@ -1,0 +1,122 @@
+{
+  "snapshot": {
+    "decision": {
+      "schemaVersion": 2,
+      "comparisonMode": "break_even",
+      "usageUnit": "cup",
+      "id": "coffee-break-even-demo",
+      "title": "A coffee machine or buying coffee?",
+      "description": "Compare cumulative spending at the same number of cups, then explore what matters to your routine. Example prices are editable.",
+      "originalInput": "An offline example: a $300 coffee machine with $1 per cup versus buying coffee at $6 per cup, with no upfront purchase.",
+      "currency": "USD",
+      "options": [
+        {
+          "id": "machine",
+          "name": "Coffee machine",
+          "fixedCosts": [],
+          "activities": [],
+          "usageCosts": {
+            "upfrontCents": {
+              "value": 30000,
+              "source": "user_input"
+            },
+            "perUseCents": {
+              "value": 100,
+              "source": "user_input"
+            }
+          }
+        },
+        {
+          "id": "shop",
+          "name": "Buying coffee",
+          "fixedCosts": [],
+          "activities": [],
+          "usageCosts": {
+            "upfrontCents": {
+              "value": 0,
+              "source": "user_input"
+            },
+            "perUseCents": {
+              "value": 600,
+              "source": "user_input"
+            }
+          }
+        }
+      ],
+      "tags": [
+        {
+          "id": "routine",
+          "type": "consideration",
+          "name": "Making coffee at home",
+          "description": "Explore how making a drink fits your routine.",
+          "targets": [
+            {
+              "optionId": "machine",
+              "consideration": "If making coffee becomes part of your routine, consider how preparation and cleanup fit your day."
+            },
+            {
+              "optionId": "shop",
+              "consideration": "If buying coffee stays part of your routine, consider how collecting it fits your day."
+            }
+          ],
+          "importance": 5
+        },
+        {
+          "id": "variety",
+          "type": "consideration",
+          "name": "Drink variety",
+          "description": "Consider the drinks you would like to make or buy.",
+          "targets": [
+            {
+              "optionId": "machine",
+              "consideration": "If drink variety matters to you, check which recipes your chosen machine can make."
+            },
+            {
+              "optionId": "shop",
+              "consideration": "If drink variety matters to you, check which drinks your chosen shop offers."
+            }
+          ]
+        }
+      ]
+    },
+    "enabledTagIds": [
+      "routine"
+    ],
+    "simulationVersion": 2,
+    "calculation": {
+      "status": "break_even",
+      "options": [
+        {
+          "optionId": "machine",
+          "upfrontCents": 30000,
+          "perUseCents": 100
+        },
+        {
+          "optionId": "shop",
+          "upfrontCents": 0,
+          "perUseCents": 600
+        }
+      ],
+      "crossover": {
+        "kind": "crossing",
+        "numerator": 30000,
+        "denominator": 500,
+        "firstWholeUse": 60,
+        "recoveryOptionId": "machine"
+      }
+    }
+  },
+  "context": {
+    "mode": "qualitative"
+  },
+  "facts": {
+    "optionA_name": "Coffee machine",
+    "optionB_name": "Buying coffee",
+    "optionA_upfrontCost": "$300.00",
+    "optionB_upfrontCost": "$0.00",
+    "optionA_perUseCost": "$1.00",
+    "optionB_perUseCost": "$6.00",
+    "usageUnit": "cup",
+    "breakEvenSummary": "Coffee machine has the same or lower modeled cost from use 60 onward."
+  }
+}

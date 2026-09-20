@@ -11,7 +11,7 @@ const user = (value: number) => ({ value, source: "user_edit" as const });
 function totals(decision: Decision, enabled: string[]) {
   const result = simulate(decision, enabled);
   expect(result.status).toBe("valid");
-  if (result.status !== "valid") throw new Error(JSON.stringify(result.issues));
+  if (result.status !== "valid") throw new Error(JSON.stringify(result));
   return result;
 }
 

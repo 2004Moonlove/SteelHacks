@@ -25,11 +25,12 @@ const activitySchema = z.strictObject({
   costCentsPerEvent: numericFieldSchema,
   minutesPerEvent: numericFieldSchema,
 });
-const optionSchema = z.strictObject({ id, name: text, fixedCosts: z.array(fixedCostSchema).max(100), activities: z.array(activitySchema).max(100) });
-const tagBase = { id, name: text, icon: text.optional(), description: text };
+const optionSchema = z.strictObject({ id, name: text, fixedCosts: z.array(fixedCostSchema).max(100), activities: z.array(activitySchema).max(100), usageCosts: z.strictObject({ upfrontCents: numericFieldSchema, perUseCents: numericFieldSchema }).optional(), subscriptionCosts: z.strictObject({ paymentCents: numericFieldSchema, periodMonths: positiveWhole.max(120) }).optional() });
+const tagBase = { id, name: text, icon: text.optional(), description: text, group: text.optional() };
 const targetOption = { optionId: id };
 const targetActivity = { ...targetOption, activityId: id };
 const tagSchema = z.discriminatedUnion("type", [
+  z.strictObject({ ...tagBase, type: z.literal("consideration"), importance: z.number().int().min(1).max(5).optional(), targets: z.array(z.strictObject({ ...targetOption, consideration: text })).min(1).max(2) }),
   z.strictObject({ ...tagBase, type: z.literal("fixed"), targets: z.array(z.strictObject({ ...targetOption, costCentsMonthly: numericFieldSchema, minutesMonthly: numericFieldSchema })).min(1).max(100) }),
   z.strictObject({ ...tagBase, type: z.literal("add_activity"), targets: z.array(z.strictObject({ ...targetActivity, eventsPerMonth: numericFieldSchema })).min(1).max(100) }),
   z.strictObject({ ...tagBase, type: z.literal("reduce_activity"), targets: z.array(z.strictObject({ ...targetActivity, eventsPerMonth: numericFieldSchema })).min(1).max(100) }),
@@ -37,7 +38,10 @@ const tagSchema = z.discriminatedUnion("type", [
 ]);
 
 export const decisionSchema = z.strictObject({
-  schemaVersion: z.literal(1),
+  schemaVersion: z.union([z.literal(1), z.literal(2)]),
+  comparisonMode: z.enum(["quantitative", "qualitative", "break_even", "subscription"]).optional(),
+  usageUnit: text.optional(),
+  comparisonMonths: positiveWhole.max(120).optional(),
   id,
   title: text,
   description: text,
@@ -67,6 +71,44 @@ export function validateDecision(value: unknown): ValidationIssue[] {
 
   const decision = parsed.data as Decision;
   const issues: ValidationIssue[] = [];
+  if (decision.schemaVersion === 1 && (decision.comparisonMode !== undefined || decision.tags.some((tag) => tag.type === "consideration" || tag.group !== undefined))) {
+    issues.push({ code: "INVALID_REFERENCE", path: "schemaVersion", message: "Comparison modes, grouped Tags, and consideration Tags require schema version 2." });
+  }
+  if (decision.schemaVersion === 2 && decision.comparisonMode === undefined) {
+    issues.push({ code: "INVALID_REFERENCE", path: "comparisonMode", message: "Choose a comparison mode for a version 2 decision." });
+  }
+  if (decision.schemaVersion === 2 && decision.tags.length > 30) {
+    issues.push({ code: "INVALID_REFERENCE", path: "tags", message: "A version 2 decision supports at most 30 relevant Tags." });
+  }
+  if (decision.comparisonMode === "break_even") {
+    if (!decision.usageUnit) issues.push({ code: "INVALID_REFERENCE", path: "usageUnit", message: "A per-use comparison needs a shared usage unit." });
+    decision.options.forEach((option, index) => {
+      if (!option.usageCosts || option.fixedCosts.length || option.activities.length) issues.push({ code: "INVALID_REFERENCE", path: `options.${index}`, message: "Per-use options require upfront and per-use costs without monthly rows.", optionId: option.id });
+    });
+    decision.tags.forEach((tag, index) => {
+      if (tag.type !== "consideration") issues.push({ code: "INVALID_REFERENCE", path: `tags.${index}`, message: "Per-use comparisons support consideration factors without monthly adjustments." });
+    });
+  } else if (decision.usageUnit !== undefined || decision.options.some((option) => option.usageCosts !== undefined)) {
+    issues.push({ code: "INVALID_REFERENCE", path: "comparisonMode", message: "Per-use cost fields require a break-even comparison." });
+  }
+  if (decision.comparisonMode === "subscription") {
+    decision.options.forEach((option, index) => {
+      if (!option.subscriptionCosts || option.fixedCosts.length || option.activities.length) issues.push({ code: "INVALID_REFERENCE", path: `options.${index}`, message: "Subscription options require a payment amount and billing period without monthly activity rows.", optionId: option.id });
+    });
+    decision.tags.forEach((tag, index) => {
+      if (tag.type !== "consideration") issues.push({ code: "INVALID_REFERENCE", path: `tags.${index}`, message: "Subscription factors describe possible experiences without changing payment terms." });
+    });
+  } else if (decision.comparisonMonths !== undefined || decision.options.some((option) => option.subscriptionCosts !== undefined)) {
+    issues.push({ code: "INVALID_REFERENCE", path: "comparisonMode", message: "Billing periods and comparison windows require a subscription comparison." });
+  }
+  if (decision.comparisonMode === "qualitative") {
+    decision.options.forEach((option, index) => {
+      if (option.fixedCosts.length || option.activities.length) issues.push({ code: "INVALID_REFERENCE", path: `options.${index}`, message: "Qualitative options cannot contain numerical costs or activities.", optionId: option.id });
+    });
+    decision.tags.forEach((tag, index) => {
+      if (tag.type !== "consideration") issues.push({ code: "INVALID_REFERENCE", path: `tags.${index}`, message: "Qualitative decisions use consideration Tags without numerical adjustments.", tagIds: [tag.id] });
+    });
+  }
   duplicateIds(decision.options.map((option) => option.id), "options", issues);
   duplicateIds(decision.tags.map((tag) => tag.id), "tags", issues);
   const optionById = new Map(decision.options.map((option) => [option.id, option]));

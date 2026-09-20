@@ -6,6 +6,10 @@ export function buildGenerationContract() {
     target: "draft-07",
     reused: "ref",
     override: ({ zodSchema, jsonSchema }) => {
+      if (jsonSchema.properties?.importance) {
+        delete jsonSchema.properties.importance;
+        jsonSchema.required = jsonSchema.required?.filter((key) => key !== "importance");
+      }
       if (zodSchema === numericFieldSchema && jsonSchema.oneOf) {
         jsonSchema.oneOf = jsonSchema.oneOf.filter((variant) => {
           const sourceSchema = variant.properties?.source;
@@ -17,7 +21,9 @@ export function buildGenerationContract() {
   });
   const tags = schema.properties?.tags;
   if (!tags || typeof tags !== "object") throw new Error("The generation contract must define Tags.");
-  tags.minItems = 5;
-  tags.maxItems = 10;
+  tags.minItems = 0;
+  tags.maxItems = 30;
+  if (schema.properties) schema.properties.schemaVersion = { const: 2, type: "number" };
+  schema.required = [...new Set([...(schema.required ?? []), "comparisonMode"])];
   return schema;
 }

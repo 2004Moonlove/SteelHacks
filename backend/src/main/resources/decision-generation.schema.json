@@ -3,20 +3,45 @@
   "type": "object",
   "properties": {
     "schemaVersion": {
-      "type": "number",
-      "const": 1
+      "const": 2,
+      "type": "number"
+    },
+    "comparisonMode": {
+      "type": "string",
+      "enum": [
+        "quantitative",
+        "qualitative",
+        "break_even",
+        "subscription"
+      ]
+    },
+    "usageUnit": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/__schema0"
+        }
+      ]
+    },
+    "comparisonMonths": {
+      "type": "integer",
+      "maximum": 120,
+      "allOf": [
+        {
+          "$ref": "#/definitions/__schema1"
+        }
+      ]
     },
     "id": {
-      "$ref": "#/definitions/__schema0"
+      "$ref": "#/definitions/__schema3"
     },
     "title": {
-      "$ref": "#/definitions/__schema1"
+      "$ref": "#/definitions/__schema0"
     },
     "description": {
-      "$ref": "#/definitions/__schema1"
+      "$ref": "#/definitions/__schema0"
     },
     "originalInput": {
-      "$ref": "#/definitions/__schema1"
+      "$ref": "#/definitions/__schema0"
     },
     "currency": {
       "type": "string",
@@ -26,10 +51,10 @@
       "type": "array",
       "items": [
         {
-          "$ref": "#/definitions/__schema2"
+          "$ref": "#/definitions/__schema4"
         },
         {
-          "$ref": "#/definitions/__schema2"
+          "$ref": "#/definitions/__schema4"
         }
       ],
       "additionalItems": false,
@@ -37,12 +62,12 @@
       "maxItems": 2
     },
     "tags": {
-      "maxItems": 10,
+      "maxItems": 30,
       "type": "array",
       "items": {
-        "$ref": "#/definitions/__schema7"
+        "$ref": "#/definitions/__schema8"
       },
-      "minItems": 5
+      "minItems": 0
     }
   },
   "required": [
@@ -53,42 +78,94 @@
     "originalInput",
     "currency",
     "options",
-    "tags"
+    "tags",
+    "comparisonMode"
   ],
   "additionalProperties": false,
   "definitions": {
     "__schema0": {
       "type": "string",
-      "pattern": "^[A-Za-z0-9_-]{1,80}(?![\\s\\S])"
-    },
-    "__schema1": {
-      "type": "string",
       "minLength": 1,
       "maxLength": 5000,
       "pattern": "[^\\u0009-\\u000D\\u001C-\\u0020\\u1680\\u2000-\\u2006\\u2008-\\u200A\\u2028\\u2029\\u205F\\u3000]"
     },
+    "__schema1": {
+      "exclusiveMinimum": 0,
+      "allOf": [
+        {
+          "$ref": "#/definitions/__schema2"
+        }
+      ]
+    },
     "__schema2": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "__schema3": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{1,80}(?![\\s\\S])"
+    },
+    "__schema4": {
       "type": "object",
       "properties": {
         "id": {
-          "$ref": "#/definitions/__schema0"
+          "$ref": "#/definitions/__schema3"
         },
         "name": {
-          "$ref": "#/definitions/__schema1"
+          "$ref": "#/definitions/__schema0"
         },
         "fixedCosts": {
           "maxItems": 100,
           "type": "array",
           "items": {
-            "$ref": "#/definitions/__schema3"
+            "$ref": "#/definitions/__schema5"
           }
         },
         "activities": {
           "maxItems": 100,
           "type": "array",
           "items": {
-            "$ref": "#/definitions/__schema6"
+            "$ref": "#/definitions/__schema7"
           }
+        },
+        "usageCosts": {
+          "type": "object",
+          "properties": {
+            "upfrontCents": {
+              "$ref": "#/definitions/__schema6"
+            },
+            "perUseCents": {
+              "$ref": "#/definitions/__schema6"
+            }
+          },
+          "required": [
+            "upfrontCents",
+            "perUseCents"
+          ],
+          "additionalProperties": false
+        },
+        "subscriptionCosts": {
+          "type": "object",
+          "properties": {
+            "paymentCents": {
+              "$ref": "#/definitions/__schema6"
+            },
+            "periodMonths": {
+              "type": "integer",
+              "maximum": 120,
+              "allOf": [
+                {
+                  "$ref": "#/definitions/__schema1"
+                }
+              ]
+            }
+          },
+          "required": [
+            "paymentCents",
+            "periodMonths"
+          ],
+          "additionalProperties": false
         }
       },
       "required": [
@@ -99,17 +176,17 @@
       ],
       "additionalProperties": false
     },
-    "__schema3": {
+    "__schema5": {
       "type": "object",
       "properties": {
         "id": {
-          "$ref": "#/definitions/__schema0"
+          "$ref": "#/definitions/__schema3"
         },
         "name": {
-          "$ref": "#/definitions/__schema1"
+          "$ref": "#/definitions/__schema0"
         },
         "amountCentsMonthly": {
-          "$ref": "#/definitions/__schema4"
+          "$ref": "#/definitions/__schema6"
         }
       },
       "required": [
@@ -119,13 +196,13 @@
       ],
       "additionalProperties": false
     },
-    "__schema4": {
+    "__schema6": {
       "oneOf": [
         {
           "type": "object",
           "properties": {
             "value": {
-              "$ref": "#/definitions/__schema5"
+              "$ref": "#/definitions/__schema2"
             },
             "source": {
               "type": "string",
@@ -134,7 +211,7 @@
             "note": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/__schema1"
+                  "$ref": "#/definitions/__schema0"
                 }
               ]
             }
@@ -149,7 +226,7 @@
           "type": "object",
           "properties": {
             "value": {
-              "$ref": "#/definitions/__schema5"
+              "$ref": "#/definitions/__schema2"
             },
             "source": {
               "type": "string",
@@ -158,7 +235,7 @@
             "note": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/__schema1"
+                  "$ref": "#/definitions/__schema0"
                 }
               ]
             }
@@ -182,7 +259,7 @@
             "note": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/__schema1"
+                  "$ref": "#/definitions/__schema0"
                 }
               ]
             }
@@ -195,19 +272,14 @@
         }
       ]
     },
-    "__schema5": {
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 9007199254740991
-    },
-    "__schema6": {
+    "__schema7": {
       "type": "object",
       "properties": {
         "id": {
-          "$ref": "#/definitions/__schema0"
+          "$ref": "#/definitions/__schema3"
         },
         "name": {
-          "$ref": "#/definitions/__schema1"
+          "$ref": "#/definitions/__schema0"
         },
         "eventUnit": {
           "type": "string",
@@ -222,15 +294,10 @@
           "type": "object",
           "properties": {
             "label": {
-              "$ref": "#/definitions/__schema1"
+              "$ref": "#/definitions/__schema0"
             },
             "eventsPerUnit": {
-              "exclusiveMinimum": 0,
-              "allOf": [
-                {
-                  "$ref": "#/definitions/__schema5"
-                }
-              ]
+              "$ref": "#/definitions/__schema1"
             }
           },
           "required": [
@@ -240,13 +307,13 @@
           "additionalProperties": false
         },
         "eventsPerMonth": {
-          "$ref": "#/definitions/__schema4"
+          "$ref": "#/definitions/__schema6"
         },
         "costCentsPerEvent": {
-          "$ref": "#/definitions/__schema4"
+          "$ref": "#/definitions/__schema6"
         },
         "minutesPerEvent": {
-          "$ref": "#/definitions/__schema4"
+          "$ref": "#/definitions/__schema6"
         }
       },
       "required": [
@@ -259,104 +326,33 @@
       ],
       "additionalProperties": false
     },
-    "__schema7": {
+    "__schema8": {
       "oneOf": [
         {
           "type": "object",
           "properties": {
             "id": {
-              "$ref": "#/definitions/__schema0"
+              "$ref": "#/definitions/__schema3"
             },
             "name": {
-              "$ref": "#/definitions/__schema1"
+              "$ref": "#/definitions/__schema0"
             },
             "icon": {
-              "$ref": "#/definitions/__schema8"
+              "$ref": "#/definitions/__schema9"
             },
             "description": {
-              "$ref": "#/definitions/__schema1"
+              "$ref": "#/definitions/__schema0"
+            },
+            "group": {
+              "$ref": "#/definitions/__schema10"
             },
             "type": {
               "type": "string",
-              "const": "fixed"
+              "const": "consideration"
             },
             "targets": {
               "minItems": 1,
-              "maxItems": 100,
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/__schema9"
-              }
-            }
-          },
-          "required": [
-            "id",
-            "name",
-            "description",
-            "type",
-            "targets"
-          ],
-          "additionalProperties": false
-        },
-        {
-          "type": "object",
-          "properties": {
-            "id": {
-              "$ref": "#/definitions/__schema0"
-            },
-            "name": {
-              "$ref": "#/definitions/__schema1"
-            },
-            "icon": {
-              "$ref": "#/definitions/__schema8"
-            },
-            "description": {
-              "$ref": "#/definitions/__schema1"
-            },
-            "type": {
-              "type": "string",
-              "const": "add_activity"
-            },
-            "targets": {
-              "minItems": 1,
-              "maxItems": 100,
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/__schema10"
-              }
-            }
-          },
-          "required": [
-            "id",
-            "name",
-            "description",
-            "type",
-            "targets"
-          ],
-          "additionalProperties": false
-        },
-        {
-          "type": "object",
-          "properties": {
-            "id": {
-              "$ref": "#/definitions/__schema0"
-            },
-            "name": {
-              "$ref": "#/definitions/__schema1"
-            },
-            "icon": {
-              "$ref": "#/definitions/__schema8"
-            },
-            "description": {
-              "$ref": "#/definitions/__schema1"
-            },
-            "type": {
-              "type": "string",
-              "const": "reduce_activity"
-            },
-            "targets": {
-              "minItems": 1,
-              "maxItems": 100,
+              "maxItems": 2,
               "type": "array",
               "items": {
                 "$ref": "#/definitions/__schema11"
@@ -376,20 +372,23 @@
           "type": "object",
           "properties": {
             "id": {
-              "$ref": "#/definitions/__schema0"
+              "$ref": "#/definitions/__schema3"
             },
             "name": {
-              "$ref": "#/definitions/__schema1"
+              "$ref": "#/definitions/__schema0"
             },
             "icon": {
-              "$ref": "#/definitions/__schema8"
+              "$ref": "#/definitions/__schema9"
             },
             "description": {
-              "$ref": "#/definitions/__schema1"
+              "$ref": "#/definitions/__schema0"
+            },
+            "group": {
+              "$ref": "#/definitions/__schema10"
             },
             "type": {
               "type": "string",
-              "const": "replace_activity"
+              "const": "fixed"
             },
             "targets": {
               "minItems": 1,
@@ -408,27 +407,170 @@
             "targets"
           ],
           "additionalProperties": false
-        }
-      ]
-    },
-    "__schema8": {
-      "allOf": [
+        },
         {
-          "$ref": "#/definitions/__schema1"
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/definitions/__schema3"
+            },
+            "name": {
+              "$ref": "#/definitions/__schema0"
+            },
+            "icon": {
+              "$ref": "#/definitions/__schema9"
+            },
+            "description": {
+              "$ref": "#/definitions/__schema0"
+            },
+            "group": {
+              "$ref": "#/definitions/__schema10"
+            },
+            "type": {
+              "type": "string",
+              "const": "add_activity"
+            },
+            "targets": {
+              "minItems": 1,
+              "maxItems": 100,
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/__schema13"
+              }
+            }
+          },
+          "required": [
+            "id",
+            "name",
+            "description",
+            "type",
+            "targets"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/definitions/__schema3"
+            },
+            "name": {
+              "$ref": "#/definitions/__schema0"
+            },
+            "icon": {
+              "$ref": "#/definitions/__schema9"
+            },
+            "description": {
+              "$ref": "#/definitions/__schema0"
+            },
+            "group": {
+              "$ref": "#/definitions/__schema10"
+            },
+            "type": {
+              "type": "string",
+              "const": "reduce_activity"
+            },
+            "targets": {
+              "minItems": 1,
+              "maxItems": 100,
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/__schema14"
+              }
+            }
+          },
+          "required": [
+            "id",
+            "name",
+            "description",
+            "type",
+            "targets"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/definitions/__schema3"
+            },
+            "name": {
+              "$ref": "#/definitions/__schema0"
+            },
+            "icon": {
+              "$ref": "#/definitions/__schema9"
+            },
+            "description": {
+              "$ref": "#/definitions/__schema0"
+            },
+            "group": {
+              "$ref": "#/definitions/__schema10"
+            },
+            "type": {
+              "type": "string",
+              "const": "replace_activity"
+            },
+            "targets": {
+              "minItems": 1,
+              "maxItems": 100,
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/__schema15"
+              }
+            }
+          },
+          "required": [
+            "id",
+            "name",
+            "description",
+            "type",
+            "targets"
+          ],
+          "additionalProperties": false
         }
       ]
     },
     "__schema9": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/__schema0"
+        }
+      ]
+    },
+    "__schema10": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/__schema0"
+        }
+      ]
+    },
+    "__schema11": {
       "type": "object",
       "properties": {
         "optionId": {
+          "$ref": "#/definitions/__schema3"
+        },
+        "consideration": {
           "$ref": "#/definitions/__schema0"
+        }
+      },
+      "required": [
+        "optionId",
+        "consideration"
+      ],
+      "additionalProperties": false
+    },
+    "__schema12": {
+      "type": "object",
+      "properties": {
+        "optionId": {
+          "$ref": "#/definitions/__schema3"
         },
         "costCentsMonthly": {
-          "$ref": "#/definitions/__schema4"
+          "$ref": "#/definitions/__schema6"
         },
         "minutesMonthly": {
-          "$ref": "#/definitions/__schema4"
+          "$ref": "#/definitions/__schema6"
         }
       },
       "required": [
@@ -438,17 +580,17 @@
       ],
       "additionalProperties": false
     },
-    "__schema10": {
+    "__schema13": {
       "type": "object",
       "properties": {
         "optionId": {
-          "$ref": "#/definitions/__schema0"
+          "$ref": "#/definitions/__schema3"
         },
         "activityId": {
-          "$ref": "#/definitions/__schema0"
+          "$ref": "#/definitions/__schema3"
         },
         "eventsPerMonth": {
-          "$ref": "#/definitions/__schema4"
+          "$ref": "#/definitions/__schema6"
         }
       },
       "required": [
@@ -458,17 +600,17 @@
       ],
       "additionalProperties": false
     },
-    "__schema11": {
+    "__schema14": {
       "type": "object",
       "properties": {
         "optionId": {
-          "$ref": "#/definitions/__schema0"
+          "$ref": "#/definitions/__schema3"
         },
         "activityId": {
-          "$ref": "#/definitions/__schema0"
+          "$ref": "#/definitions/__schema3"
         },
         "eventsPerMonth": {
-          "$ref": "#/definitions/__schema4"
+          "$ref": "#/definitions/__schema6"
         }
       },
       "required": [
@@ -478,26 +620,26 @@
       ],
       "additionalProperties": false
     },
-    "__schema12": {
+    "__schema15": {
       "type": "object",
       "properties": {
         "optionId": {
-          "$ref": "#/definitions/__schema0"
+          "$ref": "#/definitions/__schema3"
         },
         "activityId": {
-          "$ref": "#/definitions/__schema0"
+          "$ref": "#/definitions/__schema3"
         },
         "replacementName": {
-          "$ref": "#/definitions/__schema1"
+          "$ref": "#/definitions/__schema0"
         },
         "eventsPerMonth": {
-          "$ref": "#/definitions/__schema4"
+          "$ref": "#/definitions/__schema6"
         },
         "costCentsPerEvent": {
-          "$ref": "#/definitions/__schema4"
+          "$ref": "#/definitions/__schema6"
         },
         "minutesPerEvent": {
-          "$ref": "#/definitions/__schema4"
+          "$ref": "#/definitions/__schema6"
         }
       },
       "required": [

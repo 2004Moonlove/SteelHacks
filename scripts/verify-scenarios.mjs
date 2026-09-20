@@ -90,14 +90,15 @@ are sent. No credential environment variables are loaded or logged.
 
 Every scenario uses the frontend schema, reference validator, and simulation
 engine. Each Tag is tested alone, without supplying or confirming missing
-numbers. A valid baseline matching the case expectations gets one General day
-story request. Missing values produce needs_review and never become guessed
-numbers. Expected needs_review cases and incomplete optional Tags are not
+numbers. A valid quantitative baseline gets one General day story request. A
+qualitative, complete break-even, or complete subscription baseline gets one beginning/during/later
+story with its first two consideration Tags enabled. Missing values produce
+needs_review and never become guessed numbers. Expected needs_review cases and incomplete optional Tags are not
 failures. Unexpected missing baseline values, invalid outputs, HTTP failures,
 and mismatched supplied totals exit 1. Invocation/setup errors exit 2.
 
-Story checks cover snapshot identity, paired moments, reflections, and fact
-placeholders. Narrative claims still require a human review of the artifacts.
+Story checks cover snapshot identity, paired moments, reflections, optional paired
+advice, and fact placeholders. Narrative claims still require a human review of the artifacts.
 
 Cases:
 ${cases.map((item) => `  ${item.id}: ${item.name} (${item.expectedBaseline})`).join("\n")}`);
@@ -108,7 +109,7 @@ export async function loadDomain() {
   const { build } = frontendRequire("esbuild");
   const bundled = await build({
     stdin: {
-      contents: 'export { decisionSchema, validateDecision } from "./src/domain/schema"; export { simulate } from "./src/domain/simulate"; export { buildStoryFacts } from "./src/domain/story";',
+      contents: 'export { decisionSchema, validateDecision, simulate, buildStoryFacts, buildQualitativeStoryFacts, isQualitativeDecision, isBreakEvenDecision, usesLongTermStory, buildBreakEvenStoryFacts, isSubscriptionDecision, buildSubscriptionStoryFacts } from "./src/domain/index";',
       resolveDir: resolve(projectRoot, "frontend"),
       sourcefile: "scenario-smoke-entry.ts",
       loader: "ts",
@@ -124,8 +125,8 @@ function numericFields(value, path = "") {
   return Object.entries(value).flatMap(([key, child]) => numericFields(child, path ? `${path}.${key}` : key));
 }
 
-function calculationStatus(result) {
-  if (result.status === "valid") return "valid";
+export function calculationStatus(result) {
+  if (["valid", "qualitative", "break_even", "subscription"].includes(result.status)) return result.status;
   return result.issues.every((issue) => reviewCodes.has(issue.code)) ? "needs_review" : "invalid";
 }
 
@@ -142,7 +143,18 @@ export function analyzeDecision(payload, testCase, domain) {
   const structuralIssues = domain.validateDecision(decision);
   const failures = [];
   if (structuralIssues.length) failures.push("Scenario contains invalid IDs or references.");
-  if (decision.tags.length < 5 || decision.tags.length > 10) failures.push("Scenario must include 5–10 suggested Tags.");
+  if (decision.tags.length > 30) failures.push("Scenario exceeds the technical limit of 30 suggested Tags.");
+  if (testCase.expectedTagCount && (decision.tags.length < testCase.expectedTagCount.min || decision.tags.length > testCase.expectedTagCount.max)) {
+    failures.push(`This case requires ${testCase.expectedTagCount.min}–${testCase.expectedTagCount.max} relevant Tags.`);
+  }
+  if (testCase.expectedMixedTags && (!decision.tags.some((tag) => tag.type === "consideration")
+      || !decision.tags.some((tag) => ["fixed", "add_activity", "reduce_activity", "replace_activity"].includes(tag.type)))) {
+    failures.push("This case requires both numerical adjustment Tags and consideration Tags.");
+  }
+  const comparisonMode = decision.schemaVersion === 1 ? "quantitative" : decision.comparisonMode;
+  if (testCase.expectedComparisonMode && comparisonMode !== testCase.expectedComparisonMode) {
+    failures.push(`Expected comparison mode ${testCase.expectedComparisonMode}, received ${comparisonMode}.`);
+  }
   const baselineFields = numericFields(decision.options, "options");
   const unknownBaseline = baselineFields.filter((field) => field.source === "unknown");
   const unconfirmedBaseline = baselineFields.filter((field) => field.source === "demo_assumption" && !field.confirmed);
@@ -152,7 +164,7 @@ export function analyzeDecision(payload, testCase, domain) {
   const baselineStatus = calculationStatus(calculation);
   const tags = decision.tags.map((tag) => {
     const result = domain.simulate(decision, [tag.id]);
-    return { id: tag.id, name: tag.name, type: tag.type, status: calculationStatus(result), baselineBlocksCalculation: baselineStatus !== "valid", calculation: result };
+    return { id: tag.id, name: tag.name, type: tag.type, status: calculationStatus(result), baselineBlocksCalculation: !["valid", "qualitative", "break_even", "subscription"].includes(baselineStatus), calculation: result };
   });
   if (baselineStatus === "invalid") failures.push("Baseline simulation is invalid.");
   if (baselineStatus !== testCase.expectedBaseline) failures.push(`Expected baseline ${testCase.expectedBaseline}, received ${baselineStatus}.`);
@@ -161,11 +173,82 @@ export function analyzeDecision(payload, testCase, domain) {
       && totalsSignature(calculation.options) !== totalsSignature(testCase.expectedTotals)) {
     failures.push("Calculated totals do not match the explicitly supplied case values (option order ignored).");
   }
+  if (calculation.status === "break_even") {
+    const usageSignature = (options) => options.map((option) => `${option.upfrontCents}:${option.perUseCents}`).sort().join("|");
+    if (testCase.expectedUsageCosts && usageSignature(calculation.options) !== usageSignature(testCase.expectedUsageCosts)) {
+      failures.push("Usage costs do not match the explicitly supplied case values (option order ignored).");
+    }
+    const expected = testCase.expectedCrossover;
+    if (expected) {
+      const actual = calculation.crossover;
+      if (actual.kind !== expected.kind) failures.push(`Expected crossover ${expected.kind}, received ${actual.kind}.`);
+      else if (actual.kind === "crossing") {
+        if (BigInt(actual.numerator) * BigInt(expected.denominator) !== BigInt(expected.numerator) * BigInt(actual.denominator)
+            || actual.firstWholeUse !== expected.firstWholeUse) {
+          failures.push("Break-even usage does not match the supplied costs.");
+        }
+        const recovery = calculation.options.find((option) => option.optionId === actual.recoveryOptionId);
+        if (!recovery || recovery.upfrontCents !== expected.recoveryUpfrontCents || recovery.perUseCents !== expected.recoveryPerUseCents) {
+          failures.push("The crossover recovery option does not match the supplied costs.");
+        }
+      }
+    }
+  }
+  if (calculation.status === "subscription") {
+    const months = decision.comparisonMonths ?? 12;
+    if (calculation.comparisonMonths !== months || (testCase.expectedComparisonMonths !== undefined && months !== testCase.expectedComparisonMonths)) {
+      failures.push("Subscription comparison window does not match the requested months.");
+    }
+    if (testCase.expectedSubscriptionOptions) {
+      const signature = (items) => items.map((item) => `${item.paymentCents}:${item.periodMonths}:${item.totalCostCents}:${item.paymentCount}:${item.coverageMonths}`).sort().join("|");
+      const actual = calculation.options.map((option) => {
+        const costs = decision.options.find((item) => item.id === option.optionId)?.subscriptionCosts;
+        return { ...option, paymentCents: costs?.paymentCents.value, periodMonths: costs?.periodMonths };
+      });
+      if (signature(actual) !== signature(testCase.expectedSubscriptionOptions)) failures.push("Subscription payments, coverage, or total costs do not match the supplied case values.");
+    }
+    const running = [0n, 0n];
+    const expectedTimeline = Array.from({ length: months + 1 }, (_, month) => {
+      decision.options.forEach((option, index) => {
+        if (month > 0 && (month - 1) % option.subscriptionCosts.periodMonths === 0) running[index] += BigInt(option.subscriptionCosts.paymentCents.value);
+      });
+      return { month, optionACostCents: Number(running[0]), optionBCostCents: Number(running[1]) };
+    });
+    if (!Array.isArray(calculation.timeline) || calculation.timeline.length !== expectedTimeline.length
+        || expectedTimeline.some((point, index) => !calculation.timeline[index]
+          || Object.entries(point).some(([key, value]) => calculation.timeline[index][key] !== value))) {
+      failures.push("Subscription timeline does not match actual scheduled payments.");
+    }
+    if (calculation.comparison.costDeltaCents !== calculation.options[1].totalCostCents - calculation.options[0].totalCostCents) {
+      failures.push("Subscription difference does not match the option totals.");
+    }
+  }
   if (tags.some((tag) => tag.status === "invalid")) failures.push("At least one individually enabled Tag produces an invalid configuration.");
   return {
     status: failures.length ? (baselineStatus === "needs_review" ? "needs_review" : "invalid") : baselineStatus,
-    schema: "valid", structuralIssues, failures, baselineStatus, unknownBaseline, unconfirmedBaseline,
+    schema: "valid", structuralIssues, failures, comparisonMode, baselineStatus, unknownBaseline, unconfirmedBaseline,
     assumptions, calculation, tags, optionNames: decision.options.map((option) => option.name),
+  };
+}
+
+export function buildStoryRequest(decision, domain) {
+  const qualitative = domain.isQualitativeDecision(decision);
+  const breakEven = domain.isBreakEvenDecision(decision);
+  const subscription = domain.isSubscriptionDecision(decision);
+  const longTerm = domain.usesLongTermStory(decision);
+  const enabledTagIds = longTerm
+    ? decision.tags.filter((tag) => tag.type === "consideration").slice(0, 2).map((tag) => tag.id)
+    : [];
+  const calculation = domain.simulate(decision, enabledTagIds);
+  if (calculation.status !== (subscription ? "subscription" : breakEven ? "break_even" : qualitative ? "qualitative" : "valid")) {
+    throw new Error("Story requests require a valid quantitative, qualitative, break-even, or subscription configuration.");
+  }
+  return {
+    snapshot: { decision, enabledTagIds, simulationVersion: 1, calculation },
+    context: { mode: longTerm ? "qualitative" : "general" },
+    facts: subscription ? domain.buildSubscriptionStoryFacts(decision, calculation)
+      : breakEven ? domain.buildBreakEvenStoryFacts(decision, calculation)
+      : qualitative ? domain.buildQualitativeStoryFacts(decision) : domain.buildStoryFacts(decision, calculation),
   };
 }
 
@@ -177,14 +260,22 @@ export function validateStory(story, request) {
     issues.push("Story does not match the requested simulation snapshot.");
   }
   if (!nonempty(story.sharedScenario?.title) || !nonempty(story.sharedScenario?.description)) issues.push("Story needs a shared scenario title and description.");
-  const optionIds = request.snapshot.decision.options.map((option) => option.id).sort();
+  const qualitative = request.context.mode === "qualitative";
+  if (qualitative ? story.mode !== "qualitative" : story.mode !== undefined) {
+    issues.push("Story mode does not match the requested comparison mode.");
+  }
+  const optionIds = request.snapshot.decision.options.map((option) => option.id);
   const paired = (items) => Array.isArray(items) && items.length === 2
     && items.every((item) => item && nonempty(item.text))
-    && JSON.stringify(items.map((item) => item.optionId).sort()) === JSON.stringify(optionIds);
+    && JSON.stringify(items.map((item) => item.optionId)) === JSON.stringify(optionIds);
+  const momentKeys = qualitative ? ["beginning", "during", "later"] : ["morning", "daytime", "evening"];
   if (!Array.isArray(story.moments) || story.moments.length !== 3
-      || ["morning", "daytime", "evening"].some((key) => story.moments.filter((moment) => moment?.key === key).length !== 1)
-      || story.moments.some((moment) => !paired(moment?.options))) issues.push("Story needs exactly three matching moments, each containing both options.");
-  if (!paired(story.monthlyReflections)) issues.push("Story needs one monthly reflection for each option.");
+      || momentKeys.some((key, index) => story.moments[index]?.key !== key)
+      || story.moments.some((moment) => !paired(moment?.options))) issues.push(`Story needs ordered ${momentKeys.join(", ")} moments, each containing both options in order.`);
+  if (qualitative) {
+    if (!Array.isArray(story.monthlyReflections) || story.monthlyReflections.length !== 0) issues.push("Qualitative stories must have an empty monthlyReflections array.");
+  } else if (!paired(story.monthlyReflections)) issues.push("Story needs one monthly reflection for each option.");
+  if (Object.hasOwn(story, "advice") && !paired(story.advice)) issues.push("Story advice must contain nonempty guidance for both options in order.");
   const strings = JSON.stringify(story);
   for (const [, key] of strings.matchAll(/\{\{([^{}]+)\}\}/g)) {
     if (!Object.hasOwn(request.facts, key)) issues.push(`Unknown story fact placeholder: ${key}.`);
@@ -241,17 +332,14 @@ async function runCase(testCase, options, domain) {
       Object.assign(result, {
         status: analysis.status, failures: analysis.failures, schema: analysis.schema,
         schemaIssues: analysis.schemaIssues, structuralIssues: analysis.structuralIssues,
-        baselineStatus: analysis.baselineStatus, unknownBaseline: analysis.unknownBaseline,
+        comparisonMode: analysis.comparisonMode, baselineStatus: analysis.baselineStatus, unknownBaseline: analysis.unknownBaseline,
         unconfirmedBaseline: analysis.unconfirmedBaseline, optionNames: analysis.optionNames,
         calculation: analysis.calculation,
         tags: analysis.tags?.map(({ id, name, type, status, calculation }) => ({ id, name, type, status, issues: calculation.issues })),
       });
-      if (analysis.baselineStatus === "valid" && !analysis.failures.length) {
+      if (["valid", "qualitative", "break_even", "subscription"].includes(analysis.baselineStatus) && !analysis.failures.length) {
         const decision = domain.decisionSchema.parse(scenario.body);
-        const request = {
-          snapshot: { decision, enabledTagIds: [], simulationVersion: 1, calculation: analysis.calculation },
-          context: { mode: "general" }, facts: domain.buildStoryFacts(decision, analysis.calculation),
-        };
+        const request = buildStoryRequest(decision, domain);
         progress("story_started");
         const story = await postJson(options, caseDir, "story", "/api/stories/generate", request);
         const issues = story.ok && !story.parseError ? validateStory(story.body, request) : ["Story request failed; inspect story-response.json."];
@@ -278,7 +366,7 @@ export async function main(args = process.argv.slice(2)) {
   const allCases = JSON.parse(await readFile(resolve(projectRoot, "scripts/scenario-cases.json"), "utf8"));
   if (options.help || (!options.live && !options.list)) { help(allCases); return 0; }
   if (options.list) {
-    console.log(JSON.stringify(allCases.map(({ id, name, expectedBaseline }) => ({ id, name, expectedBaseline })), null, 2));
+    console.log(JSON.stringify(allCases.map(({ id, name, expectedBaseline, expectedComparisonMode }) => ({ id, name, expectedBaseline, expectedComparisonMode })), null, 2));
     return 0;
   }
   const cases = options.caseIds ? options.caseIds.map((id) => {

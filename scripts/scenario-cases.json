@@ -25,12 +25,13 @@
     "id": "gym-annual-vague",
     "name": "Annual versus monthly gym membership with missing prices",
     "expectedBaseline": "needs_review",
-    "description": "Should I get a year-long gym membership or a monthly one"
+    "description": "Should I get a year-long gym membership or a monthly one",
+    "expectedComparisonMode": "subscription"
   },
   {
     "id": "relocation-vague",
     "name": "Raw company relocation abroad question",
-    "expectedBaseline": "needs_review",
+    "expectedBaseline": "qualitative",
     "description": "Should I relocate abroad for my company or stay in my current city?"
   },
   {
@@ -80,5 +81,147 @@
       }
     ],
     "description": "Compare renting near campus with renting farther away. Near campus rent is USD 1500 per month; farther-away rent is USD 1100 per month. I attend campus 20 days per month and make exactly 2 one-way commute trips each campus day, so each option has 40 one-way trips per month. Near campus each one-way trip costs USD 0 and takes 10 minutes. Farther away each one-way trip costs USD 0 and takes 40 minutes. These are all baseline costs and tracked time; exclude other expenses and activities. Suggest an optional Uber replacement Tag for the farther-away commute: 6 one-way rides per month at USD 25 and 20 minutes per ride. Leave other unspecified optional Tag numbers unknown."
+  },
+  {
+    "id": "laptop-simple",
+    "name": "Gaming laptop versus office laptop for ongoing use",
+    "expectedBaseline": "qualitative",
+    "description": "Should I buy a gaming laptop or an office laptop for my work and leisure over the next few years? I have not chosen specific models. Explore the relevant tradeoffs without assuming their prices, specifications, battery life, weight, or my productivity."
+  },
+  {
+    "id": "investment-qualitative",
+    "name": "QQQ ETF versus Certificate of Deposit exact question",
+    "expectedBaseline": "qualitative",
+    "description": "QQQ ETF vs Certificate of Deposit",
+    "expectedComparisonMode": "qualitative"
+  },
+  {
+    "id": "career-qualitative",
+    "name": "Complex career change with family and learning considerations",
+    "expectedBaseline": "qualitative",
+    "description": "Should I leave my established career to pursue a research degree or stay in my current profession over the coming years? I want to consider family responsibilities, continuity of income, learning interests, professional identity, location flexibility, social support, reversibility, and future uncertainty. I have not supplied salaries, tuition, schedules, admissions outcomes, or a fixed timetable. Treat potential outcomes as conditional considerations rather than predictions, and do not recommend a winner."
+  },
+  {
+    "id": "coffee-machine-vague",
+    "name": "Coffee machine versus Starbucks with unknown prices",
+    "expectedComparisonMode": "break_even",
+    "expectedBaseline": "needs_review",
+    "description": "Coffee Machine vs Buying Coffee at Starbucks"
+  },
+  {
+    "id": "coffee-machine-specified",
+    "name": "Coffee machine versus Starbucks with supplied per-cup costs",
+    "expectedComparisonMode": "break_even",
+    "expectedBaseline": "break_even",
+    "expectedUsageCosts": [
+      {
+        "upfrontCents": 30000,
+        "perUseCents": 100
+      },
+      {
+        "upfrontCents": 0,
+        "perUseCents": 600
+      }
+    ],
+    "expectedCrossover": {
+      "kind": "crossing",
+      "numerator": 30000,
+      "denominator": 500,
+      "firstWholeUse": 60,
+      "recoveryUpfrontCents": 30000,
+      "recoveryPerUseCents": 100
+    },
+    "description": "Compare buying a coffee machine with buying coffee at Starbucks. The machine costs USD 300 upfront and each cup made at home costs USD 1. Buying coffee at Starbucks has USD 0 upfront cost and costs USD 6 per cup. These are the entire costs to compare; exclude subscriptions, maintenance, travel, other purchases, and time estimates. Compare how many cups it takes for the machine to recover its higher upfront cost. I have not supplied cups per month, so do not invent a monthly frequency."
+  },
+  {
+    "id": "year-month-card-vague",
+    "name": "Exact year card or month card question",
+    "expectedComparisonMode": "subscription",
+    "expectedBaseline": "needs_review",
+    "description": "year card or month card"
+  },
+  {
+    "id": "gym-subscription-12-months",
+    "name": "Annual versus monthly gym plan over 12 months",
+    "expectedComparisonMode": "subscription",
+    "expectedBaseline": "subscription",
+    "expectedComparisonMonths": 12,
+    "expectedSubscriptionOptions": [
+      {
+        "paymentCents": 60000,
+        "periodMonths": 12,
+        "totalCostCents": 60000,
+        "paymentCount": 1,
+        "coverageMonths": 12
+      },
+      {
+        "paymentCents": 6000,
+        "periodMonths": 1,
+        "totalCostCents": 72000,
+        "paymentCount": 12,
+        "coverageMonths": 12
+      }
+    ],
+    "description": "Compare a gym year card costing USD 600 per 12 months with a month card costing USD 60 per month over exactly 12 months. Both plans provide the same gym access. Compare actual payments needed to cover that window, including a full renewal payment when needed. These are all prices; there are no signup fees or per-visit charges. Do not amortize the annual payment, assume a partial refund, or introduce workout frequency or time per visit."
+  },
+  {
+    "id": "gym-subscription-6-months",
+    "name": "Annual versus monthly gym plan over 6 months",
+    "expectedComparisonMode": "subscription",
+    "expectedBaseline": "subscription",
+    "expectedComparisonMonths": 6,
+    "expectedSubscriptionOptions": [
+      {
+        "paymentCents": 60000,
+        "periodMonths": 12,
+        "totalCostCents": 60000,
+        "paymentCount": 1,
+        "coverageMonths": 12
+      },
+      {
+        "paymentCents": 6000,
+        "periodMonths": 1,
+        "totalCostCents": 36000,
+        "paymentCount": 6,
+        "coverageMonths": 6
+      }
+    ],
+    "description": "Compare a gym year card costing USD 600 per 12 months with a month card costing USD 60 per month over exactly 6 months. Both plans provide the same gym access. Compare actual payments needed to cover that window, including a full renewal payment when needed. These are all prices; there are no signup fees or per-visit charges. Do not amortize the annual payment, assume a partial refund, or introduce workout frequency or time per visit."
+  },
+  {
+    "id": "gym-subscription-13-months",
+    "name": "Annual versus monthly gym plan over 13 months",
+    "expectedComparisonMode": "subscription",
+    "expectedBaseline": "subscription",
+    "expectedComparisonMonths": 13,
+    "expectedSubscriptionOptions": [
+      {
+        "paymentCents": 60000,
+        "periodMonths": 12,
+        "totalCostCents": 120000,
+        "paymentCount": 2,
+        "coverageMonths": 24
+      },
+      {
+        "paymentCents": 6000,
+        "periodMonths": 1,
+        "totalCostCents": 78000,
+        "paymentCount": 13,
+        "coverageMonths": 13
+      }
+    ],
+    "description": "Compare a gym year card costing USD 600 per 12 months with a month card costing USD 60 per month over exactly 13 months. Both plans provide the same gym access. Compare actual payments needed to cover that window, including a full renewal payment when needed. These are all prices; there are no signup fees or per-visit charges. Do not amortize the annual payment, assume a partial refund, or introduce workout frequency or time per visit."
+  },
+  {
+    "id": "campus-housing-broad",
+    "name": "Broad on-campus versus off-campus housing decision",
+    "expectedComparisonMode": "quantitative",
+    "expectedBaseline": "needs_review",
+    "expectedTagCount": {
+      "min": 8,
+      "max": 10
+    },
+    "expectedMixedTags": true,
+    "description": "live on campus or off campus"
   }
 ]

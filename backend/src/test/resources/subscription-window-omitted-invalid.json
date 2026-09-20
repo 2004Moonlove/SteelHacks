@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 2,
+  "comparisonMode": "subscription",
+  "id": "gym-year-vs-month-13",
+  "title": "Gym Year Card vs Month Card for 13 Months",
+  "description": "Compare the total payments required to cover a 13\u2011month gym access window using either an annual card (USD\u202f600 per 12\u202fmonths) or a monthly card (USD\u202f60 per month). Both plans provide identical gym access with no signup or per\u2011visit fees. The analysis assumes full renewal payments when needed and does not amortize the annual cost, assume refunds, or factor in workout frequency or duration.",
+  "originalInput": "Compare a gym year card costing USD 600 per 12 months with a month card costing USD 60 per month over exactly 13 months. Both plans provide the same gym access. Compare actual payments needed to cover that window, including a full renewal payment when needed. These are all prices; there are no signup fees or per-visit charges. Do not amortize the annual payment, assume a partial refund, or introduce workout frequency or time per visit.",
+  "currency": "USD",
+  "options": [
+    {
+      "id": "year-card",
+      "name": "Year Card",
+      "fixedCosts": [],
+      "activities": [],
+      "subscriptionCosts": {
+        "paymentCents": {
+          "value": 60000,
+          "source": "user_input"
+        },
+        "periodMonths": 12
+      }
+    },
+    {
+      "id": "month-card",
+      "name": "Month Card",
+      "fixedCosts": [],
+      "activities": [],
+      "subscriptionCosts": {
+        "paymentCents": {
+          "value": 6000,
+          "source": "user_input"
+        },
+        "periodMonths": 1
+      }
+    }
+  ],
+  "tags": [
+    {
+      "id": "upfront-affordability",
+      "name": "Upfront Affordability",
+      "description": "Does paying a larger sum at once fit your current budget?",
+      "type": "consideration",
+      "targets": [
+        {
+          "optionId": "year-card",
+          "consideration": "If you prefer to spread costs, does the USD\u202f600 upfront payment strain your finances?"
+        },
+        {
+          "optionId": "month-card",
+          "consideration": "Are you comfortable making a smaller payment each month instead of a large upfront amount?"
+        }
+      ]
+    },
+    {
+      "id": "usage-consistency",
+      "name": "Usage Consistency",
+      "description": "How steady do you expect your gym attendance to be over the next year?",
+      "type": "consideration",
+      "targets": [
+        {
+          "optionId": "year-card",
+          "consideration": "If your attendance might drop, does paying for a full year upfront risk wasted money?"
+        },
+        {
+          "optionId": "month-card",
+          "consideration": "If you plan to go regularly, would a monthly commitment still feel worthwhile?"
+        }
+      ]
+    },
+    {
+      "id": "changing-needs",
+      "name": "Changing Needs",
+      "description": "Could your fitness goals or schedule shift in the coming months?",
+      "type": "consideration",
+      "targets": [
+        {
+          "optionId": "year-card",
+          "consideration": "If you anticipate needing a different facility or pausing gym use, does a year lock\u2011in limit flexibility?"
+        },
+        {
+          "optionId": "month-card",
+          "consideration": "Does the ability to stop or switch each month suit potential changes in your routine?"
+        }
+      ]
+    },
+    {
+      "id": "flexibility",
+      "name": "Flexibility",
+      "description": "How important is the option to cancel or modify your plan without penalty?",
+      "type": "consideration",
+      "targets": [
+        {
+          "optionId": "year-card",
+          "consideration": "Does the annual contract\u2019s cancellation policy meet your needs for flexibility?"
+        },
+        {
+          "optionId": "month-card",
+          "consideration": "Do monthly renewals give you the ease to adjust or quit whenever you wish?"
+        }
+      ]
+    },
+    {
+      "id": "access-requirements",
+      "name": "Access Requirements",
+      "description": "Do you need guaranteed access during peak times or special classes?",
+      "type": "consideration",
+      "targets": [
+        {
+          "optionId": "year-card",
+          "consideration": "Does the year card guarantee the same peak\u2011hour access as the month card?"
+        },
+        {
+          "optionId": "month-card",
+          "consideration": "Is your access to any premium services identical under both plans?"
+        }
+      ]
+    },
+    {
+      "id": "renewal-terms",
+      "name": "Renewal Terms",
+      "description": "What happens when the current term ends\u2014auto\u2011renew, manual opt\u2011in, or lapse?",
+      "type": "consideration",
+      "targets": [
+        {
+          "optionId": "year-card",
+          "consideration": "Are you comfortable with the annual card automatically renewing after 12 months unless you act?"
+        },
+        {
+          "optionId": "month-card",
+          "consideration": "Do you prefer manually deciding each month whether to continue?"
+        }
+      ]
+    }
+  ]
+}

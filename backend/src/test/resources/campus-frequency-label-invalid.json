@@ -1,0 +1,295 @@
+{
+  "schemaVersion": 2,
+  "comparisonMode": "quantitative",
+  "id": "campusLiveDecision",
+  "title": "Live on Campus vs. Off Campus",
+  "description": "Compare the recurring costs and time impacts of living in university housing versus renting an apartment or house off campus.",
+  "originalInput": "live on campus or off campus",
+  "currency": "USD",
+  "options": [
+    {
+      "id": "onCampus",
+      "name": "On\u2011Campus Housing",
+      "fixedCosts": [
+        {
+          "id": "rentOnCampus",
+          "name": "Monthly Housing Cost",
+          "amountCentsMonthly": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        {
+          "id": "utilitiesOnCampus",
+          "name": "Utilities Included",
+          "amountCentsMonthly": {
+            "value": null,
+            "source": "unknown",
+            "note": "No numeric value was supplied; enter this value to continue."
+          }
+        }
+      ],
+      "activities": [
+        {
+          "id": "commuteOnCampus",
+          "name": "Commute to Classes",
+          "eventUnit": "one_way_trip",
+          "frequencyInput": {
+            "label": "Round trips per day",
+            "eventsPerUnit": 2
+          },
+          "eventsPerMonth": {
+            "value": null,
+            "source": "unknown"
+          },
+          "costCentsPerEvent": {
+            "value": null,
+            "source": "unknown",
+            "note": "No numeric value was supplied; enter this value to continue."
+          },
+          "minutesPerEvent": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      ]
+    },
+    {
+      "id": "offCampus",
+      "name": "Off\u2011Campus Housing",
+      "fixedCosts": [
+        {
+          "id": "rentOffCampus",
+          "name": "Monthly Rent",
+          "amountCentsMonthly": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        {
+          "id": "utilitiesOffCampus",
+          "name": "Monthly Utilities",
+          "amountCentsMonthly": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        {
+          "id": "internetOffCampus",
+          "name": "Internet Service",
+          "amountCentsMonthly": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      ],
+      "activities": [
+        {
+          "id": "commuteOffCampus",
+          "name": "Commute to Campus",
+          "eventUnit": "one_way_trip",
+          "frequencyInput": {
+            "label": "Round trips per day",
+            "eventsPerUnit": 2
+          },
+          "eventsPerMonth": {
+            "value": null,
+            "source": "unknown"
+          },
+          "costCentsPerEvent": {
+            "value": null,
+            "source": "unknown"
+          },
+          "minutesPerEvent": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      ]
+    }
+  ],
+  "tags": [
+    {
+      "id": "extraUtilities",
+      "name": "Extra Utilities",
+      "description": "Additional utility costs beyond baseline (e.g., higher heating/cooling).",
+      "group": "Cost",
+      "type": "fixed",
+      "targets": [
+        {
+          "optionId": "offCampus",
+          "costCentsMonthly": {
+            "value": null,
+            "source": "unknown"
+          },
+          "minutesMonthly": {
+            "value": null,
+            "source": "unknown",
+            "note": "No numeric value was supplied; enter this value to continue."
+          }
+        }
+      ]
+    },
+    {
+      "id": "mealPlan",
+      "name": "Meal Plan Upgrade",
+      "description": "Optional upgrade to a more comprehensive meal plan.",
+      "group": "Cost",
+      "type": "fixed",
+      "targets": [
+        {
+          "optionId": "onCampus",
+          "costCentsMonthly": {
+            "value": null,
+            "source": "unknown"
+          },
+          "minutesMonthly": {
+            "value": null,
+            "source": "unknown",
+            "note": "No numeric value was supplied; enter this value to continue."
+          }
+        }
+      ]
+    },
+    {
+      "id": "addGroceries",
+      "name": "Additional Grocery Shopping",
+      "description": "Buy groceries instead of relying on a meal plan.",
+      "group": "Cost",
+      "type": "fixed",
+      "targets": [
+        {
+          "optionId": "offCampus",
+          "costCentsMonthly": {
+            "value": null,
+            "source": "unknown"
+          },
+          "minutesMonthly": {
+            "value": null,
+            "source": "unknown",
+            "note": "No numeric value was supplied; enter this value to continue."
+          }
+        }
+      ]
+    },
+    {
+      "id": "moreCampusVisits",
+      "name": "More Campus Visits",
+      "description": "Increase the number of trips to campus for labs, offices, or events.",
+      "group": "Time",
+      "type": "add_activity",
+      "targets": [
+        {
+          "optionId": "onCampus",
+          "activityId": "commuteOnCampus",
+          "eventsPerMonth": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        {
+          "optionId": "offCampus",
+          "activityId": "commuteOffCampus",
+          "eventsPerMonth": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      ]
+    },
+    {
+      "id": "replaceCommute",
+      "name": "Replace Some Trips with Rideshare",
+      "description": "Substitute a portion of walking/bus trips with rideshare for convenience or bad weather.",
+      "group": "Time & Cost",
+      "type": "replace_activity",
+      "targets": [
+        {
+          "optionId": "onCampus",
+          "activityId": "commuteOnCampus",
+          "replacementName": "Rideshare Trip",
+          "eventsPerMonth": {
+            "value": null,
+            "source": "unknown"
+          },
+          "costCentsPerEvent": {
+            "value": null,
+            "source": "unknown"
+          },
+          "minutesPerEvent": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        {
+          "optionId": "offCampus",
+          "activityId": "commuteOffCampus",
+          "replacementName": "Rideshare Trip",
+          "eventsPerMonth": {
+            "value": null,
+            "source": "unknown"
+          },
+          "costCentsPerEvent": {
+            "value": null,
+            "source": "unknown"
+          },
+          "minutesPerEvent": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      ]
+    },
+    {
+      "id": "privacyConcern",
+      "name": "Privacy Level",
+      "description": "Does the housing option provide the privacy you need for study and personal life?",
+      "group": "Living Experience",
+      "type": "consideration",
+      "targets": [
+        {
+          "optionId": "onCampus",
+          "consideration": "Do shared dorm spaces meet your privacy needs?"
+        },
+        {
+          "optionId": "offCampus",
+          "consideration": "Does a private apartment or house give you the privacy you desire?"
+        }
+      ]
+    },
+    {
+      "id": "socialConnection",
+      "name": "Social Interaction",
+      "description": "How important is easy access to campus social events and peer interaction?",
+      "group": "Living Experience",
+      "type": "consideration",
+      "targets": [
+        {
+          "optionId": "onCampus",
+          "consideration": "Does living on campus make it easier to join spontaneous campus activities?"
+        },
+        {
+          "optionId": "offCampus",
+          "consideration": "Will living off campus require extra effort to maintain campus social ties?"
+        }
+      ]
+    },
+    {
+      "id": "flexibilityLease",
+      "name": "Lease Flexibility",
+      "description": "Do you need the ability to move or change housing on short notice?",
+      "group": "Logistics",
+      "type": "consideration",
+      "targets": [
+        {
+          "optionId": "onCampus",
+          "consideration": "Are campus housing contracts flexible enough for your plans?"
+        },
+        {
+          "optionId": "offCampus",
+          "consideration": "Do off\u2011campus leases allow subletting or early termination if needed?"
+        }
+      ]
+    }
+  ]
+}

@@ -82,3 +82,7 @@ export function SheetContent({ title, description, children }: { title: string; 
     </DialogPrimitive.Portal>
   );
 }
+
+export function importanceLabel(value: number | undefined): string {
+  return value === undefined ? "Not set" : ["", "Not very important", "Slightly important", "Important", "Very important", "Essential"][value] ?? "Not set";
+}

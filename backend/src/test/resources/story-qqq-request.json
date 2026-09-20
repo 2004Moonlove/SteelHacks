@@ -1,0 +1,110 @@
+{
+  "snapshot": {
+    "decision": {
+      "schemaVersion": 2,
+      "comparisonMode": "qualitative",
+      "id": "qqq-vs-cd-investment",
+      "title": "QQQ ETF vs Certificate of Deposit",
+      "description": "Deciding between investing in the QQQ ETF (tracking the Nasdaq-100) and placing money in a Certificate of Deposit (CD) involves weighing growth potential, risk, liquidity, and time horizon. This comparison focuses on qualitative factors that affect the long\u2011term suitability of each option.",
+      "originalInput": "Should I invest in QQQ ETF or Certificate of Deposit?",
+      "currency": "USD",
+      "options": [
+        {
+          "id": "qqq",
+          "name": "QQQ ETF",
+          "fixedCosts": [],
+          "activities": []
+        },
+        {
+          "id": "cd",
+          "name": "Certificate of Deposit",
+          "fixedCosts": [],
+          "activities": []
+        }
+      ],
+      "tags": [
+        {
+          "id": "risk-tolerance",
+          "name": "Risk tolerance",
+          "description": "How much volatility can you comfortably endure?",
+          "type": "consideration",
+          "targets": [
+            {
+              "optionId": "qqq",
+              "consideration": "Are you comfortable with the possibility of short\u2011term losses in exchange for higher long\u2011term growth?"
+            },
+            {
+              "optionId": "cd",
+              "consideration": "Do you prefer a guaranteed return with minimal risk to your principal?"
+            }
+          ]
+        },
+        {
+          "id": "time-horizon",
+          "name": "Investment horizon",
+          "description": "When will you need the invested funds?",
+          "type": "consideration",
+          "targets": [
+            {
+              "optionId": "qqq",
+              "consideration": "If you won\u2019t need the money for at least 5\u201310 years, does the QQQ\u2019s growth potential align with your timeline?"
+            },
+            {
+              "optionId": "cd",
+              "consideration": "If you need the money within a few years, does a CD\u2019s fixed term match your liquidity needs?"
+            }
+          ]
+        },
+        {
+          "id": "liquidity-need",
+          "name": "Liquidity requirement",
+          "description": "How easily do you need to access your money?",
+          "type": "consideration",
+          "targets": [
+            {
+              "optionId": "qqq",
+              "consideration": "Can you tolerate selling ETF shares at any time, knowing the price may fluctuate?"
+            },
+            {
+              "optionId": "cd",
+              "consideration": "Are you willing to accept early\u2011withdrawal penalties if you need the money before the CD matures?"
+            }
+          ]
+        },
+        {
+          "id": "inflation-protection",
+          "name": "Inflation protection",
+          "description": "Will the investment keep pace with rising prices?",
+          "type": "consideration",
+          "targets": [
+            {
+              "optionId": "qqq",
+              "consideration": "Does the QQQ\u2019s historical growth suggest it could outpace inflation over the long term?"
+            },
+            {
+              "optionId": "cd",
+              "consideration": "Does the CD\u2019s fixed interest rate likely exceed inflation, or could it lose purchasing power?"
+            }
+          ]
+        }
+      ]
+    },
+    "enabledTagIds": [
+      "risk-tolerance",
+      "time-horizon",
+      "liquidity-need",
+      "inflation-protection"
+    ],
+    "simulationVersion": 1,
+    "calculation": {
+      "status": "qualitative"
+    }
+  },
+  "context": {
+    "mode": "qualitative"
+  },
+  "facts": {
+    "optionA_name": "QQQ ETF",
+    "optionB_name": "Certificate of Deposit"
+  }
+}

@@ -24,9 +24,11 @@ export type Option = {
   name: string;
   fixedCosts: FixedCost[];
   activities: Activity[];
+  usageCosts?: { upfrontCents: NumericField; perUseCents: NumericField };
+  subscriptionCosts?: { paymentCents: NumericField; periodMonths: number };
 };
 
-export type TagBase = { id: string; name: string; icon?: string; description: string };
+export type TagBase = { id: string; name: string; icon?: string; description: string; group?: string };
 export type FixedTag = TagBase & {
   type: "fixed";
   targets: { optionId: string; costCentsMonthly: NumericField; minutesMonthly: NumericField }[];
@@ -50,10 +52,18 @@ export type ReplaceActivityTag = TagBase & {
     minutesPerEvent: NumericField;
   }[];
 };
-export type Tag = FixedTag | AddActivityTag | ReduceActivityTag | ReplaceActivityTag;
+export type ConsiderationTag = TagBase & {
+  type: "consideration";
+  importance?: number;
+  targets: { optionId: string; consideration: string }[];
+};
+export type Tag = FixedTag | AddActivityTag | ReduceActivityTag | ReplaceActivityTag | ConsiderationTag;
 
 export type Decision = {
-  schemaVersion: 1;
+  schemaVersion: 1 | 2;
+  comparisonMode?: "quantitative" | "qualitative" | "break_even" | "subscription";
+  usageUnit?: string;
+  comparisonMonths?: number;
   id: string;
   title: string;
   description: string;
@@ -110,6 +120,27 @@ export type ValidCalculationResult = {
   comparison: { costDeltaCents: number; timeDeltaMinutes: number };
 };
 
+export type UsageOptionResult = { optionId: string; upfrontCents: number; perUseCents: number };
+export type BreakEvenResult = {
+  status: "break_even";
+  options: [UsageOptionResult, UsageOptionResult];
+  crossover:
+    | { kind: "crossing"; numerator: number; denominator: number; firstWholeUse: number; recoveryOptionId: string }
+    | { kind: "equal" }
+    | { kind: "no_crossing" };
+};
+
+export type SubscriptionResult = {
+  status: "subscription";
+  comparisonMonths: number;
+  options: [{ optionId: string; totalCostCents: number; paymentCount: number; coverageMonths: number }, { optionId: string; totalCostCents: number; paymentCount: number; coverageMonths: number }];
+  timeline: { month: number; optionACostCents: number; optionBCostCents: number }[];
+  comparison: { costDeltaCents: number };
+};
+
 export type CalculationResult =
+  | SubscriptionResult
+  | BreakEvenResult
   | ValidCalculationResult
+  | { status: "qualitative" }
   | { status: "invalid"; issues: ValidationIssue[] };
