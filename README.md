@@ -1,12 +1,18 @@
-# Clear Choice
+# Dayfork
 
-Clear Choice helps people understand an everyday decision, compare confirmed requirements and tradeoffs, and preview its effects on money, time and plans. Ordinary decisions work without advertising or sales material.
+Dayfork helps explore two paths for a medium- or long-term decision. Select the factors that matter, then generate two corresponding storylines. Recurring costs support editable monthly calculations; purchase-versus-use decisions support cumulative costs and a use-count break-even point; annual/monthly memberships compare whole prepaid billing periods over an editable window. Qualitative decisions go directly to factors and stories without numerical forms or charts. The product does not recommend a winner.
 
-The new workspace is the default application. The original Dayfork application, calculation engine, APIs and tests remain available at `/#legacy`. Development is on `codex/clear-choice`; `main` is preserved.
+## Requirements
 
-## Run locally
+- Node.js 24 and npm
+- Java 21
+- A local NVIDIA API key and an accessible Nemotron model ID for live model requests
 
-Requirements: Node.js 24+, npm, Java 21, and Chrome for the default browser test configuration. The repository includes a Maven wrapper. No database or account is needed.
+The annual/monthly membership, campus housing, gaming-versus-office-laptop, and coffee-machine demos, plus labeled offline story previews work without model credentials.
+
+## Run in development
+
+Use separate terminals:
 
 ```sh
 cd frontend
@@ -14,107 +20,131 @@ npm ci
 npm run dev
 ```
 
-In another terminal:
-
 ```sh
 cd backend
 ./mvnw spring-boot:run
 ```
 
-On Windows use `mvnw.cmd` and ensure `JAVA_HOME` points to Java 21. This machine has a compatible runtime at `C:/Program Files/JetBrains/DataGrip 2024.3.3/jbr`. The system-default Java 11 is too old.
+Open <http://127.0.0.1:5173>. Vite proxies `/api` to the backend at `127.0.0.1:8080`.
 
-Open [the local workspace](http://127.0.0.1:5173). Vite proxies `/api` to Spring Boot at `127.0.0.1:8080`. Both services bind to localhost.
+The macOS workspace has Java 17 as its default. Select Java 21 before starting Maven, for example:
 
-To package one local application:
+```sh
+export JAVA_HOME=$(/usr/libexec/java_home -v 21)
+```
+
+## Configure Nemotron
+
+Set these variables in the backend process environment before starting it:
+
+```sh
+export NVIDIA_API_KEY="your-local-key"
+export NVIDIA_MODEL="your-accessible-model-id"
+```
+
+Optional variables are `NVIDIA_API_URL` (default: `https://integrate.api.nvidia.com/v1/chat/completions`) and `NVIDIA_TIMEOUT_SECONDS` (default: `60`). See [.env.example](.env.example) for names. Spring Boot does not automatically load that example file. Never commit a real key or put it in a `VITE_*` variable.
+
+Without both required variables, **Try Demo** remains available. Live generation reports that model configuration is unavailable and does not silently replace the requested result with a fixture.
+
+## Test and package
 
 ```sh
 cd frontend
-npm run build
-cd ../backend
-./mvnw -Pbundle-frontend package
-java -jar target/dayfork-0.1.0.jar
-```
-
-Then open [the packaged application](http://127.0.0.1:8080).
-
-## Model configuration
-
-Set these **backend environment variables**, without putting a key in the frontend, logs, Git, or chat:
-
-| Variable | Required | Purpose |
-| --- | --- | --- |
-| `NVIDIA_API_KEY` | For live calls | Your current NVIDIA API credential |
-| `NVIDIA_MODEL` | For live calls | An accessible Nemotron model ID |
-| `NVIDIA_API_URL` | No | Defaults to `https://integrate.api.nvidia.com/v1/chat/completions` |
-| `NVIDIA_TIMEOUT_SECONDS` | No | Read timeout per request, default 60 seconds |
-| `NVIDIA_JSON_MODE` | No | Default `true`; sends `response_format: {type: "json_object"}`. Set `false` only if the selected endpoint does not support this parameter. Application schema validation always applies. |
-
-`.env.example` documents names; Spring Boot does not load it automatically. The health endpoint exposes configuration availability, never the key. No model response is replaced by a demo fixture. Model calls happen only on explicit understanding, suggestion, or material-analysis actions. Parameter edits, charts, comparisons and summaries make no model calls.
-
-[NVIDIA's Nemotron 3 Super model card](https://build.nvidia.com/nvidia/nemotron-3-super-120b-a12b/modelcard) lists Chinese and English support. `nvidia/nemotron-3-super-120b-a12b` is a documented candidate; account access, endpoint behavior and task quality still need a live check. JSON mode is not schema conformance: both the browser and server validate every response, including option references, source quotes and current version. The backend allows one repair for invalid output and does not automatically retry upstream errors or rate limits.
-
-## Try the application
-
-- **Help me choose**: describe any everyday decision, then request Nemotron interpretation. Review proposed factors before they participate. Use the manual path when no model is configured.
-- **Fictional examples**: memberships, housing with a cat, and courses. They demonstrate calculations and editing, not live understanding or live material analysis.
-- **Factors & options**: rename or add alternatives (2–6), edit typed values and sources, set hard requirements, pick one primary preference, or add/remove custom factors. Additional natural-language requirements produce proposals; they do not replace user factors. Exact normalized names and overlapping calculation rules are deduplicated. Semantic synonyms still need review.
-- **Compare & picture life**: see constraints, costs, time, scaled charts, current effects and instant summaries. Unknown values stay unknown; a comparison may tie, need information, or have no feasible option.
-- **Supporting materials**: each option owns 0–8 text materials. Analyze that option's materials together. Findings have multiple tags and exact quotes. Extracted values require explicit confirmation; a conflicting price never changes automatically. Analysis is marked stale after edits.
-- **Help me understand this**: attach pasted text to a new editable offer comparison, analyze its supporting materials, and add alternatives/requirements.
-
-The current decision is saved in this browser's local storage. No cross-device storage is used. A one-step Undo reverses the latest edit. Invalid drafts stay on screen but are not written over the last valid saved decision; browser refresh restores that last valid version. Material text is saved with the decision; analysis findings stay in memory for the workspace session.
-
-## Calculation contract
-
-Money is integer cents, rule-based time is minutes, and unknown is `null`. Comparison horizons are whole months (1–120). Average monthly use is `usesPerWeek * 52 / 12`; this is a user assumption, not predicted attendance. Calculated money is rounded once per total to cents; per-use results are rounded to cents for display. Unspecified cost components are outside the model, so include unknown fee factors when costs might apply.
-
-For `m` months:
-
-```text
-total = upfront + ceil(m / billing_months) * recurring
-      + m * usesPerWeek * 52 / 12 * per_use
-monthly minutes = time_monthly + usesPerWeek * 52 / 12 * time_per_use
-```
-
-The initial cash metric includes the first month's scheduled payment and modeled usage. Annual payments are charged in full, with renewal at each billing interval; they are not amortized. Deposits are included as initial cash outflows and no refund is assumed. Cost preferences attached to upfront/recurring/per-use inputs compare total horizon cost for lower/higher ordering. Explicit target preferences compare the specified factor's own target. Hard constraints always test their own factor values first. Costs in different currencies or rules using incompatible units are rejected; changing the currency label does not perform foreign exchange conversion.
-
-Only confirmed rules contribute. Unknown/unconfirmed required inputs make dependent metrics unavailable. Invalid rules, duplicate rules, invalid dates, invalid references and unsafe arithmetic never produce current totals. Reference-only factors do not determine the preferred option. Categories use only user-supplied ordering; there are no weighted scores or invented qualitative measurements. Date hard conditions support exact/on-or-before/on-or-after ISO dates.
-
-The fictional membership check is 1,200 CNY annually versus 150 CNY monthly, identical unlimited service and no other fees: 4 months → 1,200/600; 8 → 1,200/1,200; 9 → 1,200/1,350. Changing visits changes per-use costs, not fixed-payment ranking. With renewal, month 13 costs 2,400/1,950. Breakpoints shown are within the selected horizon and do not override hard requirements.
-
-## Verification
-
-```sh
-cd frontend
+npm ci
 npm test
-npm run schema:check
 npm run build
-npm run test:e2e
-npm run eval:model
-cd ../backend
+```
+
+```sh
+cd backend
 ./mvnw test
 ./mvnw -Pbundle-frontend package
+runtime_jar="$(mktemp /tmp/dayfork-runtime.XXXXXX)"
+cp target/dayfork-0.1.0.jar "$runtime_jar"
+java -jar "$runtime_jar"
 ```
 
-Browser tests use local Chrome. To use bundled Chromium instead, install it with `npx playwright install chromium` and set `PLAYWRIGHT_CHANNEL=chromium`. `npm run schema:export` regenerates the backend JSON Schemas from Zod after contract changes. Java applies those schemas using [NetworkNT](https://github.com/networknt/json-schema-validator/tree/1.5.9), then validates semantic references and sources.
+Build the frontend before running the `bundle-frontend` Maven profile. Open <http://127.0.0.1:8080> for the single-address local demo. The server binds to localhost. Launching a separate runtime copy keeps later builds from replacing a running JAR.
 
-`eval:model` calls the real local backend with seven English/Chinese evaluation cases. It records an explicit blocked result when configuration is absent and never treats mocked output as a live evaluation. Results and browser screenshots go to ignored `artifacts/`; traces go to ignored `frontend/test-results/`.
+## Demo path
 
-See [acceptance evidence](docs/ACCEPTANCE.md) for actual results, mock/live distinctions, and remaining limitations.
+1. Choose **Campus housing** to load the labeled fixture, or describe a decision and choose **Explore this decision** when Nemotron is configured.
+2. Review the baseline. Fill unknown values and explicitly confirm any demo assumptions.
+3. Open the dashboard, enable **Take an Uber after class**, and change its monthly trip count from 6 to 10. Far's result changes from `$1,250 / 1,480 min` to `$1,350 / 1,400 min`; Near stays at `$1,500 / 400 min`.
+4. Expand the breakdown to see original and replacement commute events.
+5. Generate aligned parallel stories. If a parameter changes afterward, the story is marked stale until **Update Story** is selected.
 
-## APIs
+The preview is explicitly labeled when it uses fixture text rather than a model response.
+
+## Qualitative decision path
+
+Choose **Gaming vs. office laptop**, or enter a decision such as “Should I buy a gaming laptop or an office laptop?” with the model configured. The qualitative path opens factor selection directly. Select concerns such as gaming, working away from home, or work/leisure boundaries, then choose **Generate Stories**. Both paths use corresponding Beginning, During, and Later stages. Stories describe possible lived situations, followed by practical advice for each path; an interactive two-path journey links the corresponding stages. There are no forced cost/time inputs, comparison charts, or monthly summaries.
+
+Factors describe possibilities to explore, not verified product specifications or guaranteed outcomes. A qualitative factor in an otherwise quantitative decision affects the story context without changing any totals. Toggling a factor never calls the model; it marks an existing story stale until explicitly updated.
+
+Tag counts follow the relevant concerns in each scenario, without global fixed quantity bands or a global minimum quota. The technical maximum is thirty. Typical broad campus housing comparisons aim for eight to ten distinct factors, mixing numerical adjustments with qualitative living concerns. Up to ten factors are visible without expansion; larger sets can be expanded. Optional importance sliders express personal priorities for story emphasis. They do not change calculated costs or time, and remain unset until edited.
+
+## Purchase versus per-use comparison
+
+Choose **Coffee machine vs. buying coffee** for a labeled example, or describe buying a coffee machine versus buying coffee at Starbucks. Enter upfront and per-cup costs; missing prices remain blank. The cost chart compares the same cup count for both options. In the example, a $300 machine with $1 per cup reaches the $6-per-cup alternative at 60 cups. This is a use-count comparison, not a promised payback date.
+
+Edit prices or the chart range locally, select factors and optional importance levels, then generate paired longer-term stories. Cost facts are calculated in code and independently reconciled by the backend. The model supplies narrative text, not arithmetic or assumed current prices.
+
+## Annual versus monthly membership
+
+Choose **Annual vs. monthly membership**, or enter `year card or month card`. Each option has a price per billing period, rather than a per-event cost or duration. The comparison window defaults visibly to twelve months and can be edited from one to 120 months without calling the model.
+
+Payments are charged in full at the start of each required period. With example prices of $600 annually and $60 monthly, totals over six months are $600 versus $360; over twelve months, $600 versus $720; and over thirteen months, $1,200 versus $780 because the annual plan renews. A step chart shows the payment pattern. Unused coverage is not assumed refundable, and cancellation fees, price changes and pause rules are not calculated.
+
+Select relevant factors such as schedule changes, a steady routine or upfront affordability. Stories depict conditional experiences under those choices and give practical suggestions for each path. Narrative details and advice do not silently add amounts or activities to the calculation.
+
+The current **Campus housing** demo offers nine factors: six numerical adjustments and three personal considerations with importance sliders. The legacy monthly arithmetic fixture remains unchanged for regression checks.
+
+## API overview
 
 | Endpoint | Purpose |
 | --- | --- |
-| `GET /api/health` | Service and configuration availability |
-| `POST /api/choices/understand` | `{description}` → validated v2 decision, proposed factors, ≤3 questions |
-| `POST /api/choices/factors` | `{decision,instruction}` → versioned factor proposals |
-| `POST /api/choices/materials` | `{decision,optionId}` → versioned findings and extracted-value proposals |
-| `POST /api/scenarios/generate` | Preserved Dayfork v1 scenario generation |
-| `POST /api/stories/generate` | Preserved Dayfork v1 model stories |
+| `GET /api/health` | Service status and whether model configuration is present; no credential values |
+| `POST /api/scenarios/generate` | Turn a decision description into a validated two-option `Decision` with explicit v2 comparison mode |
+| `POST /api/stories/generate` | Generate a structured story from an immutable monthly, per-use, subscription, or qualitative snapshot and validated fact inventory |
 
-## Scope limits
+The calculation engine runs in the browser and does not call these endpoints when Tags or parameters change. Money is represented as integer cents, time as integer minutes, and activity frequency as integer events per month. Unknown values remain unknown rather than becoming zero. The full data contract and acceptance fixture are recorded in [MEMORY.md](MEMORY.md).
 
-Live Nemotron quality is unverified on this machine until credentials/model access are configured. Structured and evidence validation cannot prove that a model has understood every requirement or the real-world truth of a quoted claim. Manual review remains part of the flow. Clear Choice summaries are deterministic templates, not model-polished stories.
+## Contract and scenario checks
 
-Material input is pasted text. OCR, file parsing, URL collection, public deployment, arbitrary formulas, exchange rates, partial-month billing, actual calendar scheduling, automatic refunds, speculative causal predictions and composite utility scoring are not implemented. All declared time and cost components are additive; describe one common use unit per decision or use fixed monthly time for unrelated activities. Hard constraints and qualitative factors still support open-domain comparisons outside the built-in cost examples.
+The frontend validator defines the machine-readable scenario format. Generate the backend's prompt schema after changing that validator:
+
+```sh
+node scripts/generate-contract.mjs
+npm --prefix frontend test
+node --test scripts/verify-scenarios.test.mjs
+```
+
+A regression test verifies that the checked-in schema matches the current validator. The schema guides model generation; strict backend validation, reference checks, and one bounded repair still apply. The model writes story text into fixed option slots, while code inserts decision IDs, simulation versions, option IDs, moment ordering, and monthly summaries from validated facts. Quantitative story responses keep their existing shape. Qualitative responses have `mode: "qualitative"`, paired `beginning`/`during`/`later` moments, and an empty `monthlyReflections` array. Money and time calculations stay in the deterministic engine. A conservative guard keeps values unknown when the input contains no numeric evidence; it is not a general proof that every model-supplied number is grounded.
+
+For `nvidia/nemotron-3-super-120b-a12b`, the client uses low-effort reasoning with a 1,024-token reasoning budget, following the [model API controls](https://docs.api.nvidia.com/nim/reference/nvidia-nemotron-3-super-120b-a12b-infer). The change was verified against the same full gym case that exceeded the default 60-second timeout. Provider timeouts still occurred during testing; this is not an availability guarantee. Other models retain their existing request parameters. Truncated completions return a specific error and do not enter semantic repair.
+
+With the configured local backend running, explicitly run the synthetic live case suite:
+
+```sh
+node scripts/verify-scenarios.mjs --live --concurrency 2 --output /tmp/dayfork-case-checks
+```
+
+Use `--list` to inspect the cases, or `--cases gym-specified,relocation-specified` to select cases. Running without `--live` makes no requests. The harness checks the real frontend schema, references, calculated totals, individual Tags, story identity, and fact placeholders; it saves a detailed `summary.json` and per-case artifacts locally. Missing prices or usage remain unknown and require review. Narrative meaning still needs human review. See the [recorded case results and limitations](docs/scenario-validation-2026-09-20.md).
+
+Broad relocation, career, purchase, and investment decisions can use qualitative factors and storylines. Explicit recurring-budget relocation comparisons still use the monthly engine. The application does not silently amortize upfront costs, invent investment returns, or predict career outcomes.
+
+## Current limits
+
+- Decisions compare exactly two options. Qualitative comparisons are not restricted to a domain list.
+- Numerical calculations support monthly activities, upfront-plus-per-use costs, and whole-period subscription payments. Arbitrary cashflow schedules, contract refunds/penalties, and investment growth are not implemented. Those decisions use the qualitative path when their central tradeoff cannot be represented by these calculators.
+- Missing numerical inputs in an otherwise calculable scenario still require price or baseline review; they are not silently converted into a qualitative result.
+- The campus timeline depicts one illustrative day; monthly totals use the full configuration.
+- The MVP saves no account or cross-device state. Browser-local persistence and custom Tags are future work.
+- Live model verification requires the configured credentials and model access. Mocked backend tests and the labeled offline demo cover the credential-free path.
+
+Qualitative-flow acceptance, live recovery observations, and remaining numerical limits are recorded in [the qualitative validation report](docs/qualitative-validation-2026-09-20.md).
+
+Per-use cost comparisons, importance sliders and actual QQQ/coffee verification are recorded in [the follow-up validation report](docs/break-even-validation-2026-09-20.md).
+
+Membership payments, mixed campus factors and experience-based stories are covered in [the membership and stories validation report](docs/membership-stories-validation-2026-09-20.md).

@@ -1,0 +1,128 @@
+{
+  "snapshot": {
+    "decision": {
+      "schemaVersion": 1,
+      "id": "contract-boundaries",
+      "title": "Story contract boundary fixture",
+      "description": "Long relocation option names and safe-integer money and time verify request compatibility.",
+      "originalInput": "Contract boundary fixture; these are test amounts, not relocation estimates.",
+      "currency": "USD",
+      "options": [
+        {
+          "id": "relocate",
+          "name": "Relocate with the company to its overseas office while renting an apartment near the new workplace",
+          "fixedCosts": [
+            {
+              "id": "rent",
+              "name": "Rent",
+              "amountCentsMonthly": {
+                "value": 9007199254740991,
+                "source": "user_edit"
+              }
+            }
+          ],
+          "activities": [
+            {
+              "id": "commute",
+              "name": "Commute",
+              "eventUnit": "event",
+              "eventsPerMonth": {
+                "value": 1,
+                "source": "user_edit"
+              },
+              "costCentsPerEvent": {
+                "value": 0,
+                "source": "user_edit"
+              },
+              "minutesPerEvent": {
+                "value": 9007199254740991,
+                "source": "user_edit"
+              }
+            }
+          ]
+        },
+        {
+          "id": "stay",
+          "name": "Stay in the current local office while continuing to rent the current apartment and commute daily",
+          "fixedCosts": [
+            {
+              "id": "rent",
+              "name": "Rent",
+              "amountCentsMonthly": {
+                "value": 1,
+                "source": "user_edit"
+              }
+            }
+          ],
+          "activities": []
+        }
+      ],
+      "tags": []
+    },
+    "enabledTagIds": [],
+    "simulationVersion": 1,
+    "calculation": {
+      "status": "valid",
+      "options": [
+        {
+          "optionId": "relocate",
+          "totalCostCents": 9007199254740991,
+          "totalTimeMinutes": 9007199254740991,
+          "breakdown": [
+            {
+              "id": "relocate:rent:fixed",
+              "kind": "baseline_fixed",
+              "label": "Rent",
+              "totalCostCents": 9007199254740991,
+              "totalTimeMinutes": 0
+            },
+            {
+              "id": "relocate:commute:original",
+              "kind": "original_activity",
+              "label": "Commute",
+              "activityId": "commute",
+              "eventsPerMonth": 1,
+              "costCentsPerEvent": 0,
+              "minutesPerEvent": 9007199254740991,
+              "totalCostCents": 0,
+              "totalTimeMinutes": 9007199254740991
+            }
+          ]
+        },
+        {
+          "optionId": "stay",
+          "totalCostCents": 1,
+          "totalTimeMinutes": 0,
+          "breakdown": [
+            {
+              "id": "stay:rent:fixed",
+              "kind": "baseline_fixed",
+              "label": "Rent",
+              "totalCostCents": 1,
+              "totalTimeMinutes": 0
+            }
+          ]
+        }
+      ],
+      "comparison": {
+        "costDeltaCents": -9007199254740990,
+        "timeDeltaMinutes": -9007199254740991
+      }
+    }
+  },
+  "context": {
+    "mode": "general"
+  },
+  "facts": {
+    "monthlyCostDifference": "$90,071,992,547,409.90",
+    "monthlyTimeDifference": "150119987579016 hr 31 min",
+    "monthlyCostComparison": "Relocate with the company to its overseas office while renting an apartment near the new workplace costs $90,071,992,547,409.90 more per month than Stay in the current local office while continuing to rent the current apartment and commute daily.",
+    "monthlyTimeComparison": "Relocate with the company to its overseas office while renting an apartment near the new workplace uses 150119987579016 hr 31 min more per month than Stay in the current local office while continuing to rent the current apartment and commute daily.",
+    "optionA_name": "Relocate with the company to its overseas office while renting an apartment near the new workplace",
+    "optionA_monthlyCost": "$90,071,992,547,409.91",
+    "optionA_monthlyTime": "150119987579016 hr 31 min",
+    "optionB_name": "Stay in the current local office while continuing to rent the current apartment and commute daily",
+    "optionB_monthlyCost": "$0.01",
+    "optionB_monthlyTime": "0 hr 0 min"
+  }
+}

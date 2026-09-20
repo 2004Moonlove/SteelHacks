@@ -1,4 +1,5 @@
 import type { Decision, ValidCalculationResult } from "./types";
+import { formatMoney as money } from "./format";
 
 export type TravelChoice = {
   id: string;
@@ -106,7 +107,6 @@ export function buildCampusDaySchedule(
   return { arrivalTime, departureTime, options: schedules as [CampusOptionSchedule, CampusOptionSchedule] };
 }
 
-const money = (cents: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(cents / 100);
 const duration = (minutes: number) => `${Math.floor(minutes / 60)} hr ${minutes % 60} min`;
 
 export function buildStoryFacts(decision: Decision, result: ValidCalculationResult, schedule?: CampusDaySchedule): Record<string, string> {

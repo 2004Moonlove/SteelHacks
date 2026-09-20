@@ -1,6 +1,6 @@
 import type { Decision, CalculationResult } from "../domain";
 
-export type StoryMode = "general" | "campus";
+export type StoryMode = "general" | "campus" | "qualitative";
 export type StoryContext = {
   mode: StoryMode;
   arrivalTime?: string;
@@ -10,13 +10,15 @@ export type StoryContext = {
 
 export type Story = {
   decisionId: string;
+  mode?: StoryMode;
   simulationVersion: number;
   sharedScenario: { title: string; description: string };
   moments: Array<{
-    key: "morning" | "daytime" | "evening";
+    key: "morning" | "daytime" | "evening" | "beginning" | "during" | "later";
     options: Array<{ optionId: string; text: string }>;
   }>;
   monthlyReflections: Array<{ optionId: string; text: string }>;
+  advice?: Array<{ optionId: string; text: string }>;
 };
 
 export type StoryRequest = {

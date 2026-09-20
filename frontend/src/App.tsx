@@ -1,6 +1,6 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, ArrowUpRight, Check, CircleHelp, Compass, GitCompareArrows, Layers3, Sparkles } from "lucide-react";
-import { demoDecision, simulate, validateDecision, type Decision } from "./domain";
+import { breakEvenDemoDecision, campusDemoDecision, subscriptionDemoDecision, usesLongTermStory, qualitativeDemoDecision, simulate, validateDecision, type Decision } from "./domain";
 import { generateScenario } from "./lib/api";
 import { useAppStore } from "./store";
 import { NumericEditor } from "./components/NumericEditor";
@@ -11,9 +11,9 @@ import type { SavedStory, StorySetup } from "./components/StoryPanel";
 type Screen = "input" | "review" | "dashboard";
 const defaultStorySetup = (): StorySetup => ({ mode: "campus", arrivalTime: "09:00", departureTime: "21:00", travel: {} });
 
-function AppHeader({ screen, onHome }: { screen: Screen; onHome: () => void }) {
-  const steps = ["Decision", "Review", "Explore"];
-  const active = screen === "input" ? 0 : screen === "review" ? 1 : 2;
+function AppHeader({ screen, qualitative, hasStory, onHome }: { screen: Screen; qualitative: boolean; hasStory: boolean; onHome: () => void }) {
+  const steps = qualitative ? ["Decision", "Factors", "Stories"] : ["Decision", "Review", "Explore"];
+  const active = screen === "input" ? 0 : qualitative ? hasStory ? 2 : 1 : screen === "review" ? 1 : 2;
   return (
     <header className="border-b border-line/80 bg-white/80 backdrop-blur-xl">
       <div className="page-wrap flex min-h-[76px] items-center justify-between gap-4">
@@ -35,6 +35,7 @@ function InputScreen({ onLoaded }: { onLoaded: (decision: Decision) => void }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  useEffect(() => () => { abortRef.current?.abort(); }, []);
 
   const submit = async () => {
     if (!description.trim()) { setError("Describe a decision to begin."); return; }
@@ -45,6 +46,7 @@ function InputScreen({ onLoaded }: { onLoaded: (decision: Decision) => void }) {
     setError(null);
     try {
       const generated = await generateScenario(description.trim(), controller.signal);
+      if (controller.signal.aborted) return;
       const issues = validateDecision(generated);
       if (issues.length) throw new Error("The generated scenario could not be validated. Please try again.");
       onLoaded(generated);
@@ -58,24 +60,25 @@ function InputScreen({ onLoaded }: { onLoaded: (decision: Decision) => void }) {
       <div className="mx-auto max-w-4xl text-center">
         <Badge className="mb-6 border border-blue-100 bg-white px-3 py-1.5 text-near shadow-sm"><Sparkles size={13} className="mr-1.5" /> A clearer view of your next choice</Badge>
         <h1 className="display mx-auto max-w-3xl text-5xl font-extrabold leading-[1.1] text-ink sm:text-6xl lg:text-[4.7rem]">Two paths.<br /><span className="bg-gradient-to-r from-near to-far bg-clip-text text-transparent">One clearer picture.</span></h1>
-        <p className="mx-auto mt-6 max-w-xl text-base leading-8 text-muted sm:text-lg">Explore the money and time behind a decision, then see how each option could play out in a comparable day.</p>
+        <p className="mx-auto mt-6 max-w-xl text-base leading-8 text-muted sm:text-lg">Explore a decision that shapes what comes next. Choose the factors that matter and see how both paths could unfold.</p>
       </div>
       <Card className="relative mx-auto mt-12 max-w-3xl overflow-hidden p-5 sm:p-8">
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-near via-sky-400 to-far" />
         <div className="mb-5 flex items-start gap-3">
           <div className="rounded-xl bg-blue-50 p-2.5 text-near"><Compass size={21} /></div>
-          <div><h2 className="text-lg font-bold text-ink">What decision are you weighing?</h2><p className="mt-1 text-sm text-muted">Include the two options and any costs or time details you already know.</p></div>
+          <div><h2 className="text-lg font-bold text-ink">What decision are you weighing?</h2><p className="mt-1 text-sm text-muted">Describe your two options, your circumstances, and what matters to you.</p></div>
         </div>
         <label htmlFor="decision-input" className="sr-only">Describe your decision</label>
-        <textarea id="decision-input" value={description} onChange={(event) => setDescription(event.target.value)} disabled={busy} placeholder="For example, should I live near campus for higher rent or farther away with a longer commute?" rows={5} className="w-full rounded-xl border border-line bg-slate-50/50 p-4 text-sm leading-7 text-ink outline-none transition placeholder:text-slate-400 focus:border-near focus:ring-4 focus:ring-blue-100" />
+        <textarea id="decision-input" value={description} onChange={(event) => setDescription(event.target.value)} disabled={busy} placeholder="For example, should I get a gaming laptop or an office laptop for work and occasional gaming?" rows={5} className="w-full rounded-xl border border-line bg-slate-50/50 p-4 text-sm leading-7 text-ink outline-none transition placeholder:text-slate-400 focus:border-near focus:ring-4 focus:ring-blue-100" />
         {error && <p role="alert" className="mt-3 rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
         <div className="mt-5 flex flex-col items-stretch justify-between gap-3 sm:flex-row sm:items-center">
-          <Button variant="ghost" className="justify-center sm:justify-start" disabled={busy} onClick={() => { setError(null); onLoaded(structuredClone(demoDecision)); }}><span className="mr-1 rounded-md bg-slate-100 px-1.5 py-0.5 text-xs">↗</span> Try the campus housing demo</Button>
+          <span className="text-xs leading-5 text-muted">Numbers are included when they meaningfully describe your decision.</span>
           <Button variant="blue" onClick={submit} disabled={busy || !description.trim()}>{busy ? "Building your scenario…" : "Explore this decision"}<ArrowRight size={17} /></Button>
         </div>
+        <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-line pt-4"><span className="mr-1 text-xs font-semibold text-muted">Offline demos</span><Button variant="ghost" size="sm" disabled={busy} onClick={() => { setError(null); onLoaded(structuredClone(subscriptionDemoDecision)); }}>Annual vs. monthly membership <ArrowUpRight size={14} /></Button><Button variant="ghost" size="sm" disabled={busy} onClick={() => { setError(null); onLoaded(structuredClone(breakEvenDemoDecision)); }}>Coffee machine vs. buying coffee <ArrowUpRight size={14} /></Button><Button variant="ghost" size="sm" disabled={busy} onClick={() => { setError(null); onLoaded(structuredClone(qualitativeDemoDecision)); }}>Gaming vs. office laptop <ArrowUpRight size={14} /></Button><Button variant="ghost" size="sm" disabled={busy} onClick={() => { setError(null); onLoaded(structuredClone(campusDemoDecision)); }}>Campus housing <ArrowUpRight size={14} /></Button></div>
       </Card>
       <div className="mx-auto mt-8 grid max-w-3xl gap-3 sm:grid-cols-3">
-        {[{ icon: GitCompareArrows, title: "Compare two paths", text: "See monthly cost and time side by side." }, { icon: Layers3, title: "Change the details", text: "Try real-life adjustments with editable tags." }, { icon: Sparkles, title: "Read parallel stories", text: "Explore the same day under each choice." }].map(({ icon: Icon, title, text }) => <div key={title} className="flex items-start gap-3 rounded-xl border border-line/70 bg-white/70 p-4"><Icon size={19} className="mt-0.5 shrink-0 text-near" /><div><p className="text-sm font-bold text-ink">{title}</p><p className="mt-1 text-xs leading-5 text-muted">{text}</p></div></div>)}
+        {[{ icon: GitCompareArrows, title: "Compare two paths", text: "Explore alternatives with lasting effects." }, { icon: Layers3, title: "Choose your factors", text: "Select the conditions that fit your life." }, { icon: Sparkles, title: "Read parallel stories", text: "See both choices in shared circumstances." }].map(({ icon: Icon, title, text }) => <div key={title} className="flex items-start gap-3 rounded-xl border border-line/70 bg-white/70 p-4"><Icon size={19} className="mt-0.5 shrink-0 text-near" /><div><p className="text-sm font-bold text-ink">{title}</p><p className="mt-1 text-xs leading-5 text-muted">{text}</p></div></div>)}
       </div>
     </main>
   );
@@ -96,7 +99,7 @@ function BaselineReview({ decision, onBack, onContinue }: { decision: Decision; 
           </div>
         </div></Card>)}
       </div>
-      <div className="mt-7 flex flex-col items-start justify-between gap-4 rounded-2xl border border-line bg-white p-5 sm:flex-row sm:items-center"><div className="flex items-start gap-3"><CircleHelp size={19} className={result.status === "valid" ? "mt-0.5 text-far" : "mt-0.5 text-amber-600"} /><div><p className="text-sm font-bold text-ink">{result.status === "valid" ? "Ready to explore" : `${result.issues.length} item${result.issues.length === 1 ? "" : "s"} need attention`}</p><p className="mt-1 text-xs leading-5 text-muted">{result.status === "valid" ? "You can still edit these numbers later." : result.issues[0]?.message}</p></div></div><Button variant="blue" disabled={result.status !== "valid"} onClick={onContinue}>Compare options <ArrowUpRight size={17} /></Button></div>
+      <div className="mt-7 flex flex-col items-start justify-between gap-4 rounded-2xl border border-line bg-white p-5 sm:flex-row sm:items-center"><div className="flex items-start gap-3"><CircleHelp size={19} className={result.status === "valid" ? "mt-0.5 text-far" : "mt-0.5 text-amber-600"} /><div><p className="text-sm font-bold text-ink">{result.status === "valid" ? "Ready to explore" : result.status === "invalid" ? `${result.issues.length} item${result.issues.length === 1 ? "" : "s"} need attention` : "Ready to explore"}</p><p className="mt-1 text-xs leading-5 text-muted">{result.status === "valid" ? "You can still edit these numbers later." : result.status === "invalid" ? result.issues[0]?.message : "Choose the factors that matter to you."}</p></div></div><Button variant="blue" disabled={result.status !== "valid"} onClick={onContinue}>Compare options <ArrowUpRight size={17} /></Button></div>
     </main>
   );
 }
@@ -112,7 +115,7 @@ export default function App() {
   const setCurrentStory = (next: SavedStory | null) => {
     if (next === null || next.snapshotDecisionId === decisionRef.current?.id) setSavedStory(next);
   };
-  const openDecision = (next: Decision) => { decisionRef.current = next; setDecision(next); setSavedStory(null); setStorySetup(defaultStorySetup()); setScreen("review"); window.scrollTo({ top: 0 }); };
+  const openDecision = (next: Decision) => { decisionRef.current = next; setDecision(next); setSavedStory(null); setStorySetup({ ...defaultStorySetup(), mode: usesLongTermStory(next) ? "qualitative" : next.options.every((option) => option.activities.some((activity) => activity.eventUnit === "one_way_trip")) ? "campus" : "general" }); setScreen(usesLongTermStory(next) ? "dashboard" : "review"); window.scrollTo({ top: 0 }); };
   const navigate = (next: Screen) => { setScreen(next); window.scrollTo({ top: 0 }); };
-  return <div className="app-shell"><AppHeader screen={screen} onHome={() => navigate("input")} />{screen === "input" || !decision ? <InputScreen onLoaded={openDecision} /> : screen === "review" ? <BaselineReview decision={decision} onBack={() => navigate("input")} onContinue={() => navigate("dashboard")} /> : <Dashboard decision={decision} onReview={() => navigate("review")} onNew={() => navigate("input")} savedStory={savedStory} setSavedStory={setCurrentStory} storySetup={storySetup} setStorySetup={setStorySetup} />}<footer className="border-t border-line/70 bg-white/60 py-7"><div className="page-wrap flex flex-col justify-between gap-2 text-xs text-muted sm:flex-row"><span>Dayfork · Explore your tradeoffs with clarity.</span><span>Illustrations are examples. Monthly totals use your full configuration.</span></div></footer></div>;
+  return <div className="app-shell"><AppHeader screen={screen} qualitative={!!decision && usesLongTermStory(decision)} hasStory={!!savedStory} onHome={() => navigate("input")} />{screen === "input" || !decision ? <InputScreen onLoaded={openDecision} /> : screen === "review" ? <BaselineReview decision={decision} onBack={() => navigate("input")} onContinue={() => navigate("dashboard")} /> : <Dashboard decision={decision} onReview={() => navigate("review")} onNew={() => navigate("input")} savedStory={savedStory} setSavedStory={setCurrentStory} storySetup={storySetup} setStorySetup={setStorySetup} />}<footer className="border-t border-line/70 bg-white/60 py-7"><div className="page-wrap flex flex-col justify-between gap-2 text-xs text-muted sm:flex-row"><span>Dayfork · Explore your tradeoffs with clarity.</span><span>Stories explore possibilities. Calculations appear when the decision supports them.</span></div></footer></div>;
 }

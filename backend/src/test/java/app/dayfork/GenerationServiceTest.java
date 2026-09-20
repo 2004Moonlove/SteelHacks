@@ -25,7 +25,7 @@ class GenerationServiceTest {
 
     @Test
     void repairsMalformedScenarioOnlyOnceAndPreservesUserInput() {
-        model.reply("not JSON", validDecision());
+        model.reply("not JSON", currentGeneratedDecision());
         JsonNode decision = service.scenario("  live near campus or farther away  ");
         assertEquals("live near campus or farther away", decision.path("originalInput").asText());
         assertEquals(5, decision.path("tags").size());
@@ -90,8 +90,8 @@ class GenerationServiceTest {
 
     @Test
     void generatedDecisionCannotClaimUserEditsOrDemoAssumptions() {
-        String fakeEdit = validDecision().replaceFirst("\\\"source\\\":\\\"user_input\\\"", "\"source\":\"user_edit\"");
-        String fakeAssumption = validDecision().replaceFirst("\\\"source\\\":\\\"user_input\\\"",
+        String fakeEdit = currentGeneratedDecision().replaceFirst("\\\"source\\\":\\\"user_input\\\"", "\"source\":\"user_edit\"");
+        String fakeAssumption = currentGeneratedDecision().replaceFirst("\\\"source\\\":\\\"user_input\\\"",
                 "\"source\":\"demo_assumption\",\"confirmed\":true,\"note\":\"Made up\"");
         model.reply(fakeEdit, fakeAssumption);
         ApiException exception = assertThrows(ApiException.class, () -> service.scenario("Option A or B"));
@@ -191,6 +191,20 @@ class GenerationServiceTest {
               "monthlyReflections":[{"optionId":"a","text":"The monthly cost is {{optionA_monthlyCost}}."},{"optionId":"b","text":"The monthly cost is {{optionB_monthlyCost}}."}]
             }
             """;
+    }
+
+    private String currentGeneratedDecision() {
+        return validDecision().replace("\"schemaVersion\":1", "\"schemaVersion\":2,\"comparisonMode\":\"quantitative\"");
+    }
+
+    @Test
+    void rejectsLegacyModelOutputButKeepsLoadedLegacyDecisionsAndStories() throws Exception {
+        contract.decision(mapper.readTree(validDecision()));
+        stories.request(validStoryRequest());
+        model.reply(validDecision(), currentGeneratedDecision());
+        JsonNode generated = service.scenario("Housing near campus or farther away?");
+        assertEquals(2, generated.path("schemaVersion").asInt());
+        assertEquals(2, model.calls);
     }
 
     private String validDecision() {

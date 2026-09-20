@@ -1,0 +1,18 @@
+{
+  "sharedScenario": {
+    "title": "Choosing a Gym Access Plan for the Comparison Window",
+    "description": "You need gym access for the duration given by {{comparisonMonths}} and are deciding between a Year Card (pay {{optionA_payment}} every {{optionA_periodMonths}} months) and a Month Card (pay {{optionB_payment}} each month). Both give the same gym entry with no extra fees. {{subscriptionCostComparison}}"
+  },
+  "optionA": {
+    "beginning": "You sign up for the Year Card, paying {{optionA_payment}} upfront for the first {{optionA_periodMonths}} months of access.",
+    "during": "After some time, you use the gym regularly, swiping your card at the entrance each visit without worrying about extra charges.",
+    "later": "When the initial period ends, you pay another {{optionA_payment}} to renew, giving you coverage that extends well beyond the comparison window.",
+    "advice": "Note the renewal date so you can prepare the second {{optionA_payment}} before your current term ends."
+  },
+  "optionB": {
+    "beginning": "You start with the Month Card, paying {{optionB_payment}} for the first month of gym access.",
+    "during": "Later, your schedule changes and you attend less often; you still pay {{optionB_payment}} each month but can choose to skip a month if you pause.",
+    "later": "At the end of the comparison window you have paid the total for {{optionB_paymentCount}} months and stop the subscription because you no longer need access.",
+    "advice": "Set a monthly reminder to review your usage and decide whether to continue, pause, or cancel before each new {{optionB_payment}} is due."
+  }
+}

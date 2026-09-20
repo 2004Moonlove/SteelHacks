@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 2,
+  "comparisonMode": "quantitative",
+  "id": "gym-membership-choice",
+  "title": "Year-long vs. Monthly Gym Membership",
+  "description": "Decision about committing to a longer\u2011term gym contract versus paying month\u2011to\u2011month, focusing on recurring cost and flexibility.",
+  "originalInput": "Should I get a year-long gym membership or a monthly one",
+  "currency": "USD",
+  "options": [
+    {
+      "id": "yearly",
+      "name": "Year-long Membership",
+      "fixedCosts": [
+        {
+          "id": "annual-fee",
+          "name": "Annual membership fee",
+          "amountCentsMonthly": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      ],
+      "activities": []
+    },
+    {
+      "id": "monthly",
+      "name": "Monthly Membership",
+      "fixedCosts": [
+        {
+          "id": "monthly-fee",
+          "name": "Monthly membership fee",
+          "amountCentsMonthly": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      ],
+      "activities": []
+    }
+  ],
+  "tags": [
+    {
+      "id": "cost-sensitivity",
+      "name": "Cost sensitivity",
+      "description": "How important is minimizing monthly expense versus total annual cost?",
+      "type": "consideration",
+      "targets": [
+        {
+          "optionId": "yearly",
+          "consideration": "Prefer lower total annual cost even if monthly payment is higher"
+        },
+        {
+          "optionId": "monthly",
+          "consideration": "Prefer lower monthly outlay to keep cash flow flexible"
+        }
+      ]
+    },
+    {
+      "id": "commitment-flexibility",
+      "name": "Commitment flexibility",
+      "description": "Desire to change or cancel gym access without penalty.",
+      "type": "consideration",
+      "targets": [
+        {
+          "optionId": "yearly",
+          "consideration": "Accept longer commitment for potential discount"
+        },
+        {
+          "optionId": "monthly",
+          "consideration": "Want ability to pause or cancel anytime"
+        }
+      ]
+    },
+    {
+      "id": "usage-consistency",
+      "name": "Usage consistency",
+      "description": "Expectation of regular gym attendance throughout the year.",
+      "type": "consideration",
+      "targets": [
+        {
+          "optionId": "yearly",
+          "consideration": "Plan to use the gym regularly enough to justify a yearly contract"
+        },
+        {
+          "optionId": "monthly",
+          "consideration": "Unsure about future attendance, prefer month\u2011to\u2011month"
+        }
+      ]
+    }
+  ]
+}

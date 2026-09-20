@@ -1,0 +1,366 @@
+{
+  "snapshot": {
+    "decision": {
+      "schemaVersion": 1,
+      "id": "campus-housing-demo",
+      "title": "Live near campus or farther away?",
+      "description": "Compare monthly housing costs and one-way campus travel time.",
+      "originalInput": "Should I rent near campus or farther away?",
+      "currency": "USD",
+      "options": [
+        {
+          "id": "near",
+          "name": "Near campus",
+          "fixedCosts": [
+            {
+              "id": "rent",
+              "name": "Rent",
+              "amountCentsMonthly": {
+                "value": 150000,
+                "source": "demo_assumption",
+                "confirmed": true,
+                "note": "Illustrative monthly rent for the demo."
+              }
+            }
+          ],
+          "activities": [
+            {
+              "id": "commute",
+              "name": "Walk to campus",
+              "eventUnit": "one_way_trip",
+              "frequencyInput": {
+                "label": "Campus days per month",
+                "eventsPerUnit": 2
+              },
+              "eventsPerMonth": {
+                "value": 40,
+                "source": "demo_assumption",
+                "confirmed": true,
+                "note": "20 campus days with two one-way trips each."
+              },
+              "costCentsPerEvent": {
+                "value": 0,
+                "source": "demo_assumption",
+                "confirmed": true,
+                "note": "Known zero-cost walking trip in this fixture."
+              },
+              "minutesPerEvent": {
+                "value": 10,
+                "source": "demo_assumption",
+                "confirmed": true,
+                "note": "Illustrative one-way walking time."
+              }
+            }
+          ]
+        },
+        {
+          "id": "far",
+          "name": "Farther away",
+          "fixedCosts": [
+            {
+              "id": "rent",
+              "name": "Rent",
+              "amountCentsMonthly": {
+                "value": 110000,
+                "source": "demo_assumption",
+                "confirmed": true,
+                "note": "Illustrative monthly rent for the demo."
+              }
+            }
+          ],
+          "activities": [
+            {
+              "id": "commute",
+              "name": "Campus shuttle",
+              "eventUnit": "one_way_trip",
+              "frequencyInput": {
+                "label": "Campus days per month",
+                "eventsPerUnit": 2
+              },
+              "eventsPerMonth": {
+                "value": 40,
+                "source": "demo_assumption",
+                "confirmed": true,
+                "note": "20 campus days with two one-way trips each."
+              },
+              "costCentsPerEvent": {
+                "value": 0,
+                "source": "demo_assumption",
+                "confirmed": true,
+                "note": "Known zero-cost transit trip in this fixture."
+              },
+              "minutesPerEvent": {
+                "value": 40,
+                "source": "demo_assumption",
+                "confirmed": true,
+                "note": "Illustrative one-way transit time."
+              }
+            }
+          ]
+        }
+      ],
+      "tags": [
+        {
+          "id": "uber",
+          "type": "replace_activity",
+          "name": "Take an Uber after class",
+          "icon": "car-front",
+          "description": "Replace some farther-away one-way commutes with Uber rides.",
+          "targets": [
+            {
+              "optionId": "far",
+              "activityId": "commute",
+              "replacementName": "Uber ride",
+              "eventsPerMonth": {
+                "value": 6,
+                "source": "demo_assumption",
+                "confirmed": true,
+                "note": "Six one-way rides in this example."
+              },
+              "costCentsPerEvent": {
+                "value": 2500,
+                "source": "demo_assumption",
+                "confirmed": true,
+                "note": "Illustrative fare per one-way ride."
+              },
+              "minutesPerEvent": {
+                "value": 20,
+                "source": "demo_assumption",
+                "confirmed": true,
+                "note": "Illustrative duration per one-way ride."
+              }
+            }
+          ]
+        },
+        {
+          "id": "remote-days",
+          "type": "reduce_activity",
+          "name": "Spend fewer days on campus",
+          "icon": "house",
+          "description": "Four fewer campus days remove eight one-way commutes in each option.",
+          "targets": [
+            {
+              "optionId": "near",
+              "activityId": "commute",
+              "eventsPerMonth": {
+                "value": 8,
+                "source": "demo_assumption",
+                "confirmed": true,
+                "note": "Four campus days times two trips."
+              }
+            },
+            {
+              "optionId": "far",
+              "activityId": "commute",
+              "eventsPerMonth": {
+                "value": 8,
+                "source": "demo_assumption",
+                "confirmed": true,
+                "note": "Four campus days times two trips."
+              }
+            }
+          ]
+        },
+        {
+          "id": "extra-campus",
+          "type": "add_activity",
+          "name": "Visit campus more often",
+          "icon": "calendar-plus",
+          "description": "Five extra campus days add ten one-way commutes in each option.",
+          "targets": [
+            {
+              "optionId": "near",
+              "activityId": "commute",
+              "eventsPerMonth": {
+                "value": 10,
+                "source": "demo_assumption",
+                "confirmed": true,
+                "note": "Five campus days times two trips."
+              }
+            },
+            {
+              "optionId": "far",
+              "activityId": "commute",
+              "eventsPerMonth": {
+                "value": 10,
+                "source": "demo_assumption",
+                "confirmed": true,
+                "note": "Five campus days times two trips."
+              }
+            }
+          ]
+        },
+        {
+          "id": "drive",
+          "type": "replace_activity",
+          "name": "Drive to campus",
+          "icon": "car",
+          "description": "Replace farther-away one-way commutes with driving.",
+          "targets": [
+            {
+              "optionId": "far",
+              "activityId": "commute",
+              "replacementName": "Drive",
+              "eventsPerMonth": {
+                "value": 15,
+                "source": "demo_assumption",
+                "confirmed": true,
+                "note": "Illustrative one-way driving trips."
+              },
+              "costCentsPerEvent": {
+                "value": 800,
+                "source": "demo_assumption",
+                "confirmed": true,
+                "note": "Illustrative fuel and parking per trip."
+              },
+              "minutesPerEvent": {
+                "value": 25,
+                "source": "demo_assumption",
+                "confirmed": true,
+                "note": "Illustrative driving time per trip."
+              }
+            }
+          ]
+        },
+        {
+          "id": "transit-pass",
+          "type": "fixed",
+          "name": "Buy a transit pass",
+          "icon": "ticket",
+          "description": "Add a fixed monthly pass cost to the farther-away option.",
+          "targets": [
+            {
+              "optionId": "far",
+              "costCentsMonthly": {
+                "value": 9750,
+                "source": "demo_assumption",
+                "confirmed": true,
+                "note": "Illustrative monthly pass price."
+              },
+              "minutesMonthly": {
+                "value": 0,
+                "source": "demo_assumption",
+                "confirmed": true,
+                "note": "A pass does not itself take time."
+              }
+            }
+          ]
+        },
+        {
+          "id": "parking",
+          "type": "fixed",
+          "name": "Pay for parking",
+          "icon": "square-parking",
+          "description": "Add a fixed monthly parking fee to the farther-away option.",
+          "targets": [
+            {
+              "optionId": "far",
+              "costCentsMonthly": {
+                "value": 6000,
+                "source": "demo_assumption",
+                "confirmed": true,
+                "note": "Illustrative monthly parking price."
+              },
+              "minutesMonthly": {
+                "value": 0,
+                "source": "demo_assumption",
+                "confirmed": true,
+                "note": "Parking fee has no direct time cost in this example."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "enabledTagIds": [
+      "uber"
+    ],
+    "calculation": {
+      "status": "valid",
+      "options": [
+        {
+          "optionId": "near",
+          "totalCostCents": 150000,
+          "totalTimeMinutes": 400,
+          "breakdown": [
+            {
+              "id": "near:rent:fixed",
+              "kind": "baseline_fixed",
+              "label": "Rent",
+              "totalCostCents": 150000,
+              "totalTimeMinutes": 0
+            },
+            {
+              "id": "near:commute:original",
+              "kind": "original_activity",
+              "label": "Walk to campus",
+              "activityId": "commute",
+              "eventsPerMonth": 40,
+              "costCentsPerEvent": 0,
+              "minutesPerEvent": 10,
+              "totalCostCents": 0,
+              "totalTimeMinutes": 400
+            }
+          ]
+        },
+        {
+          "optionId": "far",
+          "totalCostCents": 125000,
+          "totalTimeMinutes": 1480,
+          "breakdown": [
+            {
+              "id": "far:rent:fixed",
+              "kind": "baseline_fixed",
+              "label": "Rent",
+              "totalCostCents": 110000,
+              "totalTimeMinutes": 0
+            },
+            {
+              "id": "far:commute:original",
+              "kind": "original_activity",
+              "label": "Campus shuttle",
+              "activityId": "commute",
+              "eventsPerMonth": 34,
+              "costCentsPerEvent": 0,
+              "minutesPerEvent": 40,
+              "totalCostCents": 0,
+              "totalTimeMinutes": 1360
+            },
+            {
+              "id": "far:commute:uber:replacement",
+              "kind": "replacement_activity",
+              "label": "Uber ride",
+              "activityId": "commute",
+              "tagId": "uber",
+              "eventsPerMonth": 6,
+              "costCentsPerEvent": 2500,
+              "minutesPerEvent": 20,
+              "totalCostCents": 15000,
+              "totalTimeMinutes": 120
+            }
+          ]
+        }
+      ],
+      "comparison": {
+        "costDeltaCents": -25000,
+        "timeDeltaMinutes": 1080
+      }
+    },
+    "simulationVersion": 1
+  },
+  "context": {
+    "mode": "general"
+  },
+  "facts": {
+    "monthlyCostDifference": "$250.00",
+    "monthlyTimeDifference": "18 hr 0 min",
+    "monthlyCostComparison": "Near campus costs $250.00 more per month than Farther away.",
+    "monthlyTimeComparison": "Farther away uses 18 hr 0 min more per month than Near campus.",
+    "optionA_name": "Near campus",
+    "optionA_monthlyCost": "$1,500.00",
+    "optionA_monthlyTime": "6 hr 40 min",
+    "optionB_name": "Farther away",
+    "optionB_monthlyCost": "$1,250.00",
+    "optionB_monthlyTime": "24 hr 40 min"
+  }
+}

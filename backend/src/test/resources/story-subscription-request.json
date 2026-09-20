@@ -1,0 +1,264 @@
+{
+  "snapshot": {
+    "decision": {
+      "schemaVersion": 2,
+      "comparisonMode": "subscription",
+      "id": "annual-monthly-demo",
+      "title": "A year card or a month card?",
+      "description": "Compare whole membership payments over an editable window, then explore how each arrangement could fit your life.",
+      "originalInput": "An offline example: a year card costs $600 per year and a month card costs $60 per month.",
+      "currency": "USD",
+      "options": [
+        {
+          "id": "annual",
+          "name": "Year card",
+          "fixedCosts": [],
+          "activities": [],
+          "subscriptionCosts": {
+            "paymentCents": {
+              "value": 60000,
+              "source": "user_input"
+            },
+            "periodMonths": 12
+          }
+        },
+        {
+          "id": "monthly",
+          "name": "Month card",
+          "fixedCosts": [],
+          "activities": [],
+          "subscriptionCosts": {
+            "paymentCents": {
+              "value": 6000,
+              "source": "user_input"
+            },
+            "periodMonths": 1
+          }
+        }
+      ],
+      "tags": [
+        {
+          "id": "routine",
+          "type": "consideration",
+          "name": "Building a steady routine",
+          "group": "Everyday use",
+          "description": "Explore how a recurring membership could settle into your routine.",
+          "targets": [
+            {
+              "optionId": "annual",
+              "consideration": "If you keep returning regularly, a prepaid period could become part of a steady routine without a fresh purchase each month."
+            },
+            {
+              "optionId": "monthly",
+              "consideration": "If you keep returning regularly, each renewal could become a recurring point to continue or change your routine."
+            }
+          ],
+          "importance": 5
+        },
+        {
+          "id": "schedule",
+          "type": "consideration",
+          "name": "A changing schedule",
+          "group": "Everyday use",
+          "description": "Imagine a period when competing commitments interrupt your usual use.",
+          "targets": [
+            {
+              "optionId": "annual",
+              "consideration": "If other commitments interrupt your use, prepaid access could remain available while you are away; any pause or refund terms need verification."
+            },
+            {
+              "optionId": "monthly",
+              "consideration": "If other commitments interrupt your use, you could revisit the next purchase subject to the actual renewal terms."
+            }
+          ]
+        },
+        {
+          "id": "upfront-budget",
+          "type": "consideration",
+          "name": "Room in your current budget",
+          "group": "Commitment",
+          "description": "Explore paying for a longer period at once or funding shorter periods as they arrive.",
+          "targets": [
+            {
+              "optionId": "annual",
+              "consideration": "If the larger initial payment competes with other needs, you may have less uncommitted cash at the start."
+            },
+            {
+              "optionId": "monthly",
+              "consideration": "If smaller payments fit your cash flow, you may spread the outlay across successive renewals."
+            }
+          ]
+        },
+        {
+          "id": "changing-needs",
+          "type": "consideration",
+          "name": "Trying it before committing",
+          "group": "Commitment",
+          "description": "Explore finding out whether this membership remains useful after getting started.",
+          "targets": [
+            {
+              "optionId": "annual",
+              "consideration": "If the experience turns out to fit differently than expected, unused access may remain within the prepaid period."
+            },
+            {
+              "optionId": "monthly",
+              "consideration": "If the experience turns out to fit differently than expected, a coming renewal may offer an earlier point to reassess under the actual terms."
+            }
+          ]
+        },
+        {
+          "id": "relocation",
+          "type": "consideration",
+          "name": "Changing where you live",
+          "group": "Future changes",
+          "description": "Imagine moving away from the place or service this membership supports.",
+          "targets": [
+            {
+              "optionId": "annual",
+              "consideration": "If your location changes, the usefulness of remaining access depends on portability and transfer terms."
+            },
+            {
+              "optionId": "monthly",
+              "consideration": "If your location changes, the next renewal could be a point to change arrangements, subject to notice requirements."
+            }
+          ]
+        },
+        {
+          "id": "renewal",
+          "type": "consideration",
+          "name": "Managing renewals",
+          "group": "Future changes",
+          "description": "Explore how renewal decisions fit into your ongoing responsibilities.",
+          "targets": [
+            {
+              "optionId": "annual",
+              "consideration": "If renewals happen less often, a renewal date could be easier to overlook unless you keep a reminder."
+            },
+            {
+              "optionId": "monthly",
+              "consideration": "If renewal decisions recur more often, they may become a regular administrative task or an automatic payment depending on the terms."
+            }
+          ]
+        }
+      ],
+      "comparisonMonths": 13
+    },
+    "enabledTagIds": [
+      "routine",
+      "upfront-budget"
+    ],
+    "simulationVersion": 3,
+    "calculation": {
+      "status": "subscription",
+      "comparisonMonths": 13,
+      "options": [
+        {
+          "optionId": "annual",
+          "totalCostCents": 120000,
+          "paymentCount": 2,
+          "coverageMonths": 24
+        },
+        {
+          "optionId": "monthly",
+          "totalCostCents": 78000,
+          "paymentCount": 13,
+          "coverageMonths": 13
+        }
+      ],
+      "timeline": [
+        {
+          "month": 0,
+          "optionACostCents": 0,
+          "optionBCostCents": 0
+        },
+        {
+          "month": 1,
+          "optionACostCents": 60000,
+          "optionBCostCents": 6000
+        },
+        {
+          "month": 2,
+          "optionACostCents": 60000,
+          "optionBCostCents": 12000
+        },
+        {
+          "month": 3,
+          "optionACostCents": 60000,
+          "optionBCostCents": 18000
+        },
+        {
+          "month": 4,
+          "optionACostCents": 60000,
+          "optionBCostCents": 24000
+        },
+        {
+          "month": 5,
+          "optionACostCents": 60000,
+          "optionBCostCents": 30000
+        },
+        {
+          "month": 6,
+          "optionACostCents": 60000,
+          "optionBCostCents": 36000
+        },
+        {
+          "month": 7,
+          "optionACostCents": 60000,
+          "optionBCostCents": 42000
+        },
+        {
+          "month": 8,
+          "optionACostCents": 60000,
+          "optionBCostCents": 48000
+        },
+        {
+          "month": 9,
+          "optionACostCents": 60000,
+          "optionBCostCents": 54000
+        },
+        {
+          "month": 10,
+          "optionACostCents": 60000,
+          "optionBCostCents": 60000
+        },
+        {
+          "month": 11,
+          "optionACostCents": 60000,
+          "optionBCostCents": 66000
+        },
+        {
+          "month": 12,
+          "optionACostCents": 60000,
+          "optionBCostCents": 72000
+        },
+        {
+          "month": 13,
+          "optionACostCents": 120000,
+          "optionBCostCents": 78000
+        }
+      ],
+      "comparison": {
+        "costDeltaCents": -42000
+      }
+    }
+  },
+  "context": {
+    "mode": "qualitative"
+  },
+  "facts": {
+    "comparisonMonths": "13",
+    "optionA_name": "Year card",
+    "optionA_payment": "$600.00",
+    "optionA_periodMonths": "12",
+    "optionA_totalCost": "$1,200.00",
+    "optionA_paymentCount": "2",
+    "optionA_coverageMonths": "24",
+    "optionB_name": "Month card",
+    "optionB_payment": "$60.00",
+    "optionB_periodMonths": "1",
+    "optionB_totalCost": "$780.00",
+    "optionB_paymentCount": "13",
+    "optionB_coverageMonths": "13",
+    "subscriptionCostComparison": "Year card costs $1,200.00 and Month card costs $780.00 over 13 months."
+  }
+}

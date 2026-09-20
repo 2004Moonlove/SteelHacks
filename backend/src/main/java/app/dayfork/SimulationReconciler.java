@@ -55,7 +55,7 @@ public class SimulationReconciler {
                 List<Replacement> replacements = new ArrayList<>();
                 for (JsonNode tag : enabledTags) {
                     String type = tag.path("type").asText();
-                    if (type.equals("fixed")) continue;
+                    if (type.equals("fixed") || type.equals("consideration")) continue;
                     for (JsonNode target : tag.path("targets")) {
                         if (!optionId.equals(target.path("optionId").asText())
                                 || !activityId.equals(target.path("activityId").asText())) continue;

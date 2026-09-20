@@ -19,10 +19,3 @@ textarea { resize: vertical; }
 .subtle-grid { background-image: linear-gradient(to right, rgba(77, 109, 166, .055) 1px, transparent 1px), linear-gradient(to bottom, rgba(77, 109, 166, .055) 1px, transparent 1px); background-size: 30px 30px; }
 .number { font-variant-numeric: tabular-nums; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }
-
-.choice-textarea { width: 100%; border: 1px solid #e1e6ef; border-radius: 12px; padding: 14px; background: #f9fbfe; font-size: 14px; line-height: 1.7; color: #17243c; outline: none; }
-.choice-textarea:focus { border-color: #3868db; box-shadow: 0 0 0 3px #dce7ff; }
-.field-label { display: grid; gap: 6px; font-size: 12px; font-weight: 600; color: #566680; }
-summary:focus-visible, a:focus-visible { outline: 3px solid #b7cdff; outline-offset: 3px; }
-input[type=checkbox] { accent-color: #3868db; }
-@media (max-width: 480px) { .page-wrap { width: calc(100% - 24px); } }

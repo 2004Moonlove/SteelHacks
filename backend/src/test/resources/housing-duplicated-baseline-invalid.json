@@ -1,0 +1,354 @@
+{
+  "schemaVersion": 2,
+  "comparisonMode": "quantitative",
+  "id": "housing_on_vs_off_campus",
+  "title": "Live On Campus vs Off Campus",
+  "description": "Choose between living in on-campus housing or renting an off-campus apartment while attending school. This decision involves recurring housing costs, utilities, commuting, grocery and laundry expenses, and lifestyle factors such as privacy, social connection, flexibility, and safety.",
+  "originalInput": "live on campus or off campus",
+  "currency": "USD",
+  "options": [
+    {
+      "id": "on",
+      "name": "On-Campus Housing",
+      "fixedCosts": [
+        {
+          "id": "rent_on",
+          "name": "Room and Board",
+          "amountCentsMonthly": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        {
+          "id": "utilities_on",
+          "name": "Utilities (electricity, water, internet)",
+          "amountCentsMonthly": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        {
+          "id": "grocery_on",
+          "name": "Monthly Groceries",
+          "amountCentsMonthly": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      ],
+      "activities": [
+        {
+          "id": "commute_on",
+          "name": "Commute to Class",
+          "eventUnit": "one_way_trip",
+          "eventsPerMonth": {
+            "value": null,
+            "source": "unknown"
+          },
+          "costCentsPerEvent": {
+            "value": null,
+            "source": "unknown",
+            "note": "No numeric value was supplied; enter this value to continue."
+          },
+          "minutesPerEvent": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        {
+          "id": "laundry_on",
+          "name": "Laundry",
+          "eventUnit": "session",
+          "eventsPerMonth": {
+            "value": null,
+            "source": "unknown"
+          },
+          "costCentsPerEvent": {
+            "value": null,
+            "source": "unknown"
+          },
+          "minutesPerEvent": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      ]
+    },
+    {
+      "id": "off",
+      "name": "Off-Campus Apartment",
+      "fixedCosts": [
+        {
+          "id": "rent_off",
+          "name": "Monthly Rent",
+          "amountCentsMonthly": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        {
+          "id": "utilities_off",
+          "name": "Utilities (electricity, water, gas, internet)",
+          "amountCentsMonthly": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        {
+          "id": "grocery_off",
+          "name": "Monthly Groceries",
+          "amountCentsMonthly": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      ],
+      "activities": [
+        {
+          "id": "commute_off",
+          "name": "Commute to Campus",
+          "eventUnit": "one_way_trip",
+          "eventsPerMonth": {
+            "value": null,
+            "source": "unknown"
+          },
+          "costCentsPerEvent": {
+            "value": null,
+            "source": "unknown"
+          },
+          "minutesPerEvent": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        {
+          "id": "laundry_off",
+          "name": "Laundry",
+          "eventUnit": "session",
+          "eventsPerMonth": {
+            "value": null,
+            "source": "unknown"
+          },
+          "costCentsPerEvent": {
+            "value": null,
+            "source": "unknown"
+          },
+          "minutesPerEvent": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      ]
+    }
+  ],
+  "tags": [
+    {
+      "id": "fixed_rent",
+      "name": "Monthly Rent Cost",
+      "description": "Enter your expected monthly rent for each option.",
+      "type": "fixed",
+      "targets": [
+        {
+          "optionId": "on",
+          "costCentsMonthly": {
+            "value": null,
+            "source": "unknown"
+          },
+          "minutesMonthly": {
+            "value": null,
+            "source": "unknown",
+            "note": "No numeric value was supplied; enter this value to continue."
+          }
+        },
+        {
+          "optionId": "off",
+          "costCentsMonthly": {
+            "value": null,
+            "source": "unknown"
+          },
+          "minutesMonthly": {
+            "value": null,
+            "source": "unknown",
+            "note": "No numeric value was supplied; enter this value to continue."
+          }
+        }
+      ]
+    },
+    {
+      "id": "fixed_utilities",
+      "name": "Utilities Cost",
+      "description": "Estimate monthly electricity, water, gas, and internet expenses.",
+      "type": "fixed",
+      "targets": [
+        {
+          "optionId": "on",
+          "costCentsMonthly": {
+            "value": null,
+            "source": "unknown"
+          },
+          "minutesMonthly": {
+            "value": null,
+            "source": "unknown",
+            "note": "No numeric value was supplied; enter this value to continue."
+          }
+        },
+        {
+          "optionId": "off",
+          "costCentsMonthly": {
+            "value": null,
+            "source": "unknown"
+          },
+          "minutesMonthly": {
+            "value": null,
+            "source": "unknown",
+            "note": "No numeric value was supplied; enter this value to continue."
+          }
+        }
+      ]
+    },
+    {
+      "id": "commute_time",
+      "name": "Commute Time",
+      "description": "Enter average one\u2011way travel time to campus and frequency per month.",
+      "type": "add_activity",
+      "targets": [
+        {
+          "optionId": "on",
+          "activityId": "commute_on",
+          "eventsPerMonth": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        {
+          "optionId": "off",
+          "activityId": "commute_off",
+          "eventsPerMonth": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      ]
+    },
+    {
+      "id": "fixed_grocery",
+      "name": "Monthly Grocery Cost",
+      "description": "Enter your typical monthly grocery spending.",
+      "type": "fixed",
+      "targets": [
+        {
+          "optionId": "on",
+          "costCentsMonthly": {
+            "value": null,
+            "source": "unknown"
+          },
+          "minutesMonthly": {
+            "value": null,
+            "source": "unknown",
+            "note": "No numeric value was supplied; enter this value to continue."
+          }
+        },
+        {
+          "optionId": "off",
+          "costCentsMonthly": {
+            "value": null,
+            "source": "unknown"
+          },
+          "minutesMonthly": {
+            "value": null,
+            "source": "unknown",
+            "note": "No numeric value was supplied; enter this value to continue."
+          }
+        }
+      ]
+    },
+    {
+      "id": "laundry_sessions",
+      "name": "Laundry Frequency",
+      "description": "Enter how many laundry loads you do per month and the time each takes.",
+      "type": "add_activity",
+      "targets": [
+        {
+          "optionId": "on",
+          "activityId": "laundry_on",
+          "eventsPerMonth": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        {
+          "optionId": "off",
+          "activityId": "laundry_off",
+          "eventsPerMonth": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      ]
+    },
+    {
+      "id": "privacy",
+      "name": "Privacy Level",
+      "description": "Does the option provide the privacy you need for studying and personal time?",
+      "type": "consideration",
+      "targets": [
+        {
+          "optionId": "on",
+          "consideration": "Does on\u2011campus housing give you enough private space?"
+        },
+        {
+          "optionId": "off",
+          "consideration": "Does an off\u2011campus apartment meet your privacy needs?"
+        }
+      ]
+    },
+    {
+      "id": "social_connection",
+      "name": "Social Opportunities",
+      "description": "How important is easy access to campus events and peer interaction?",
+      "type": "consideration",
+      "targets": [
+        {
+          "optionId": "on",
+          "consideration": "Will living on campus help you stay socially connected?"
+        },
+        {
+          "optionId": "off",
+          "consideration": "Will living off campus make it harder to join spontaneous campus activities?"
+        }
+      ]
+    },
+    {
+      "id": "flexibility",
+      "name": "Lease Flexibility",
+      "description": "Consider how easy it is to change or end your housing arrangement if your needs shift.",
+      "type": "consideration",
+      "targets": [
+        {
+          "optionId": "on",
+          "consideration": "Are you able to move out of on\u2011campus housing mid\u2011semester if needed?"
+        },
+        {
+          "optionId": "off",
+          "consideration": "Does the off\u2011campus lease allow subletting or early termination?"
+        }
+      ]
+    },
+    {
+      "id": "safety",
+      "name": "Safety Perception",
+      "description": "How safe do you feel in the housing option and its surroundings?",
+      "type": "consideration",
+      "targets": [
+        {
+          "optionId": "on",
+          "consideration": "Do you feel safe living on campus?"
+        },
+        {
+          "optionId": "off",
+          "consideration": "Do you feel safe in the neighborhood of the off\u2011campus apartment?"
+        }
+      ]
+    }
+  ]
+}
