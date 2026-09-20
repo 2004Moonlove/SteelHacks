@@ -56,7 +56,7 @@ class ScenarioGenerationRegressionTest {
         fee.put("value", 5000).put("source", "derived");
         model.reply(decision);
 
-        JsonNode result = service.scenario(INPUT);
+        JsonNode result = service.scenario(INPUT + ". The annual plan is USD 600 per year and I visit 12 times per month.");
 
         assertEquals(1, model.requests.size());
         assertEquals(fee, result.path("options").get(0).path("fixedCosts").get(0).path("amountCentsMonthly"));
@@ -67,6 +67,22 @@ class ScenarioGenerationRegressionTest {
             assertEquals("unknown", activity.path("minutesPerEvent").path("source").asText());
             assertTrue(activity.path("minutesPerEvent").path("value").isNull());
         }
+    }
+
+    @Test
+    void clearsInventedKnownNumbersWhenTheQuestionSuppliesNoQuantity() throws Exception {
+        JsonNode decision = withoutFrequencyConversion();
+        ObjectNode fee = (ObjectNode) decision.path("options").get(0).path("fixedCosts").get(0).path("amountCentsMonthly");
+        fee.put("value", 5000).put("source", "user_input");
+        model.reply(decision);
+
+        JsonNode result = service.scenario("Should I buy a gym membership or pay per visit?");
+
+        JsonNode resultFee = result.path("options").get(0).path("fixedCosts").get(0).path("amountCentsMonthly");
+        assertTrue(resultFee.path("value").isNull());
+        assertEquals("unknown", resultFee.path("source").asText());
+        assertEquals(1, model.requests.size());
+        contract.generatedDecision(result);
     }
 
     @ParameterizedTest

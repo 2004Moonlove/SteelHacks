@@ -29,6 +29,7 @@ public class NvidiaModelClient implements ModelClient {
     private static final Set<Integer> RETRYABLE_STATUSES = Set.of(429, 500, 502, 503, 504);
     private static final Duration RETRY_WINDOW = Duration.ofSeconds(10);
     private static final Duration MAX_RETRY_DELAY = Duration.ofSeconds(2);
+    private static final String LOW_EFFORT_MODEL = "nvidia/nemotron-3-super-120b-a12b";
     private final RestClient client;
     private final ObjectMapper mapper;
     private final String apiKey;
@@ -62,16 +63,22 @@ public class NvidiaModelClient implements ModelClient {
             throw new ApiException(HttpStatus.SERVICE_UNAVAILABLE, "MODEL_NOT_CONFIGURED",
                     "Model access is not configured. Set NVIDIA_API_KEY and NVIDIA_MODEL.");
         }
+        Map<String, Object> request = requestBody(messages);
         long started = System.nanoTime();
         for (int attempt = 1; attempt <= 2; attempt++) {
             try {
                 String body = client.post().uri(url)
                         .header("Authorization", "Bearer " + apiKey)
-                        .body(Map.of("model", model, "messages", messages, "stream", false))
+                        .body(request)
                         .retrieve().body(String.class);
                 JsonNode response = body == null || body.isBlank() ? null : mapper.readTree(body);
-                JsonNode content = response == null ? null
-                        : response.path("choices").path(0).path("message").path("content");
+                JsonNode choice = response == null ? null : response.path("choices").path(0);
+                if (choice != null && "length".equals(choice.path("finish_reason").asText())) {
+                    log.warn("Model response truncated: attempt={}, elapsedMs={}", attempt, elapsedMillis(started));
+                    throw new ApiException(HttpStatus.BAD_GATEWAY, "MODEL_RESPONSE_TRUNCATED",
+                            "The model response was cut short before it finished. Please retry.");
+                }
+                JsonNode content = choice == null ? null : choice.path("message").path("content");
                 if (content == null || !content.isTextual() || content.asText().isBlank()) {
                     throw new ApiException(HttpStatus.BAD_GATEWAY, "MODEL_RESPONSE_INVALID",
                             "The model returned an empty response.");
@@ -103,6 +110,16 @@ public class NvidiaModelClient implements ModelClient {
             }
         }
         throw new IllegalStateException("Model request attempts exhausted.");
+    }
+
+    private Map<String, Object> requestBody(List<Message> messages) {
+        if (LOW_EFFORT_MODEL.equals(model)) {
+            // These controls are specific to this model; retain the provider's content-token limit.
+            return Map.of("model", model, "messages", messages, "stream", false,
+                    "chat_template_kwargs", Map.of("enable_thinking", true, "low_effort", true),
+                    "reasoning_budget", 1024);
+        }
+        return Map.of("model", model, "messages", messages, "stream", false);
     }
 
     private static long elapsedMillis(long started) {

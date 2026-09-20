@@ -84,6 +84,29 @@ The preview is explicitly labeled when it uses fixture text rather than a model 
 
 The calculation engine runs in the browser and does not call these endpoints when Tags or parameters change. Money is represented as integer cents, time as integer minutes, and activity frequency as integer events per month. Unknown values remain unknown rather than becoming zero. The full data contract and acceptance fixture are recorded in [MEMORY.md](MEMORY.md).
 
+## Contract and scenario checks
+
+The frontend validator defines the machine-readable scenario format. Generate the backend's prompt schema after changing that validator:
+
+```sh
+node scripts/generate-contract.mjs
+npm --prefix frontend test
+```
+
+A regression test verifies that the checked-in schema matches the current validator. The schema guides model generation; strict backend validation, reference checks, and one bounded repair still apply. The model writes story text into fixed option slots, while code inserts decision IDs, simulation versions, option IDs, moment ordering, and monthly summaries from validated facts. The public story API is unchanged. Money and time calculations stay in the deterministic engine. A conservative guard keeps values unknown when the input contains no numeric evidence; it is not a general proof that every model-supplied number is grounded.
+
+For `nvidia/nemotron-3-super-120b-a12b`, the client uses low-effort reasoning with a 1,024-token reasoning budget, following the [model API controls](https://docs.api.nvidia.com/nim/reference/nvidia-nemotron-3-super-120b-a12b-infer). The change was verified against the same full gym case that exceeded the default 60-second timeout. Provider timeouts still occurred during testing; this is not an availability guarantee. Other models retain their existing request parameters. Truncated completions return a specific error and do not enter semantic repair.
+
+With the configured local backend running, explicitly run the synthetic live case suite:
+
+```sh
+node scripts/verify-scenarios.mjs --live --concurrency 2 --output /tmp/dayfork-case-checks
+```
+
+Use `--list` to inspect the cases, or `--cases gym-specified,relocation-specified` to select cases. Running without `--live` makes no requests. The harness checks the real frontend schema, references, calculated totals, individual Tags, story identity, and fact placeholders; it saves a detailed `summary.json` and per-case artifacts locally. Missing prices or usage remain unknown and require review. Narrative meaning still needs human review. See the [recorded case results and limitations](docs/scenario-validation-2026-09-20.md).
+
+Relocation examples compare supplied recurring USD expenses and routine time. They do not model a complete career or immigration decision, or silently amortize upfront relocation costs.
+
 ## Current limits
 
 - Decisions must fit two options, monthly cost/time values, and the four built-in Tag rules: fixed, add activity, reduce activity, and replace activity.

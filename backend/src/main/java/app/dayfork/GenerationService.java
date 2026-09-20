@@ -12,37 +12,47 @@ import org.springframework.stereotype.Service;
 @Service
 public class GenerationService {
     private static final String SCENARIO_PROMPT = """
-            Return one JSON object only. Build a monthly money-and-time comparison for exactly two options.
+            Return one JSON object only, without markdown fences or surrounding prose. Build a monthly money-and-time comparison for exactly two options.
             Use this contract: {schemaVersion:1,id,title,description,originalInput,currency:"USD",options:[{id,name,fixedCosts:[{id,name,amountCentsMonthly:NumericField}],activities:[{id,name,eventUnit,frequencyInput?:{label,eventsPerUnit},eventsPerMonth:NumericField,costCentsPerEvent:NumericField,minutesPerEvent:NumericField}]}],tags:[Tag]}.
+            Each option contains ONLY id, name, fixedCosts, and activities. Do not add option.description or other fields absent from the contract. Put the comparison explanation in the top-level description.
             NumericField is {value:nonnegative safe integer,source:"user_input"|"derived",note?:string} for explicitly supplied or deterministic values; otherwise {value:null,source:"unknown",note?:string}. Never guess numbers, and do not create demo assumptions.
             A missing value must always be {value:null,source:"unknown"}, even when a future calculation could derive it. Never pair null with user_input or derived. Omit unused optional fields instead of returning null or an empty string.
             eventUnit must be exactly one of "one_way_trip", "meal", "session", or "event". Use "session" for gym visits and "meal" for meals.
             Omit frequencyInput unless it is needed for a known unit conversion. Its eventsPerUnit is a plain positive integer, NOT a NumericField and NOT the number of visits per month. For example, {label:"Round trips",eventsPerUnit:2} converts each round trip to two one-way events. Unknown usage belongs in eventsPerMonth as {value:null,source:"unknown"}.
-            Build the baseline BEFORE suggesting Tags. Include each option's unavoidable fixed charges even when their amounts are unknown. A gym membership needs a membership fee in fixedCosts for BOTH options; do not leave fixedCosts empty because the price was not supplied. Store the annual plan's monthly-equivalent fee there, never only as a per-visit fee. Other decisions may have only per-use costs when that matches how they are paid.
+            Build the baseline BEFORE suggesting Tags. Include each option's unavoidable fixed charges even when their amounts are unknown. Include a membership fee in fixedCosts only for an option that actually requires a membership. When comparing membership against pay-per-visit access, put the visit price in costCentsPerEvent for the pay-per-visit option and do not invent a membership fee for it. When BOTH options are membership plans, include both fees even if unknown. Store an annual plan's monthly-equivalent fee in fixedCosts, never only as a per-visit fee. Other decisions may have only per-use costs when that matches how they are paid.
             Return 5 to 10 relevant Tags. Every Tag is {id,name,description,icon?:string,type,targets:[...]}. Allowed types and targets: fixed => {optionId,costCentsMonthly:NumericField,minutesMonthly:NumericField}; add_activity or reduce_activity => {optionId,activityId,eventsPerMonth:NumericField}; replace_activity => {optionId,activityId,replacementName,eventsPerMonth:NumericField,costCentsPerEvent:NumericField,minutesPerEvent:NumericField}.
             All referenced option and activity IDs must exist. Target arrays must be nonempty and contain no duplicate option/activity pair. Use stable short ASCII IDs. Costs are integer USD cents, time is integer minutes, and frequencies are integer events per month. Unknown means null, never zero. Confirmed zero is allowed only if clear from the input.
             Tags are optional, concrete changes to baseline behavior or spending, not comparison headings. Do not turn baseline membership fees, total cost, savings, commitment length, or abstract flexibility into extra fixed charges. Use actions such as additional sessions, fewer sessions, replacing a session, or an optional paid service. Include relevant baseline activities with unknown parameters when the user has not supplied their usage.
             Match every Tag to its exact arithmetic: fixed ADDS a recurring charge or tracked time; add_activity ADDS more events of the SAME baseline activity at its existing price and duration; reduce_activity REMOVES events; replace_activity swaps existing events for a DIFFERENT activity with its own cost and time. For example, coached workouts replace regular sessions; adding ordinary sessions cannot represent a new trainer fee. Moving an unchanged activity to morning or evening does not add events and is not a supported Tag. Suggest distinct concrete adjustments and keep editable frequencies out of Tag names.
             For annual versus monthly plans, clearly label an annual plan's fixed cost as its monthly equivalent and explain the yearly payment basis in its note. Keep unspecified prices unknown. Do not model contract duration as time spent, or cancellation/refund terms as recurring fees without supplied terms.
+            Model the same primary recurring need for both options. Do not add unrelated baseline activities such as language classes or gym visits solely to create enough Tags. Suggested optional activities must stay clearly optional; unknown parameters need user review and cannot become invented known costs or time.
+            For relocating abroad versus staying local, compare recurring monthly living costs and configured routine activities only. State in the top-level description that only configured recurring expenses and routines are compared, not the full career, immigration, or life decision. Leave unknown local prices and travel times unknown. Do not invent moving-cost amortization, salary offsets, exchange rates, visa or tax costs, or broad personal outcomes. One-time visa, permit, setup, and relocation fees need a separate cost horizon and must not be silently added to monthly totals, including unknown monthly-equivalent fee rows. Use supplied USD amounts; otherwise ask for USD equivalents through unknown fields.
             An added activity must already exist in the option baseline. Replacement events consume original events of the same unit. Do not invent formulas or subjective scores. Make titles and descriptions English.
             """;
     private static final String STORY_PROMPT = """
             Return one JSON object only. Write two comparable English narratives for the exact same circumstances and aligned moments. Do not recommend a winner, assign feelings or outcomes, or introduce unconfigured paid/time-consuming events, traffic, weather, extra rides, meals, or activities.
-            The input contains a validated simulation snapshot, a story context, and a fact inventory. Monthly figures belong to the full simulation; the day is illustrative. Use only the supplied facts for every numeric claim or clock time, formatted as {{factId}}. Do not write digits or spelled-out numeric claims directly in story text. Do not invent fact IDs. No markdown.
-            Required JSON: {decisionId:<input decision.id>,simulationVersion:<input version>,sharedScenario:{title:string,description:string},moments:[{key:"morning",options:[{optionId:<first option id>,text:string},{optionId:<second option id>,text:string}]},{key:"daytime",options:[...]},{key:"evening",options:[...]}],monthlyReflections:[{optionId:<first option id>,text:string},{optionId:<second option id>,text:string}]}.
-            Each text should be concise and grounded. Refer to supplied monthly totals in the reflections using fact placeholders. Keep corresponding moments parallel.
+            The input contains a validated projection of configured routines for optionA and optionB, a context mode, and a canonical fact inventory. Monthly figures belong to the full simulation; the day is illustrative. Use only the supplied facts for every numeric claim or clock time, formatted as {{factId}}. Do not write digits or spelled-out numeric claims directly in story text. Do not invent fact IDs. No markdown.
+            Fill this fixed text-only JSON object: {sharedScenario:{title:string,description:string},optionA:{morning:string,daytime:string,evening:string},optionB:{morning:string,daytime:string,evening:string}}. Include exactly these fields, with every text nonempty. Do not return monthly reflections, IDs, versions, moments arrays, or other metadata; the application builds monthly reflections from the validated totals and inserts snapshot metadata.
+            Match the input optionA and optionB slots exactly. Keep every text concise and grounded, at most 5000 characters. Keep corresponding moments parallel. Use {{optionA_name}} and {{optionB_name}} for option names, including names with digits such as a gym brand. Never copy digits from a name directly into narrative text. The monthlyCostComparison and monthlyTimeComparison facts are complete sentences; if used, place their placeholders as standalone sentences, never as an amount inside another sentence.
+            Narrate only activities whose hasMonthlyEvents flag is true. A recurring expense label, such as groceries or rent, does not authorize adding a meal, shopping trip, work shift, hobby, or other unconfigured activity. Do not fill gaps with an invented daily routine. A moment without a configured activity can simply acknowledge that the comparison assigns no activity to that moment. Enabled adjustment names describe monthly configuration changes, not extra daily events; zero-event activities do not occur in this configuration.
+            In general mode, illustrate at most one occurrence of each configured activity across all aligned moments. Do not repeat a gym visit, meal, or other activity in morning, daytime, and evening just to fill those slots. Other moments may reflect on the arrangement without adding preparation, trips, purchases, or other time-consuming events. If a configured activity label specifies dinner, place its single occurrence in the evening.
+            In campus mode, the supplied outboundMode, inboundMode, and clock facts identify the selected illustrative outbound and inbound trips, which are the explicit exception to the general-mode occurrence rule. Morning text must use the corresponding option's leaveHome, arriveCampus, and outboundMode fact placeholders. Evening text must use its leaveCampus, arriveHome, and inboundMode fact placeholders. Keep all monthly activity frequencies distinct from this illustrative day. Never infer daily replacements from monthly replacement availability. Do not copy numeric text from activity or adjustment labels; use a qualitative label unless a canonical fact placeholder supplies it.
             """;
 
     private final ModelClient model;
     private final ObjectMapper mapper;
     private final ContractValidator contract;
     private final StoryValidator stories;
+    private final StoryDraftAssembler storyDrafts;
+    private final StoryModelInput storyInput;
 
     public GenerationService(ModelClient model, ObjectMapper mapper, ContractValidator contract, StoryValidator stories) {
         this.model = model;
         this.mapper = mapper;
         this.contract = contract;
         this.stories = stories;
+        this.storyDrafts = new StoryDraftAssembler(mapper, contract);
+        this.storyInput = new StoryModelInput(mapper);
     }
 
     public JsonNode scenario(String description) {
@@ -52,8 +62,9 @@ public class GenerationService {
                     "Enter a decision description of up to 4,000 characters.",
                     List.of(new ApiException.FieldIssue("description", "A decision description is required.")));
         }
-        return generate(SCENARIO_PROMPT, trimmed, output -> {
+        return generate(SCENARIO_PROMPT + GenerationContract.systemPromptSuffix(), trimmed, output -> {
             if (output instanceof ObjectNode object) object.put("originalInput", trimmed);
+            GeneratedValueNormalizer.normalize(output, trimmed);
             normalizeMissingGeneratedValues(output);
             contract.generatedDecision(output);
         });
@@ -79,7 +90,9 @@ public class GenerationService {
             throw new ApiException(HttpStatus.BAD_REQUEST, "INVALID_REQUEST", "The story request is invalid.",
                     List.of(new ApiException.FieldIssue(exception.path(), exception.getMessage())));
         }
-        return generate(STORY_PROMPT, serialize(request), output -> stories.response(output, request));
+        JsonNode draft = generate(STORY_PROMPT, serialize(storyInput.project(request)),
+                output -> stories.response(storyDrafts.assemble(output, request), request));
+        return storyDrafts.assemble(draft, request);
     }
 
     private JsonNode generate(String systemPrompt, String input, Consumer<JsonNode> validator) {

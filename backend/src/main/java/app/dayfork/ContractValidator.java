@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ContractValidator {
+    static final int MAX_TEXT_LENGTH = 5000;
     private static final long MAX_SAFE_INTEGER = 9_007_199_254_740_991L;
     private static final Pattern ID = Pattern.compile("[A-Za-z0-9_-]{1,80}");
 
@@ -179,7 +180,7 @@ public class ContractValidator {
     }
 
     public String string(JsonNode node, String path) {
-        if (!node.isTextual() || node.asText().isBlank() || node.asText().length() > 5000) {
+        if (!node.isTextual() || node.asText().isBlank() || node.asText().length() > MAX_TEXT_LENGTH) {
             fail(path, "A nonempty string is required.");
         }
         return node.asText();

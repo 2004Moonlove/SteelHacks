@@ -2,12 +2,12 @@ import { useMemo } from "react";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { ArrowLeft, ArrowRight, ArrowUpRight, Clock3, Coins, Edit3, Info, Plus, RotateCcw, WandSparkles } from "lucide-react";
 import { simulate, type Decision, type Tag, type ValidCalculationResult } from "../domain";
+import { formatMoney as dollars } from "../domain/format";
 import { useAppStore } from "../store";
 import { NumericEditor } from "./NumericEditor";
 import { StoryPanel, type SavedStory, type StorySetup } from "./StoryPanel";
 import { Badge, Button, Card, Sheet, SheetContent, SheetTrigger, Toggle } from "./ui";
 
-const dollars = (cents: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 2 }).format(cents / 100);
 const hours = (minutes: number) => `${Math.floor(minutes / 60)}h ${String(minutes % 60).padStart(2, "0")}m`;
 
 function comparisonText(value: number, unit: "cost" | "time", first: string, second: string) {

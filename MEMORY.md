@@ -1,6 +1,6 @@
 # Dayfork — Project Memory
 
-Last updated: 2026-09-19
+Last updated: 2026-09-20
 
 ## Status and Authorization
 
@@ -12,7 +12,7 @@ The canonical local repository is `/Users/ivan/Desktop/my-projects/SteelHacks`, 
 
 The product was renamed to Dayfork on 2026-09-19. The UI branding, frontend package, backend namespace (`app.dayfork`), application entry point, build artifact (`dayfork-0.1.0.jar`), and documentation now use the new name. Rename verification passed: 19 frontend tests, 9 backend tests, both production builds, and localhost checks for the packaged page, UI assets, and API health.
 
-The user chose offline verification for this round. Real Nemotron scenario and story requests remain unverified: the local demo did not have `NVIDIA_API_KEY` and `NVIDIA_MODEL` configured, and its health response reported `modelConfigured: false`. A key previously disclosed in chat must be rotated before live use; never copy it into source, project memory, or Git history.
+The initial implementation round used offline verification. At that point, real Nemotron scenario and story requests were unverified: the local demo did not have `NVIDIA_API_KEY` and `NVIDIA_MODEL` configured, and its health response reported `modelConfigured: false`. A key previously disclosed in chat must be rotated before live use; never copy it into source, project memory, or Git history.
 
 This file distinguishes explicit requirements from working design decisions and suggestions that remain unresolved.
 
@@ -98,7 +98,7 @@ The supplied technology plan is the working implementation baseline:
 | Optional persistence | Zustand persist + localStorage, browser-local only |
 | Tests | Vitest for meaningful simulation and validation coverage |
 
-Implemented dependency versions are recorded by `frontend/package-lock.json` and `backend/pom.xml` (Spring Boot 3.5.7). The available Nemotron model ID remains unselected. Verify account access and endpoint behavior before claiming live-model acceptance.
+Implemented dependency versions are recorded by `frontend/package-lock.json` and `backend/pom.xml` (Spring Boot 3.5.7). The local service is now configured for `nvidia/nemotron-3-super-120b-a12b`; live checks are recorded below. Initial offline acceptance did not establish model access. Credentials remain local and are never committed.
 
 The backend protects credentials, calls the model, validates its output, and exposes decision generation at `POST /api/scenarios/generate` and story generation at `POST /api/stories/generate`.
 
@@ -237,6 +237,29 @@ The backend now accepts the two comparison facts as a complete pair and independ
 Shared General day and Campus day request fixtures are consumed by frontend and backend regression tests, checking that the current frontend builders produce the same calculation and fact inventory accepted by the backend.
 
 Verification: all 21 frontend tests and 67 backend tests passed, along with the production frontend build and bundled backend package. After the localhost service restart, the identical General day demo request that previously returned HTTP 400 completed against the configured live model with HTTP 200 in about 16 seconds, returning three paired moments and two monthly reflections. Campus day request compatibility is covered by the shared fixture and backend tests; no new live Campus day narrative check was performed in this fix.
+
+
+### Multi-Scenario Contract Reliability
+
+On 2026-09-20, the user explicitly requested pushing the verified fix to the remote repository, exercising multiple scenarios including gym membership versus pay-per-visit and relocating abroad versus staying local, and fixing repeated request/field mismatches without changing existing functionality. The previous story comparison fix was pushed to `main` as `437f752`.
+
+The initial live gym question `Should I buy a gym membership or pay per visit?` failed after the bounded model repair because it returned an unsupported `decision.options[0].description`. The initial broad company-relocation response was structurally valid but included an unknown monthly-equivalent visa fee without a cost horizon. Independent cross-language tests also reproduced valid story requests rejected for long option names and a one-cent mismatch when JavaScript formatted maximum-safe-integer cents as fractional dollars.
+
+The working implementation now uses a code-owned contract and text slots:
+
+- `scripts/generate-contract.mjs` generates the backend's scenario prompt JSON Schema from the frontend Zod validator. Generation-specific restrictions allow only `user_input`, `derived`, and `unknown` sources and require 5–10 Tags. A regression test prevents the checked-in prompt schema from drifting from the current validator. The schema is prompt guidance; strict backend validation and the existing bounded repair remain mandatory.
+- Frontend and backend structural limits now agree for IDs, nonblank text, optional notes, unexpected fields, and collection sizes. Previously accepted model-generated decisions remain compatible; invalid extra fields are rejected rather than silently discarded.
+- The model supplies morning/daytime/evening text slots for option A and option B. Backend code inserts decision ID, snapshot version, option IDs, ordered moments, and monthly summaries using the validated canonical facts. The public story response shape is unchanged. Valid legacy model responses remain accepted, while incorrect legacy metadata is still rejected.
+- The story model receives a compact projection of configured recurring items, activities, enabled adjustments, and validated facts. Raw snapshot metadata, original input, and numeric fields are excluded; campus travel facts remain available. This reduces irrelevant details and numeric copying but does not prove narrative correctness.
+- A conservative numeric guard clears otherwise-valid `user_input` or `derived` values to `unknown` when the question supplies no possible numeric evidence. It never invents values or repairs malformed fields. Explicit numeric words, article-plus-unit phrases such as “an hour,” and free/no-fee cues preserve normal handling. This is not a complete provenance check when an input contains some quantities.
+- The story fact validator permits derived comparisons containing valid long option names while continuing to reconstruct and compare the exact facts. A shared integer-cent formatter keeps Dashboard and story money strings consistent with Java without floating-point loss.
+- Prompt guidance distinguishes actual membership fees from pure pay-per-visit costs. Relocation examples cover only configured recurring USD expenses and routine time, exclude unsupported upfront-cost amortization and salary/tax/immigration estimates, and leave missing numbers unknown. These tests do not expand the product into a full relocation or life-decision adviser.
+
+The opt-in `scripts/verify-scenarios.mjs --live` suite uses the real frontend schema and simulation engine against localhost. It checks known totals, reference validity, individual Tag configurations, story identity, and fact placeholders. Vague inputs are expected to require baseline review; the harness does not manufacture values. Detailed artifacts stay outside the repository by default. Rerunning a case clears only the known generated artifact files, preventing stale successful responses from being confused with a failed new run. Editing simulation parameters still never calls a model, and story generation/regeneration remains explicit.
+
+For the configured Nemotron model only, low-effort reasoning and a 1,024-token reasoning budget reduce unnecessary reasoning overhead. Other model request parameters remain unchanged. Truncated completions receive a distinct `MODEL_RESPONSE_TRUNCATED` error. Provider timeouts and temporary unavailability remain possible and are reported separately from invalid local requests.
+
+Verification: 41 frontend tests and 112 backend tests passed, together with the production frontend build and bundled backend package. Successful live scenario responses covered all seven corpus inputs across multiple recorded runs. The known-value gym, relocation, dinner, and housing cases matched expected deterministic totals; vague cases retained missing baseline inputs. Provider timeouts and an intermediate model-output validation failure also occurred. The final gym, relocation, dinner, and Campus day story requests all returned HTTP 200 with deterministic monthly summaries. Narrative timing can still drift between paired options; full results and remaining suggestion-quality limits are recorded in `docs/scenario-validation-2026-09-20.md`; these observations are not an all-pass reliability guarantee.
 
 ## Tag Contract
 

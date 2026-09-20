@@ -1,48 +1,50 @@
 import { z } from "zod";
 import type { Decision, ValidationIssue } from "./types";
 
-const whole = z.number().int().nonnegative().refine(Number.isSafeInteger, "Must be a safe integer");
+const whole = z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER);
 const positiveWhole = whole.positive();
-const id = z.string().min(1).refine((value) => value.trim().length > 0, "Cannot be blank");
+const id = z.string().regex(/^[A-Za-z0-9_-]{1,80}(?![\s\S])/, "Use 1 to 80 letters, numbers, underscores, or hyphens");
+// Match Java String.isBlank without trimming or changing user-provided text.
+const text = z.string().min(1).max(5000).regex(/[^\u0009-\u000D\u001C-\u0020\u1680\u2000-\u2006\u2008-\u200A\u2028\u2029\u205F\u3000]/, "Cannot be blank");
 
 export const numericFieldSchema = z.discriminatedUnion("source", [
-  z.object({ value: whole, source: z.literal("user_input"), note: z.string().optional() }),
-  z.object({ value: whole, source: z.literal("user_edit"), note: z.string().optional() }),
-  z.object({ value: whole, source: z.literal("derived"), note: z.string().optional() }),
-  z.object({ value: whole, source: z.literal("demo_assumption"), confirmed: z.boolean(), note: z.string().trim().min(1) }),
-  z.object({ value: z.null(), source: z.literal("unknown"), note: z.string().optional() }),
+  z.strictObject({ value: whole, source: z.literal("user_input"), note: text.optional() }),
+  z.strictObject({ value: whole, source: z.literal("user_edit"), note: text.optional() }),
+  z.strictObject({ value: whole, source: z.literal("derived"), note: text.optional() }),
+  z.strictObject({ value: whole, source: z.literal("demo_assumption"), confirmed: z.boolean(), note: text }),
+  z.strictObject({ value: z.null(), source: z.literal("unknown"), note: text.optional() }),
 ]);
 
-const fixedCostSchema = z.object({ id, name: id, amountCentsMonthly: numericFieldSchema });
-const activitySchema = z.object({
+const fixedCostSchema = z.strictObject({ id, name: text, amountCentsMonthly: numericFieldSchema });
+const activitySchema = z.strictObject({
   id,
-  name: id,
+  name: text,
   eventUnit: z.enum(["one_way_trip", "meal", "session", "event"]),
-  frequencyInput: z.object({ label: id, eventsPerUnit: positiveWhole }).optional(),
+  frequencyInput: z.strictObject({ label: text, eventsPerUnit: positiveWhole }).optional(),
   eventsPerMonth: numericFieldSchema,
   costCentsPerEvent: numericFieldSchema,
   minutesPerEvent: numericFieldSchema,
 });
-const optionSchema = z.object({ id, name: id, fixedCosts: z.array(fixedCostSchema), activities: z.array(activitySchema) });
-const tagBase = { id, name: id, icon: z.string().optional(), description: z.string() };
+const optionSchema = z.strictObject({ id, name: text, fixedCosts: z.array(fixedCostSchema).max(100), activities: z.array(activitySchema).max(100) });
+const tagBase = { id, name: text, icon: text.optional(), description: text };
 const targetOption = { optionId: id };
 const targetActivity = { ...targetOption, activityId: id };
 const tagSchema = z.discriminatedUnion("type", [
-  z.object({ ...tagBase, type: z.literal("fixed"), targets: z.array(z.object({ ...targetOption, costCentsMonthly: numericFieldSchema, minutesMonthly: numericFieldSchema })).min(1) }),
-  z.object({ ...tagBase, type: z.literal("add_activity"), targets: z.array(z.object({ ...targetActivity, eventsPerMonth: numericFieldSchema })).min(1) }),
-  z.object({ ...tagBase, type: z.literal("reduce_activity"), targets: z.array(z.object({ ...targetActivity, eventsPerMonth: numericFieldSchema })).min(1) }),
-  z.object({ ...tagBase, type: z.literal("replace_activity"), targets: z.array(z.object({ ...targetActivity, replacementName: id, eventsPerMonth: numericFieldSchema, costCentsPerEvent: numericFieldSchema, minutesPerEvent: numericFieldSchema })).min(1) }),
+  z.strictObject({ ...tagBase, type: z.literal("fixed"), targets: z.array(z.strictObject({ ...targetOption, costCentsMonthly: numericFieldSchema, minutesMonthly: numericFieldSchema })).min(1).max(100) }),
+  z.strictObject({ ...tagBase, type: z.literal("add_activity"), targets: z.array(z.strictObject({ ...targetActivity, eventsPerMonth: numericFieldSchema })).min(1).max(100) }),
+  z.strictObject({ ...tagBase, type: z.literal("reduce_activity"), targets: z.array(z.strictObject({ ...targetActivity, eventsPerMonth: numericFieldSchema })).min(1).max(100) }),
+  z.strictObject({ ...tagBase, type: z.literal("replace_activity"), targets: z.array(z.strictObject({ ...targetActivity, replacementName: text, eventsPerMonth: numericFieldSchema, costCentsPerEvent: numericFieldSchema, minutesPerEvent: numericFieldSchema })).min(1).max(100) }),
 ]);
 
-export const decisionSchema = z.object({
+export const decisionSchema = z.strictObject({
   schemaVersion: z.literal(1),
   id,
-  title: id,
-  description: z.string(),
-  originalInput: z.string(),
+  title: text,
+  description: text,
+  originalInput: text,
   currency: z.literal("USD"),
   options: z.tuple([optionSchema, optionSchema]),
-  tags: z.array(tagSchema),
+  tags: z.array(tagSchema).max(100),
 });
 
 function duplicateIds(ids: string[], path: string, issues: ValidationIssue[]): void {

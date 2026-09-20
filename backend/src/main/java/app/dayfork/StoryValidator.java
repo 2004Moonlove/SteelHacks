@@ -116,8 +116,13 @@ public class StoryValidator {
         if (facts.size() < 1 || facts.size() > 100) ContractValidator.fail("facts", "Provide 1 to 100 facts.");
         facts.fields().forEachRemaining(entry -> {
             contract.id(com.fasterxml.jackson.databind.node.TextNode.valueOf(entry.getKey()), "facts key");
-            String value = contract.string(entry.getValue(), "facts." + entry.getKey());
-            if (value.length() > 200) ContractValidator.fail("facts." + entry.getKey(), "Fact text is too long.");
+            JsonNode value = entry.getValue();
+            // Comparison facts contain two valid option names plus deterministic amounts.
+            // Their exact content is checked below; narrative text limits do not apply.
+            if (!value.isTextual() || value.asText().isBlank()
+                    || value.asText().length() > 2 * ContractValidator.MAX_TEXT_LENGTH + 100) {
+                ContractValidator.fail("facts." + entry.getKey(), "Fact text must match the supported simulation facts.");
+            }
         });
         expectedFact(facts, "optionA_name", decision.path("options").get(0).path("name").asText());
         expectedFact(facts, "optionB_name", decision.path("options").get(1).path("name").asText());

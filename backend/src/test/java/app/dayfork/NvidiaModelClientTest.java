@@ -3,6 +3,7 @@ package app.dayfork;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpServer;
@@ -31,6 +32,57 @@ class NvidiaModelClientTest {
             assertEquals("Generated content", provider.client().complete(messages()));
             assertEquals(2, provider.requests.size());
             assertEquals(provider.requests.get(0), provider.requests.get(1));
+        }
+    }
+
+    @Test
+    void boundsReasoningForTheSupportedModelWithoutReducingTheContentTokenLimit() throws Exception {
+        try (var provider = new ProviderStub(successfulReply())) {
+            assertEquals("Generated content", provider.client("nvidia/nemotron-3-super-120b-a12b").complete(messages()));
+            var request = new ObjectMapper().readTree(provider.requests.getFirst());
+            assertEquals("nvidia/nemotron-3-super-120b-a12b", request.path("model").asText());
+            assertEquals(1024, request.path("reasoning_budget").asInt());
+            assertTrue(request.path("chat_template_kwargs").path("enable_thinking").asBoolean());
+            assertTrue(request.path("chat_template_kwargs").path("low_effort").asBoolean());
+            assertFalse(request.has("max_tokens"));
+            assertEquals(new ObjectMapper().valueToTree(messages()), request.path("messages"));
+            assertEquals(1, provider.requests.size());
+        }
+    }
+
+    @Test
+    void preservesSupportedModelReasoningControlsAcrossTheExistingRetry() throws Exception {
+        try (var provider = new ProviderStub(new Reply(503, "Busy", "0"), successfulReply())) {
+            assertEquals("Generated content", provider.client("nvidia/nemotron-3-super-120b-a12b").complete(messages()));
+            assertEquals(2, provider.requests.size());
+            assertEquals(provider.requests.getFirst(), provider.requests.getLast());
+            var request = new ObjectMapper().readTree(provider.requests.getFirst());
+            assertEquals(1024, request.path("reasoning_budget").asInt());
+            assertTrue(request.path("chat_template_kwargs").path("low_effort").asBoolean());
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"test-model", "nvidia/nemotron-3-nano-30b-a3b", "nvidia/nemotron-3-super-120b-a12b-custom"})
+    void leavesOtherModelRequestsUnchanged(String model) throws Exception {
+        try (var provider = new ProviderStub(successfulReply())) {
+            assertEquals("Generated content", provider.client(model).complete(messages()));
+            var request = new ObjectMapper().readTree(provider.requests.getFirst());
+            assertEquals(new ObjectMapper().valueToTree(Map.of("model", model, "messages", messages(), "stream", false)), request);
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", "{\"title\":\"unfinished", "{}"})
+    void reportsProviderTruncationBeforeParsingOrRepairingContent(String content) throws Exception {
+        String body = new ObjectMapper().writeValueAsString(Map.of("choices",
+                List.of(Map.of("finish_reason", "length", "message", Map.of("content", content)))));
+        try (var provider = new ProviderStub(new Reply(200, body, null), successfulReply())) {
+            ApiException error = assertThrows(ApiException.class, () -> provider.client().complete(messages()));
+            assertEquals("MODEL_RESPONSE_TRUNCATED", error.code());
+            assertEquals(HttpStatus.BAD_GATEWAY, error.status());
+            assertTrue(error.getMessage().contains("Please retry"));
+            assertEquals(1, provider.requests.size());
         }
     }
 
@@ -139,7 +191,11 @@ class NvidiaModelClientTest {
         }
 
         NvidiaModelClient client() {
-            return new NvidiaModelClient(new ObjectMapper(), "test-key", "test-model",
+            return client("test-model");
+        }
+
+        NvidiaModelClient client(String model) {
+            return new NvidiaModelClient(new ObjectMapper(), "test-key", model,
                     "http://127.0.0.1:" + server.getAddress().getPort() + "/chat/completions", 1);
         }
 
