@@ -227,6 +227,17 @@ For fast HTTP 429, 500, 502, 503, or 504 responses, the client retries the same 
 
 Verification: all 48 backend tests and the bundled package passed. HTTP stub tests cover successful transient recovery, retry exhaustion, Retry-After handling, actionable error categories, empty responses, preserved requests, and absence of private provider text in logs. After restart, a real browser completed the exact gym input in approximately 44 seconds with two options and seven generated Tags, then verified baseline review, Tag toggles, and local price edits without further generation calls. A live cooking-versus-delivery request returned HTTP 200 in approximately 36 seconds with two options and eight Tags and reached baseline review. The captured real meal response was then replayed to finish UI/calculation checks after fixing an ambiguous heading selector in the temporary test script. Missing meal prices, usage, and duration remained unknown. These checks establish coverage for those examples; broader model reliability and narrative quality still require evaluation.
 
+
+### Story Request Contract Alignment
+
+On 2026-09-19, a user reported `The story request is invalid.` in General day. A request built with the actual frontend `simulate` and `buildStoryFacts` functions reproduced HTTP 400 at `facts.monthlyCostComparison` with `Unsupported fact key.` The frontend always sent `monthlyCostComparison` and `monthlyTimeComparison`, while the backend's allowed fact inventory omitted both. The request failed before any model call; Campus day used the same mismatched inventory.
+
+The backend now accepts the two comparison facts as a complete pair and independently reconstructs their exact statements from reconciled option totals and names. Positive, negative, and equal differences remain deterministic. Requests using the older fact inventory remain valid; contradictory comparisons, incomplete pairs, and arbitrary additional facts remain invalid. No model call is added when simulation parameters change.
+
+Shared General day and Campus day request fixtures are consumed by frontend and backend regression tests, checking that the current frontend builders produce the same calculation and fact inventory accepted by the backend.
+
+Verification: all 21 frontend tests and 67 backend tests passed, along with the production frontend build and bundled backend package. After the localhost service restart, the identical General day demo request that previously returned HTTP 400 completed against the configured live model with HTTP 200 in about 16 seconds, returning three paired moments and two monthly reflections. Campus day request compatibility is covered by the shared fixture and backend tests; no new live Campus day narrative check was performed in this fix.
+
 ## Tag Contract
 
 Keep four explicit external types: `fixed`, `add_activity`, `reduce_activity`, and `replace_activity`. The technology proposal's three conceptual rule groups do not replace this four-type data contract.

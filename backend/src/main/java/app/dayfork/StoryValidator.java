@@ -130,6 +130,13 @@ public class StoryValidator {
         Set<String> allowedFacts = new HashSet<>(List.of(
                 "optionA_name", "optionB_name", "optionA_monthlyCost", "optionB_monthlyCost",
                 "optionA_monthlyTime", "optionB_monthlyTime", "monthlyCostDifference", "monthlyTimeDifference"));
+        if (facts.has("monthlyCostComparison") || facts.has("monthlyTimeComparison")) {
+            String optionA = decision.path("options").get(0).path("name").asText();
+            String optionB = decision.path("options").get(1).path("name").asText();
+            expectedFact(facts, "monthlyCostComparison", costComparison(optionA, optionB, cost[1] - cost[0]));
+            expectedFact(facts, "monthlyTimeComparison", timeComparison(optionA, optionB, time[1] - time[0]));
+            allowedFacts.addAll(List.of("monthlyCostComparison", "monthlyTimeComparison"));
+        }
         if (mode.equals("campus")) {
             for (String prefix : List.of("optionA", "optionB")) {
                 for (String suffix : List.of("leaveHome", "arriveCampus", "leaveCampus", "arriveHome",
@@ -257,6 +264,20 @@ public class StoryValidator {
 
     private void expectedFact(JsonNode facts, String key, String expected) {
         if (!expected.equals(facts.path(key).asText())) ContractValidator.fail("facts." + key, "Fact does not match simulation results.");
+    }
+
+    private String costComparison(String optionA, String optionB, long delta) {
+        if (delta == 0) return optionA + " and " + optionB + " have equal monthly cost.";
+        String higher = delta > 0 ? optionB : optionA;
+        String lower = delta > 0 ? optionA : optionB;
+        return higher + " costs " + money(Math.abs(delta)) + " more per month than " + lower + ".";
+    }
+
+    private String timeComparison(String optionA, String optionB, long delta) {
+        if (delta == 0) return optionA + " and " + optionB + " use equal monthly time.";
+        String higher = delta > 0 ? optionB : optionA;
+        String lower = delta > 0 ? optionA : optionB;
+        return higher + " uses " + duration(Math.abs(delta)) + " more per month than " + lower + ".";
     }
 
     private String money(long cents) {
